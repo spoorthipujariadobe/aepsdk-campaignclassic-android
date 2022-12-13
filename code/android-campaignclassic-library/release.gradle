@@ -1,0 +1,83 @@
+/**
+ * Copyright 2022 Adobe. All rights reserved.
+ * This file is licensed to you under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License. You may obtain a copy
+ * of the License at http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under
+ * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+ * OF ANY KIND, either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+apply plugin: 'signing'
+
+def groupIdForPublish = 'com.adobe.marketing.mobile'
+
+publishing {
+    publications {
+        release(MavenPublication) {
+            groupId = groupIdForPublish
+            artifactId = rootProject.campaignClassicExtensionName
+            version = rootProject.campaignClassicExtensionVersion
+            artifact("$buildDir/outputs/aar/${rootProject.campaignClassicExtensionAARName}")
+            pom {
+                name = rootProject.mavenRepoName
+                description = rootProject.mavenRepoDescription
+                url = 'https://aep-sdks.gitbook.io'
+                licenses {
+                    license {
+                        name = 'Adobe Proprietary'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'adobe'
+                        name = 'adobe'
+                        email = 'adobe-mobile-testing@adobe.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:github.com//Adobe-Marketing-Cloud/acp-sdks.git'
+                    developerConnection = 'scm:git:ssh://github.com//Adobe-Marketing-Cloud/acp-sdks.git'
+                    url = 'https://github.com/Adobe-Marketing-Cloud/acp-sdks'
+                }
+                withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+
+                    def coreDependencyNode = dependenciesNode.appendNode('dependency')
+                    coreDependencyNode.appendNode('groupId', 'org.jetbrains.kotlin')
+                    coreDependencyNode.appendNode('artifactId', 'kotlin-stdlib-jdk8')
+                    coreDependencyNode.appendNode('version', rootProject.kotlin_version)
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "sonatype"
+            url = "https://oss.sonatype.org/content/repositories/snapshots/"
+            credentials {
+                username = System.getenv("SONATYPE_USERNAME")
+                password = System.getenv("SONATYPE_PASSWORD")
+            }
+        }
+    }
+}
+tasks.withType(Javadoc).all { enabled = false }
+publishToMavenLocal.dependsOn('assemblePhone')
+publishReleasePublicationToMavenLocal.dependsOn('assemblePhone')
+publish.dependsOn('assemblePhone')
+
+ext."signing.gnupg.executable"="gpg"
+ext."signing.gnupg.keyName"=System.getenv("GPG_KEY_ID")
+ext."signing.gnupg.passphrase"=System.getenv("GPG_PASSPHRASE")
+
+signing {
+    useGpgCmd()
+    required {
+        tasks.withType(PublishToMavenRepository).find {
+            gradle.taskGraph.hasTask it
+        }
+    }
+    sign publishing.publications
+}
