@@ -14,13 +14,12 @@ package com.adobe.marketing.mobile.campaignclassic;
 /**
  * This class holds all constant values used only by the Campaign Classic extension
  */
-public final class CampaignClassicConstants {
+final class CampaignClassicConstants {
 
 	private CampaignClassicConstants() {}
 
-	public static final String LOG_TAG = "CampaignClassicExtension";
+	static final String LOG_TAG = "CampaignClassicExtension";
 	static final String EXTENSION_NAME = "com.adobe.module.campaignclassic";
-	public static final String EXTENSION_VERSION = "2.0.0";
 	static final String FRIENDLY_NAME = "CampaignClassic";
 
 	static final String REGISTER_API_URL_BASE	= "https://%s/nms/mobile/1/registerAndroid.jssp";
@@ -49,7 +48,7 @@ public final class CampaignClassicConstants {
 	/*
 	    EventDataKeys
 	 */
-	public static final class EventDataKeys {
+	static final class EventDataKeys {
 		private EventDataKeys() {}
 
 		static final class Configuration {
@@ -63,16 +62,16 @@ public final class CampaignClassicConstants {
 			private Configuration() {}
 		}
 
-		public static final class CampaignClassic {
-			public static final String REGISTER_DEVICE = "registerdevice";
-			public static final String TRACK_RECEIVE = "trackreceive";
-			public static final String TRACK_CLICK = "trackclick";
-			public static final String TRACK_INFO = "trackinfo";
+		static final class CampaignClassic {
+			static final String REGISTER_DEVICE = "registerdevice";
+			static final String TRACK_RECEIVE = "trackreceive";
+			static final String TRACK_CLICK = "trackclick";
+			static final String TRACK_INFO = "trackinfo";
 			static final String TRACK_INFO_KEY_MESSAGE_ID = "_mId";
 			static final String TRACK_INFO_KEY_DELIVERY_ID = "_dId";
-			public static final String DEVICE_TOKEN = "devicetoken";
-			public static final String USER_KEY = "userkey";
-			public static final String ADDITIONAL_PARAMETERS = "additionalparameters";
+			static final String DEVICE_TOKEN = "devicetoken";
+			static final String USER_KEY = "userkey";
+			static final String ADDITIONAL_PARAMETERS = "additionalparameters";
 			static final String HTTP_HEADER_KEY_CONTENT_TYPE = "Content-Type";
 			static final String HTTP_HEADER_CONTENT_TYPE_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
 			static final String HTTP_HEADER_CONTENT_TYPE_UTF8_CHARSET = "charset=UTF-8";

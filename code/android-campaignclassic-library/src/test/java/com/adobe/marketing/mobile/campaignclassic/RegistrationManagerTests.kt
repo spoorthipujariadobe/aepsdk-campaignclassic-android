@@ -413,7 +413,7 @@ class RegistrationManagerTests {
     ) {
         Mockito.`when`(
             extensionApi.getSharedState(
-                ArgumentMatchers.eq(CampaignClassicConstants.EventDataKeys.Configuration.EXTENSION_NAME),
+                ArgumentMatchers.eq(CampaignClassicTestConstants.EventDataKeys.Configuration.EXTENSION_NAME),
                 ArgumentMatchers.any(),
                 ArgumentMatchers.anyBoolean(),
                 ArgumentMatchers.any()

@@ -37,7 +37,7 @@ public class CampaignClassicTests {
     public void test_extensionVersion() {
         // test
         final String extensionVersion = CampaignClassic.extensionVersion();
-        Assert.assertEquals("extensionVersion API should return the correct version string.", CampaignClassicConstants.EXTENSION_VERSION,
+        Assert.assertEquals("extensionVersion API should return the correct version string.", CampaignClassicTestConstants.EXTENSION_VERSION,
                 extensionVersion);
     }
 
@@ -111,9 +111,9 @@ public class CampaignClassicTests {
             Assert.assertEquals("com.adobe.eventSource.requestContent", event.getSource());
 
             final Map<String, Object> eventData = event.getEventData();
-            Assert.assertTrue((Boolean) eventData.get(CampaignClassicConstants.EventDataKeys.CampaignClassic.REGISTER_DEVICE));
-            Assert.assertEquals(token, eventData.get(CampaignClassicConstants.EventDataKeys.CampaignClassic.DEVICE_TOKEN));
-            Assert.assertEquals(userKey, eventData.get(CampaignClassicConstants.EventDataKeys.CampaignClassic.USER_KEY));
+            Assert.assertTrue((Boolean) eventData.get(CampaignClassicTestConstants.EventDataKeys.CampaignClassic.REGISTER_DEVICE));
+            Assert.assertEquals(token, eventData.get(CampaignClassicTestConstants.EventDataKeys.CampaignClassic.DEVICE_TOKEN));
+            Assert.assertEquals(userKey, eventData.get(CampaignClassicTestConstants.EventDataKeys.CampaignClassic.USER_KEY));
             Assert.assertEquals(additionalParams, eventData.get(CampaignClassicTestConstants.EventDataKeys.CampaignClassic.ADDITIONAL_PARAMETERS));
         }
     }
@@ -137,9 +137,9 @@ public class CampaignClassicTests {
             Assert.assertEquals("com.adobe.eventSource.requestContent", event.getSource());
 
             final Map<String, Object> eventData = event.getEventData();
-            Assert.assertTrue((Boolean) eventData.get(CampaignClassicConstants.EventDataKeys.CampaignClassic.REGISTER_DEVICE));
-            Assert.assertEquals(token, eventData.get(CampaignClassicConstants.EventDataKeys.CampaignClassic.DEVICE_TOKEN));
-            Assert.assertNull(eventData.get(CampaignClassicConstants.EventDataKeys.CampaignClassic.USER_KEY));
+            Assert.assertTrue((Boolean) eventData.get(CampaignClassicTestConstants.EventDataKeys.CampaignClassic.REGISTER_DEVICE));
+            Assert.assertEquals(token, eventData.get(CampaignClassicTestConstants.EventDataKeys.CampaignClassic.DEVICE_TOKEN));
+            Assert.assertNull(eventData.get(CampaignClassicTestConstants.EventDataKeys.CampaignClassic.USER_KEY));
             Assert.assertNull(eventData.get(CampaignClassicTestConstants.EventDataKeys.CampaignClassic.ADDITIONAL_PARAMETERS));
         }
     }
@@ -183,8 +183,8 @@ public class CampaignClassicTests {
             Assert.assertEquals("com.adobe.eventSource.requestContent", event.getSource());
 
             final Map<String, Object> eventData = event.getEventData();
-            Assert.assertTrue((Boolean) eventData.get(CampaignClassicConstants.EventDataKeys.CampaignClassic.TRACK_RECEIVE));
-            Assert.assertEquals(trackInfo, eventData.get(CampaignClassicConstants.EventDataKeys.CampaignClassic.TRACK_INFO));
+            Assert.assertTrue((Boolean) eventData.get(CampaignClassicTestConstants.EventDataKeys.CampaignClassic.TRACK_RECEIVE));
+            Assert.assertEquals(trackInfo, eventData.get(CampaignClassicTestConstants.EventDataKeys.CampaignClassic.TRACK_INFO));
 
         }
     }
@@ -235,8 +235,8 @@ public class CampaignClassicTests {
             Assert.assertEquals("com.adobe.eventSource.requestContent", event.getSource());
 
             final Map<String, Object> eventData = event.getEventData();
-            Assert.assertTrue((Boolean) eventData.get(CampaignClassicConstants.EventDataKeys.CampaignClassic.TRACK_CLICK));
-            Assert.assertEquals(trackInfo, eventData.get(CampaignClassicConstants.EventDataKeys.CampaignClassic.TRACK_INFO));
+            Assert.assertTrue((Boolean) eventData.get(CampaignClassicTestConstants.EventDataKeys.CampaignClassic.TRACK_CLICK));
+            Assert.assertEquals(trackInfo, eventData.get(CampaignClassicTestConstants.EventDataKeys.CampaignClassic.TRACK_INFO));
         }
     }
 

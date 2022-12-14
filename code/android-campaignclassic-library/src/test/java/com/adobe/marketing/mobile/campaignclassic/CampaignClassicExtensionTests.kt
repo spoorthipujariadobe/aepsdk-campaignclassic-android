@@ -68,7 +68,7 @@ class CampaignClassicExtensionTests {
         // setup
         Mockito.`when`(
             extensionApi.getSharedState(
-                ArgumentMatchers.eq(CampaignClassicConstants.EventDataKeys.Configuration.EXTENSION_NAME),
+                ArgumentMatchers.eq(CampaignClassicTestConstants.EventDataKeys.Configuration.EXTENSION_NAME),
                 any(),
                 ArgumentMatchers.anyBoolean(),
                 any()
@@ -198,7 +198,7 @@ class CampaignClassicExtensionTests {
     ) {
         Mockito.`when`(
             extensionApi.getSharedState(
-                ArgumentMatchers.eq(CampaignClassicConstants.EventDataKeys.Configuration.EXTENSION_NAME),
+                ArgumentMatchers.eq(CampaignClassicTestConstants.EventDataKeys.Configuration.EXTENSION_NAME),
                 any(),
                 ArgumentMatchers.anyBoolean(),
                 any()
@@ -207,7 +207,7 @@ class CampaignClassicExtensionTests {
             SharedStateResult(
                 SharedStateStatus.SET,
                 mapOf(
-                    CampaignClassicConstants.EventDataKeys.Configuration.GLOBAL_CONFIG_PRIVACY to privacyStatus.value
+                    CampaignClassicTestConstants.EventDataKeys.Configuration.GLOBAL_CONFIG_PRIVACY to privacyStatus.value
                 )
             )
         )
