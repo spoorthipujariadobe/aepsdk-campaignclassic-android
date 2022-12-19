@@ -76,7 +76,10 @@ class CampaignClassicIntegrationTests {
             // initialize Campaign Classic extension
             MobileCore.setApplication(appContext)
             MobileCore.setLogLevel(LoggingMode.VERBOSE)
-            MobileCore.registerExtensions(listOf(CampaignClassicExtension::class.java)) {
+            MobileCore.registerExtensions(listOf(
+                CampaignClassicExtension::class.java,
+                MonitorExtension::class.java
+            )) {
                 countDownLatch.countDown()
             }
             countDownLatch.await(100, TimeUnit.MILLISECONDS)
@@ -102,8 +105,9 @@ class CampaignClassicIntegrationTests {
     fun test_registerDevice_VerifySuccessfulDeviceRegistrationWhenAllParametersArePresent() {
         // setup
         val countDownLatch = CountDownLatch(1)
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
-        Thread.sleep(20)
 
         // test
         CampaignClassic.registerDevice(
@@ -157,8 +161,9 @@ class CampaignClassicIntegrationTests {
         // setup
         var registerDeviceRequestCaught = false
         val countDownLatch = CountDownLatch(1)
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
-        Thread.sleep(20)
 
         // test
         CampaignClassic.registerDevice(
@@ -186,8 +191,9 @@ class CampaignClassicIntegrationTests {
     fun test_registerDevice_VerifySuccessfulDeviceRegistrationWhenUserKeyIsEmpty() {
         // setup
         val countDownLatch = CountDownLatch(1)
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
-        Thread.sleep(20)
 
         // test
         CampaignClassic.registerDevice(
@@ -228,8 +234,9 @@ class CampaignClassicIntegrationTests {
     fun test_registerDevice_VerifySuccessfulDeviceRegistrationWhenUserKeyIsNull() {
         // setup
         val countDownLatch = CountDownLatch(1)
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
-        Thread.sleep(20)
 
         // test
         CampaignClassic.registerDevice(
@@ -270,8 +277,9 @@ class CampaignClassicIntegrationTests {
     fun test_registerDevice_VerifySuccessfulDeviceRegistrationWhenAdditionalParameterIsNull() {
         // setup
         val countDownLatch = CountDownLatch(1)
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
-        Thread.sleep(20)
 
         // test
         CampaignClassic.registerDevice("testToken", "user@email.com", null)
@@ -302,8 +310,9 @@ class CampaignClassicIntegrationTests {
         // setup
         var registerDeviceRequestCaught = false
         val countDownLatch = CountDownLatch(1)
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration(integrationKey = null)
-        Thread.sleep(20)
 
         // test
         CampaignClassic.registerDevice(
@@ -332,8 +341,9 @@ class CampaignClassicIntegrationTests {
         // setup
         var registerDeviceRequestCaught = false
         val countDownLatch = CountDownLatch(1)
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration(marketingServer = null)
-        Thread.sleep(20)
 
         // test
         CampaignClassic.registerDevice(
@@ -362,8 +372,9 @@ class CampaignClassicIntegrationTests {
         // setup
         var registerDeviceRequestCaught = false
         val countDownLatch = CountDownLatch(1)
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration(privacyStatus = MobilePrivacyStatus.UNKNOWN.value)
-        Thread.sleep(20)
 
         // test
         CampaignClassic.registerDevice(
@@ -392,8 +403,9 @@ class CampaignClassicIntegrationTests {
         // setup
         var registerDeviceRequestCaught = false
         val countDownLatch = CountDownLatch(1)
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration(privacyStatus = MobilePrivacyStatus.OPT_OUT.value)
-        Thread.sleep(20)
 
         // test
         CampaignClassic.registerDevice(
@@ -420,8 +432,9 @@ class CampaignClassicIntegrationTests {
     @Test
     fun test_registerDevice_VerifyNoDeviceRegistrationRequestSentWhenNoConfiguration() {
         // setup
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         MobileCore.clearUpdatedConfiguration()
-        Thread.sleep(20)
         var registerDeviceRequestCaught = false
         val countDownLatch = CountDownLatch(1)
 
@@ -451,8 +464,9 @@ class CampaignClassicIntegrationTests {
     fun test_registerDevice_VerifySecondDeviceRegistrationRequestIsNotSentWhenRegistrationParametersAreUnchanged() {
         // setup
         val countDownLatch = CountDownLatch(1)
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
-        Thread.sleep(20)
 
         // test
         CampaignClassic.registerDevice(
@@ -506,8 +520,9 @@ class CampaignClassicIntegrationTests {
     fun test_registerDevice_VerifySecondDeviceRegistrationRequestIsSentWhenRegistrationParametersAreChanged() {
         // setup
         val countDownLatch = CountDownLatch(1)
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
-        Thread.sleep(20)
 
         // test
         CampaignClassic.registerDevice(
@@ -562,8 +577,9 @@ class CampaignClassicIntegrationTests {
     fun test_registerDevice_VerifyFailedDeviceRegistrationWhenMarketingServerReturns404Error() {
         // setup
         val countDownLatch = CountDownLatch(1)
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration(marketingServer = "testMarketingServerFailed")
-        Thread.sleep(20)
 
         // test
         CampaignClassic.registerDevice(
@@ -600,8 +616,9 @@ class CampaignClassicIntegrationTests {
     fun test_trackNotificationReceive_VerifyTrackNotificationReceiveRequestSentWhenAllParametersArePresentV7() {
         // setup
         val countDownLatch = CountDownLatch(1)
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationReceive(
@@ -628,8 +645,9 @@ class CampaignClassicIntegrationTests {
     fun test_trackNotificationReceive_VerifyTrackNotificationReceiveRequestSentWhenAllParametersArePresentV8() {
         // setup
         val countDownLatch = CountDownLatch(1)
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationReceive(
@@ -657,8 +675,9 @@ class CampaignClassicIntegrationTests {
         // setup
         val countDownLatch = CountDownLatch(1)
         var trackNotificationRequestCaught = false
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationReceive(mapOf(CampaignClassicTestConstants.EventDataKeys.CampaignClassic.TRACK_INFO_KEY_DELIVERY_ID to "testDeliveryId"))
@@ -679,8 +698,9 @@ class CampaignClassicIntegrationTests {
         // setup
         val countDownLatch = CountDownLatch(1)
         var trackNotificationRequestCaught = false
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationReceive(
@@ -706,8 +726,9 @@ class CampaignClassicIntegrationTests {
         // setup
         val countDownLatch = CountDownLatch(1)
         var trackNotificationRequestCaught = false
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationReceive(
@@ -733,8 +754,9 @@ class CampaignClassicIntegrationTests {
         // setup
         val countDownLatch = CountDownLatch(1)
         var trackNotificationRequestCaught = false
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationReceive(
@@ -760,8 +782,9 @@ class CampaignClassicIntegrationTests {
         // setup
         val countDownLatch = CountDownLatch(1)
         var trackNotificationRequestCaught = false
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationReceive(mapOf(CampaignClassicTestConstants.EventDataKeys.CampaignClassic.TRACK_INFO_KEY_MESSAGE_ID to "12345"))
@@ -782,8 +805,9 @@ class CampaignClassicIntegrationTests {
         // setup
         val countDownLatch = CountDownLatch(1)
         var trackNotificationRequestCaught = false
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationReceive(
@@ -809,8 +833,9 @@ class CampaignClassicIntegrationTests {
         // setup
         val countDownLatch = CountDownLatch(1)
         var trackNotificationRequestCaught = false
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationReceive(
@@ -836,8 +861,9 @@ class CampaignClassicIntegrationTests {
         // setup
         val countDownLatch = CountDownLatch(1)
         var trackNotificationRequestCaught = false
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration(trackingServer = null)
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationReceive(
@@ -863,8 +889,9 @@ class CampaignClassicIntegrationTests {
         // setup
         val countDownLatch = CountDownLatch(1)
         var trackNotificationRequestCaught = false
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         MobileCore.clearUpdatedConfiguration()
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationReceive(
@@ -890,8 +917,9 @@ class CampaignClassicIntegrationTests {
         // setup
         val countDownLatch = CountDownLatch(1)
         var trackNotificationRequestCaught = false
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration(privacyStatus = MobilePrivacyStatus.OPT_OUT.value)
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationReceive(
@@ -917,8 +945,9 @@ class CampaignClassicIntegrationTests {
         // setup
         val countDownLatch = CountDownLatch(1)
         var trackNotificationRequestCaught = false
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration(privacyStatus = MobilePrivacyStatus.UNKNOWN.value)
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationReceive(
@@ -943,8 +972,9 @@ class CampaignClassicIntegrationTests {
     fun test_trackNotificationReceive_VerifyTrackNotificationReceiveMultipleRequestsOnMultipleCalls() {
         // setup
         val countDownLatch = CountDownLatch(1)
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationReceive(
@@ -994,8 +1024,9 @@ class CampaignClassicIntegrationTests {
     fun test_trackNotificationReceive_VerifyTrackNotificationReceiveRequestWhenTrackingServerReturns404Error() {
         // setup
         val countDownLatch = CountDownLatch(1)
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration(trackingServer = "testTrackingServerFailed")
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationReceive(
@@ -1025,8 +1056,9 @@ class CampaignClassicIntegrationTests {
     fun test_trackNotificationClick_VerifyTrackNotificationClickRequestSentWhenAllParametersArePresentV7() {
         // setup
         val countDownLatch = CountDownLatch(1)
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationClick(
@@ -1053,8 +1085,9 @@ class CampaignClassicIntegrationTests {
     fun test_trackNotificationClick_VerifyTrackNotificationClickRequestSentWhenAllParametersArePresentV8() {
         // setup
         val countDownLatch = CountDownLatch(1)
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationClick(
@@ -1082,8 +1115,9 @@ class CampaignClassicIntegrationTests {
         // setup
         val countDownLatch = CountDownLatch(1)
         var trackNotificationRequestCaught = false
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationClick(mapOf(CampaignClassicTestConstants.EventDataKeys.CampaignClassic.TRACK_INFO_KEY_DELIVERY_ID to "testDeliveryId"))
@@ -1104,8 +1138,9 @@ class CampaignClassicIntegrationTests {
         // setup
         val countDownLatch = CountDownLatch(1)
         var trackNotificationRequestCaught = false
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationClick(
@@ -1131,8 +1166,9 @@ class CampaignClassicIntegrationTests {
         // setup
         val countDownLatch = CountDownLatch(1)
         var trackNotificationRequestCaught = false
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationClick(
@@ -1158,8 +1194,9 @@ class CampaignClassicIntegrationTests {
         // setup
         val countDownLatch = CountDownLatch(1)
         var trackNotificationRequestCaught = false
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationClick(
@@ -1185,8 +1222,9 @@ class CampaignClassicIntegrationTests {
         // setup
         val countDownLatch = CountDownLatch(1)
         var trackNotificationRequestCaught = false
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationClick(mapOf(CampaignClassicTestConstants.EventDataKeys.CampaignClassic.TRACK_INFO_KEY_MESSAGE_ID to "12345"))
@@ -1207,8 +1245,9 @@ class CampaignClassicIntegrationTests {
         // setup
         val countDownLatch = CountDownLatch(1)
         var trackNotificationRequestCaught = false
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationClick(
@@ -1234,8 +1273,9 @@ class CampaignClassicIntegrationTests {
         // setup
         val countDownLatch = CountDownLatch(1)
         var trackNotificationRequestCaught = false
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationClick(
@@ -1261,8 +1301,9 @@ class CampaignClassicIntegrationTests {
         // setup
         val countDownLatch = CountDownLatch(1)
         var trackNotificationRequestCaught = false
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration(trackingServer = null)
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationClick(
@@ -1288,8 +1329,9 @@ class CampaignClassicIntegrationTests {
         // setup
         val countDownLatch = CountDownLatch(1)
         var trackNotificationRequestCaught = false
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         MobileCore.clearUpdatedConfiguration()
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationClick(
@@ -1315,8 +1357,9 @@ class CampaignClassicIntegrationTests {
         // setup
         val countDownLatch = CountDownLatch(1)
         var trackNotificationRequestCaught = false
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration(privacyStatus = MobilePrivacyStatus.OPT_OUT.value)
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationClick(
@@ -1342,8 +1385,9 @@ class CampaignClassicIntegrationTests {
         // setup
         val countDownLatch = CountDownLatch(1)
         var trackNotificationRequestCaught = false
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration(privacyStatus = MobilePrivacyStatus.UNKNOWN.value)
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationClick(
@@ -1368,8 +1412,9 @@ class CampaignClassicIntegrationTests {
     fun test_trackNotificationClick_VerifyTrackNotificationClickMultipleRequestsOnMultipleCalls() {
         // setup
         val countDownLatch = CountDownLatch(1)
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationClick(
@@ -1419,8 +1464,9 @@ class CampaignClassicIntegrationTests {
     fun test_trackNotificationClick_VerifyTrackNotificationClickRequestWhenTrackingServerReturns404Error() {
         // setup
         val countDownLatch = CountDownLatch(1)
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
         setupConfiguration(trackingServer = "testTrackingServerFailed")
-        Thread.sleep(20)
 
         // test
         CampaignClassic.trackNotificationClick(
@@ -1484,6 +1530,10 @@ private class MockedHttpConnecting : HttpConnecting {
     }
 
     override fun close() {}
+}
+
+private fun configurationAwareness(callback: ConfigurationMonitor) {
+    MonitorExtension.configurationAwareness(callback)
 }
 
 private class MockedHttpConnectingFailed : HttpConnecting {
