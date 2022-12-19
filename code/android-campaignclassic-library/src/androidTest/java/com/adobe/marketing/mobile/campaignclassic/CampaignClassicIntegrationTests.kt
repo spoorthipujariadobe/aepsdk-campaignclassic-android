@@ -10,16 +10,16 @@
  */
 package com.adobe.marketing.mobile.campaignclassic
 
-import android.app.Application
+import android.content.Context
 import android.os.Build
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
 import com.adobe.marketing.mobile.CampaignClassic
 import com.adobe.marketing.mobile.LoggingMode
 import com.adobe.marketing.mobile.MobileCore
 import com.adobe.marketing.mobile.MobilePrivacyStatus
+import com.adobe.marketing.mobile.SDKHelper
 import com.adobe.marketing.mobile.services.HttpConnecting
-import com.adobe.marketing.mobile.services.NamedCollection
 import com.adobe.marketing.mobile.services.NetworkRequest
 import com.adobe.marketing.mobile.services.Networking
 import com.adobe.marketing.mobile.services.ServiceProvider
@@ -39,17 +39,11 @@ class CampaignClassicIntegrationTests {
 
     companion object {
         private var networkMonitor: NetworkMonitor? = null
-        private var dataStore: NamedCollection? = null
 
         @BeforeClass
         @JvmStatic
         fun setupClass() {
-            val appContext =
-                InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as Application
-
-            val countDownLatch = CountDownLatch(1)
-
-            // Setup services
+            // Setup network service
             ServiceProvider.getInstance().networkService = Networking { request, callback ->
                 var connection: HttpConnecting? = null
                 with(request.url) {
@@ -72,24 +66,35 @@ class CampaignClassicIntegrationTests {
                 }
                 networkMonitor?.let { it(request) }
             }
-
-            // initialize Campaign Classic extension
-            MobileCore.setApplication(appContext)
-            MobileCore.setLogLevel(LoggingMode.VERBOSE)
-            MobileCore.registerExtensions(listOf(
-                CampaignClassicExtension::class.java,
-                MonitorExtension::class.java
-            )) {
-                countDownLatch.countDown()
-            }
-            countDownLatch.await(100, TimeUnit.MILLISECONDS)
         }
+    }
+
+    private fun clearSharedPreference() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val dataStore = context.getSharedPreferences(CampaignClassicTestConstants.DATASTORE_KEY, 0)
+        val editor = dataStore.edit()
+        editor.clear()
+        editor.commit()
     }
 
     @Before
     fun setup() {
-        dataStore = ServiceProvider.getInstance().dataStoreService?.getNamedCollection(CampaignClassicTestConstants.DATASTORE_KEY)
-        dataStore?.removeAll()
+        networkMonitor = null
+        SDKHelper.resetSDK()
+
+        MobileCore.setApplication(ApplicationProvider.getApplicationContext())
+
+        clearSharedPreference()
+
+        MobileCore.setLogLevel(LoggingMode.VERBOSE)
+        val countDownLatch = CountDownLatch(1)
+        MobileCore.registerExtensions(listOf(
+            CampaignClassicExtension::class.java,
+            MonitorExtension::class.java
+        )) {
+            countDownLatch.countDown()
+        }
+        Assert.assertTrue(countDownLatch.await(1000, TimeUnit.MILLISECONDS))
     }
 
     @Test
@@ -133,13 +138,13 @@ class CampaignClassicIntegrationTests {
             Assert.assertTrue(payload.contains("registrationToken=testToken&"))
             Assert.assertTrue(payload.contains("mobileAppUuid=testIntegrationKey&"))
             Assert.assertTrue(payload.contains("userKey=user%40email.com&"))
-            Assert.assertTrue(payload.contains("deviceImei"))
-            Assert.assertTrue(payload.contains("deviceName=${Build.DEVICE}&"))
-            Assert.assertTrue(payload.contains("deviceModel=${Build.MODEL}&"))
-            Assert.assertTrue(payload.contains("deviceBrand=${Build.BRAND}&"))
-            Assert.assertTrue(payload.contains("deviceManufacturer=${Build.MANUFACTURER}&"))
+            Assert.assertTrue(payload.contains("deviceImei="))
+            Assert.assertTrue(payload.contains("deviceName="))
+            Assert.assertTrue(payload.contains("deviceModel="))
+            Assert.assertTrue(payload.contains("deviceBrand="))
+            Assert.assertTrue(payload.contains("deviceManufacturer="))
             Assert.assertTrue(payload.contains("osName=android&"))
-            Assert.assertTrue(payload.contains("osVersion=Android%20${Build.VERSION.RELEASE}&"))
+            Assert.assertTrue(payload.contains("osVersion=Android%20"))
             Assert.assertTrue(payload.contains("osLanguage=en-US&"))
 
             // verify additional params
@@ -148,18 +153,14 @@ class CampaignClassicIntegrationTests {
             Assert.assertTrue(payload.contains("name%22%20value%3D%22testUser"))
             Assert.assertTrue(payload.contains("age%22%20value%3D%2235.9"))
 
-            // verify registration hash stored in datastore
-            Assert.assertNotNull(dataStore?.getString(CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH, null))
-
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
     fun test_registerDevice_VerifyNoDeviceRegistrationRequestSentWhenDeviceTokenIsEmpty() {
         // setup
-        var registerDeviceRequestCaught = false
         val countDownLatch = CountDownLatch(1)
         val configurationLatch = CountDownLatch(1)
         configurationAwareness { configurationLatch.countDown() }
@@ -179,12 +180,11 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             if (request.url.startsWith("https://testMarketingServer/nms/mobile/1/registerAndroid.jssp")) {
-                registerDeviceRequestCaught = true
+                countDownLatch.countDown()
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertFalse(registerDeviceRequestCaught)
+        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
@@ -222,12 +222,9 @@ class CampaignClassicIntegrationTests {
             Assert.assertTrue(payload.contains("name%22%20value%3D%22testUser"))
             Assert.assertTrue(payload.contains("age%22%20value%3D%2235.9"))
 
-            // verify registration hash stored in datastore
-            Assert.assertNotNull(dataStore?.getString(CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH, null))
-
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
@@ -265,12 +262,9 @@ class CampaignClassicIntegrationTests {
             Assert.assertTrue(payload.contains("name%22%20value%3D%22testUser"))
             Assert.assertTrue(payload.contains("age%22%20value%3D%2235.9"))
 
-            // verify registration hash stored in datastore
-            Assert.assertNotNull(dataStore?.getString(CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH, null))
-
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
@@ -297,18 +291,14 @@ class CampaignClassicIntegrationTests {
             // verify additional params
             Assert.assertTrue(payload.contains("additionalParameters%3E%3C%2FadditionalParameters%3E"))
 
-            // verify registration hash stored in datastore
-            Assert.assertNotNull(dataStore?.getString(CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH, null))
-
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
     fun test_registerDevice_VerifyNoDeviceRegistrationRequestSentWhenIntegrationKeyIsNotPresent() {
         // setup
-        var registerDeviceRequestCaught = false
         val countDownLatch = CountDownLatch(1)
         val configurationLatch = CountDownLatch(1)
         configurationAwareness { configurationLatch.countDown() }
@@ -328,18 +318,16 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             if (request.url.startsWith("https://testMarketingServer/nms/mobile/1/registerAndroid.jssp")) {
-                registerDeviceRequestCaught = true
+                countDownLatch.countDown()
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertFalse(registerDeviceRequestCaught)
+        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
     fun test_registerDevice_VerifyNoDeviceRegistrationRequestSentWhenMarketingServerIsNotPresent() {
         // setup
-        var registerDeviceRequestCaught = false
         val countDownLatch = CountDownLatch(1)
         val configurationLatch = CountDownLatch(1)
         configurationAwareness { configurationLatch.countDown() }
@@ -359,18 +347,16 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             if (request.url.startsWith("https://testMarketingServer/nms/mobile/1/registerAndroid.jssp")) {
-                registerDeviceRequestCaught = true
+                countDownLatch.countDown()
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertFalse(registerDeviceRequestCaught)
+        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
     fun test_registerDevice_VerifyNoDeviceRegistrationRequestSentWhenPrivacyStatusUnknown() {
         // setup
-        var registerDeviceRequestCaught = false
         val countDownLatch = CountDownLatch(1)
         val configurationLatch = CountDownLatch(1)
         configurationAwareness { configurationLatch.countDown() }
@@ -390,18 +376,16 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             if (request.url.startsWith("https://testMarketingServer/nms/mobile/1/registerAndroid.jssp")) {
-                registerDeviceRequestCaught = true
+                countDownLatch.countDown()
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertFalse(registerDeviceRequestCaught)
+        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
     fun test_registerDevice_VerifyNoDeviceRegistrationRequestSentWhenPrivacyStatusOptOut() {
         // setup
-        var registerDeviceRequestCaught = false
         val countDownLatch = CountDownLatch(1)
         val configurationLatch = CountDownLatch(1)
         configurationAwareness { configurationLatch.countDown() }
@@ -421,43 +405,11 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             if (request.url.startsWith("https://testMarketingServer/nms/mobile/1/registerAndroid.jssp")) {
-                registerDeviceRequestCaught = true
+                countDownLatch.countDown()
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertFalse(registerDeviceRequestCaught)
-    }
-
-    @Test
-    fun test_registerDevice_VerifyNoDeviceRegistrationRequestSentWhenNoConfiguration() {
-        // setup
-        val configurationLatch = CountDownLatch(1)
-        configurationAwareness { configurationLatch.countDown() }
-        MobileCore.clearUpdatedConfiguration()
-        var registerDeviceRequestCaught = false
-        val countDownLatch = CountDownLatch(1)
-
-        // test
-        CampaignClassic.registerDevice(
-            "testToken", "user@email.com",
-            mapOf(
-                "zipcode" to 94403,
-                "subscribed" to true,
-                "name" to "testUser",
-                "age" to 35.9
-            )
-        )
-
-        // verify
-        networkMonitor = { request ->
-            if (request.url.startsWith("https://testMarketingServer/nms/mobile/1/registerAndroid.jssp")) {
-                registerDeviceRequestCaught = true
-            }
-        }
-
-        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertFalse(registerDeviceRequestCaught)
+        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
@@ -483,16 +435,11 @@ class CampaignClassicIntegrationTests {
         networkMonitor = { request ->
             // verify network request url
             Assert.assertEquals("https://testMarketingServer/nms/mobile/1/registerAndroid.jssp", request.url)
-
-            // verify registration hash stored in datastore
-            Assert.assertNotNull(dataStore?.getString(CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH, null))
-
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
 
         networkMonitor = null
-        var registerDeviceRequestCaught = false
         val countDownLatch2 = CountDownLatch(1)
         // test
         CampaignClassic.registerDevice(
@@ -508,12 +455,11 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             if (request.url.startsWith("https://testMarketingServer/nms/mobile/1/registerAndroid.jssp")) {
-                registerDeviceRequestCaught = true
+                countDownLatch.countDown()
             }
         }
 
-        Assert.assertFalse(countDownLatch2.await(1, TimeUnit.SECONDS))
-        Assert.assertFalse(registerDeviceRequestCaught)
+        Assert.assertFalse(countDownLatch2.await(5, TimeUnit.SECONDS))
     }
 
     @Test
@@ -540,13 +486,9 @@ class CampaignClassicIntegrationTests {
             // verify network request url
             Assert.assertEquals("https://testMarketingServer/nms/mobile/1/registerAndroid.jssp", request.url)
 
-            // verify registration hash stored in datastore
-            Assert.assertNotNull(dataStore?.getString(CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH, null))
-
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
-
+        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
         networkMonitor = null
         val countDownLatch2 = CountDownLatch(1)
         // test
@@ -565,12 +507,9 @@ class CampaignClassicIntegrationTests {
             // verify network request url
             Assert.assertEquals("https://testMarketingServer/nms/mobile/1/registerAndroid.jssp", request.url)
 
-            // verify registration hash stored in datastore
-            Assert.assertNotNull(dataStore?.getString(CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH, null))
-
             countDownLatch2.countDown()
         }
-        Assert.assertTrue(countDownLatch2.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch2.await(5, TimeUnit.SECONDS))
     }
 
     @Test
@@ -600,12 +539,9 @@ class CampaignClassicIntegrationTests {
                 request.url
             )
 
-            // verify registration hash stored in datastore
-            Assert.assertNull(dataStore?.getString(CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH, null))
-
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     // =================================================================================================================
@@ -638,7 +574,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
@@ -667,14 +603,13 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
     fun test_trackNotificationReceive_VerifyTrackNotificationReceiveRequestNotSentWhenBroadLogIdIsNotPresent() {
         // setup
         val countDownLatch = CountDownLatch(1)
-        var trackNotificationRequestCaught = false
         val configurationLatch = CountDownLatch(1)
         configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
@@ -685,19 +620,17 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             if (request.url.startsWith("https://testTrackingServer/r/?id=h")) {
-                trackNotificationRequestCaught = true
+                countDownLatch.countDown()
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertFalse(trackNotificationRequestCaught)
+        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
     fun test_trackNotificationReceive_VerifyTrackNotificationReceiveRequestNotSentWhenBroadLogIdIsEmpty() {
         // setup
         val countDownLatch = CountDownLatch(1)
-        var trackNotificationRequestCaught = false
         val configurationLatch = CountDownLatch(1)
         configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
@@ -713,19 +646,17 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             if (request.url.startsWith("https://testTrackingServer/r/?id=h")) {
-                trackNotificationRequestCaught = true
+                countDownLatch.countDown()
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertFalse(trackNotificationRequestCaught)
+        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
     fun test_trackNotificationReceive_VerifyTrackNotificationReceiveRequestNotSentWhenBroadLogIdIsNull() {
         // setup
         val countDownLatch = CountDownLatch(1)
-        var trackNotificationRequestCaught = false
         val configurationLatch = CountDownLatch(1)
         configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
@@ -741,19 +672,17 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             if (request.url.startsWith("https://testTrackingServer/r/?id=h")) {
-                trackNotificationRequestCaught = true
+                countDownLatch.countDown()
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertFalse(trackNotificationRequestCaught)
+        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
     fun test_trackNotificationReceive_VerifyTrackNotificationReceiveRequestNotSentWhenBroadLogIdIsInvalid() {
         // setup
         val countDownLatch = CountDownLatch(1)
-        var trackNotificationRequestCaught = false
         val configurationLatch = CountDownLatch(1)
         configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
@@ -769,19 +698,17 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             if (request.url.startsWith("https://testTrackingServer/r/?id=h")) {
-                trackNotificationRequestCaught = true
+                countDownLatch.countDown()
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertFalse(trackNotificationRequestCaught)
+        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
     fun test_trackNotificationReceive_VerifyTrackNotificationReceiveRequestNotSentWhenDeliveryIdIsNotPresent() {
         // setup
         val countDownLatch = CountDownLatch(1)
-        var trackNotificationRequestCaught = false
         val configurationLatch = CountDownLatch(1)
         configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
@@ -792,19 +719,17 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             if (request.url.startsWith("https://testTrackingServer/r/?id=h")) {
-                trackNotificationRequestCaught = true
+                countDownLatch.countDown()
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertFalse(trackNotificationRequestCaught)
+        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
     fun test_trackNotificationReceive_VerifyTrackNotificationReceiveRequestNotSentWhenDeliveryIdIsEmpty() {
         // setup
         val countDownLatch = CountDownLatch(1)
-        var trackNotificationRequestCaught = false
         val configurationLatch = CountDownLatch(1)
         configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
@@ -820,19 +745,17 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             if (request.url.startsWith("https://testTrackingServer/r/?id=h")) {
-                trackNotificationRequestCaught = true
+                countDownLatch.countDown()
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertFalse(trackNotificationRequestCaught)
+        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
     fun test_trackNotificationReceive_VerifyTrackNotificationReceiveRequestNotSentWhenDeliveryIdIsNull() {
         // setup
         val countDownLatch = CountDownLatch(1)
-        var trackNotificationRequestCaught = false
         val configurationLatch = CountDownLatch(1)
         configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
@@ -848,19 +771,17 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             if (request.url.startsWith("https://testTrackingServer/r/?id=h")) {
-                trackNotificationRequestCaught = true
+                countDownLatch.countDown()
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertFalse(trackNotificationRequestCaught)
+        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
     fun test_trackNotificationReceive_VerifyTrackNotificationReceiveRequestNotSentWhenTrackingServerIsNull() {
         // setup
         val countDownLatch = CountDownLatch(1)
-        var trackNotificationRequestCaught = false
         val configurationLatch = CountDownLatch(1)
         configurationAwareness { configurationLatch.countDown() }
         setupConfiguration(trackingServer = null)
@@ -876,47 +797,17 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             if (request.url.startsWith("https://testTrackingServer/r/?id=h")) {
-                trackNotificationRequestCaught = true
+                countDownLatch.countDown()
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertFalse(trackNotificationRequestCaught)
-    }
-
-    @Test
-    fun test_trackNotificationReceive_VerifyTrackNotificationReceiveRequestNotSentWhenNoConfiguration() {
-        // setup
-        val countDownLatch = CountDownLatch(1)
-        var trackNotificationRequestCaught = false
-        val configurationLatch = CountDownLatch(1)
-        configurationAwareness { configurationLatch.countDown() }
-        MobileCore.clearUpdatedConfiguration()
-
-        // test
-        CampaignClassic.trackNotificationReceive(
-            mapOf(
-                CampaignClassicTestConstants.EventDataKeys.CampaignClassic.TRACK_INFO_KEY_DELIVERY_ID to null,
-                CampaignClassicTestConstants.EventDataKeys.CampaignClassic.TRACK_INFO_KEY_MESSAGE_ID to "12345"
-            )
-        )
-
-        // verify
-        networkMonitor = { request ->
-            if (request.url.startsWith("https://testTrackingServer/r/?id=h")) {
-                trackNotificationRequestCaught = true
-            }
-        }
-
-        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertFalse(trackNotificationRequestCaught)
+        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
     fun test_trackNotificationReceive_VerifyTrackNotificationReceiveRequestNotSentWhenPrivacyStatusIsOptOut() {
         // setup
         val countDownLatch = CountDownLatch(1)
-        var trackNotificationRequestCaught = false
         val configurationLatch = CountDownLatch(1)
         configurationAwareness { configurationLatch.countDown() }
         setupConfiguration(privacyStatus = MobilePrivacyStatus.OPT_OUT.value)
@@ -932,19 +823,17 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             if (request.url.startsWith("https://testTrackingServer/r/?id=h")) {
-                trackNotificationRequestCaught = true
+                countDownLatch.countDown()
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertFalse(trackNotificationRequestCaught)
+        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
     fun test_trackNotificationReceive_VerifyTrackNotificationReceiveRequestNotSentWhenPrivacyStatusIsUnknown() {
         // setup
         val countDownLatch = CountDownLatch(1)
-        var trackNotificationRequestCaught = false
         val configurationLatch = CountDownLatch(1)
         configurationAwareness { configurationLatch.countDown() }
         setupConfiguration(privacyStatus = MobilePrivacyStatus.UNKNOWN.value)
@@ -960,12 +849,11 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             if (request.url.startsWith("https://testTrackingServer/r/?id=h")) {
-                trackNotificationRequestCaught = true
+                countDownLatch.countDown()
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertFalse(trackNotificationRequestCaught)
+        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
@@ -994,7 +882,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
 
         val countDownLatch2 = CountDownLatch(1)
         networkMonitor = null
@@ -1017,7 +905,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch2.countDown()
         }
-        Assert.assertTrue(countDownLatch2.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch2.await(5, TimeUnit.SECONDS))
     }
 
     @Test
@@ -1045,7 +933,7 @@ class CampaignClassicIntegrationTests {
             countDownLatch.countDown()
         }
 
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     // =================================================================================================================
@@ -1078,7 +966,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
@@ -1107,14 +995,13 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
     fun test_trackNotificationClick_VerifyTrackNotificationClickRequestNotSentWhenBroadLogIdIsNotPresent() {
         // setup
         val countDownLatch = CountDownLatch(1)
-        var trackNotificationRequestCaught = false
         val configurationLatch = CountDownLatch(1)
         configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
@@ -1125,19 +1012,17 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             if (request.url.startsWith("https://testTrackingServer/r/?id=h")) {
-                trackNotificationRequestCaught = true
+                countDownLatch.countDown()
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertFalse(trackNotificationRequestCaught)
+        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
     fun test_trackNotificationClick_VerifyTrackNotificationClickRequestNotSentWhenBroadLogIdIsEmpty() {
         // setup
         val countDownLatch = CountDownLatch(1)
-        var trackNotificationRequestCaught = false
         val configurationLatch = CountDownLatch(1)
         configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
@@ -1153,19 +1038,17 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             if (request.url.startsWith("https://testTrackingServer/r/?id=h")) {
-                trackNotificationRequestCaught = true
+                countDownLatch.countDown()
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertFalse(trackNotificationRequestCaught)
+        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
     fun test_trackNotificationClick_VerifyTrackNotificationClickRequestNotSentWhenBroadLogIdIsNull() {
         // setup
         val countDownLatch = CountDownLatch(1)
-        var trackNotificationRequestCaught = false
         val configurationLatch = CountDownLatch(1)
         configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
@@ -1181,19 +1064,17 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             if (request.url.startsWith("https://testTrackingServer/r/?id=h")) {
-                trackNotificationRequestCaught = true
+                countDownLatch.countDown()
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertFalse(trackNotificationRequestCaught)
+        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
     fun test_trackNotificationClick_VerifyTrackNotificationClickRequestNotSentWhenBroadLogIdIsInvalid() {
         // setup
         val countDownLatch = CountDownLatch(1)
-        var trackNotificationRequestCaught = false
         val configurationLatch = CountDownLatch(1)
         configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
@@ -1209,19 +1090,17 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             if (request.url.startsWith("https://testTrackingServer/r/?id=h")) {
-                trackNotificationRequestCaught = true
+                countDownLatch.countDown()
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertFalse(trackNotificationRequestCaught)
+        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
     fun test_trackNotificationClick_VerifyTrackNotificationClickRequestNotSentWhenDeliveryIdIsNotPresent() {
         // setup
         val countDownLatch = CountDownLatch(1)
-        var trackNotificationRequestCaught = false
         val configurationLatch = CountDownLatch(1)
         configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
@@ -1232,19 +1111,17 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             if (request.url.startsWith("https://testTrackingServer/r/?id=h")) {
-                trackNotificationRequestCaught = true
+                countDownLatch.countDown()
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertFalse(trackNotificationRequestCaught)
+        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
     fun test_trackNotificationClick_VerifyTrackNotificationClickRequestNotSentWhenDeliveryIdIsEmpty() {
         // setup
         val countDownLatch = CountDownLatch(1)
-        var trackNotificationRequestCaught = false
         val configurationLatch = CountDownLatch(1)
         configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
@@ -1260,19 +1137,17 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             if (request.url.startsWith("https://testTrackingServer/r/?id=h")) {
-                trackNotificationRequestCaught = true
+                countDownLatch.countDown()
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertFalse(trackNotificationRequestCaught)
+        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
     fun test_trackNotificationClick_VerifyTrackNotificationClickRequestNotSentWhenDeliveryIdIsNull() {
         // setup
         val countDownLatch = CountDownLatch(1)
-        var trackNotificationRequestCaught = false
         val configurationLatch = CountDownLatch(1)
         configurationAwareness { configurationLatch.countDown() }
         setupConfiguration()
@@ -1288,19 +1163,17 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             if (request.url.startsWith("https://testTrackingServer/r/?id=h")) {
-                trackNotificationRequestCaught = true
+                countDownLatch.countDown()
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertFalse(trackNotificationRequestCaught)
+        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
     fun test_trackNotificationClick_VerifyTrackNotificationClickRequestNotSentWhenTrackingServerIsNull() {
         // setup
         val countDownLatch = CountDownLatch(1)
-        var trackNotificationRequestCaught = false
         val configurationLatch = CountDownLatch(1)
         configurationAwareness { configurationLatch.countDown() }
         setupConfiguration(trackingServer = null)
@@ -1316,47 +1189,17 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             if (request.url.startsWith("https://testTrackingServer/r/?id=h")) {
-                trackNotificationRequestCaught = true
+                countDownLatch.countDown()
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertFalse(trackNotificationRequestCaught)
-    }
-
-    @Test
-    fun test_trackNotificationClick_VerifyTrackNotificationClickRequestNotSentWhenNoConfiguration() {
-        // setup
-        val countDownLatch = CountDownLatch(1)
-        var trackNotificationRequestCaught = false
-        val configurationLatch = CountDownLatch(1)
-        configurationAwareness { configurationLatch.countDown() }
-        MobileCore.clearUpdatedConfiguration()
-
-        // test
-        CampaignClassic.trackNotificationClick(
-            mapOf(
-                CampaignClassicTestConstants.EventDataKeys.CampaignClassic.TRACK_INFO_KEY_DELIVERY_ID to null,
-                CampaignClassicTestConstants.EventDataKeys.CampaignClassic.TRACK_INFO_KEY_MESSAGE_ID to "12345"
-            )
-        )
-
-        // verify
-        networkMonitor = { request ->
-            if (request.url.startsWith("https://testTrackingServer/r/?id=h")) {
-                trackNotificationRequestCaught = true
-            }
-        }
-
-        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertFalse(trackNotificationRequestCaught)
+        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
     fun test_trackNotificationClick_VerifyTrackNotificationClickRequestNotSentWhenPrivacyStatusIsOptOut() {
         // setup
         val countDownLatch = CountDownLatch(1)
-        var trackNotificationRequestCaught = false
         val configurationLatch = CountDownLatch(1)
         configurationAwareness { configurationLatch.countDown() }
         setupConfiguration(privacyStatus = MobilePrivacyStatus.OPT_OUT.value)
@@ -1372,19 +1215,17 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             if (request.url.startsWith("https://testTrackingServer/r/?id=h")) {
-                trackNotificationRequestCaught = true
+                countDownLatch.countDown()
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertFalse(trackNotificationRequestCaught)
+        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
     fun test_trackNotificationClick_VerifyTrackNotificationClickRequestNotSentWhenPrivacyStatusIsUnknown() {
         // setup
         val countDownLatch = CountDownLatch(1)
-        var trackNotificationRequestCaught = false
         val configurationLatch = CountDownLatch(1)
         configurationAwareness { configurationLatch.countDown() }
         setupConfiguration(privacyStatus = MobilePrivacyStatus.UNKNOWN.value)
@@ -1400,12 +1241,11 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             if (request.url.startsWith("https://testTrackingServer/r/?id=h")) {
-                trackNotificationRequestCaught = true
+                countDownLatch.countDown()
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertFalse(trackNotificationRequestCaught)
+        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     @Test
@@ -1434,7 +1274,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
 
         val countDownLatch2 = CountDownLatch(1)
         networkMonitor = null
@@ -1457,7 +1297,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch2.countDown()
         }
-        Assert.assertTrue(countDownLatch2.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch2.await(5, TimeUnit.SECONDS))
     }
 
     @Test
@@ -1485,7 +1325,7 @@ class CampaignClassicIntegrationTests {
             countDownLatch.countDown()
         }
 
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
     }
 
     private fun setupConfiguration(
