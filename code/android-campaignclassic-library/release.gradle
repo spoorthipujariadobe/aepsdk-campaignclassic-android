@@ -10,20 +10,26 @@
  * governing permissions and limitations under the License.
  */
 apply plugin: 'signing'
+apply plugin: 'maven-publish'
+
+def isReleaseBuild() {
+    return hasProperty('release')
+}
 
 def groupIdForPublish = 'com.adobe.marketing.mobile'
+version = isReleaseBuild() ? rootProject.campaignClassicExtensionVersion : rootProject.campaignClassicExtensionVersion+"-SNAPSHOT"
 
 publishing {
     publications {
         release(MavenPublication) {
             groupId = groupIdForPublish
             artifactId = rootProject.campaignClassicExtensionName
-            version = rootProject.campaignClassicExtensionVersion
+            version = version
             artifact("$buildDir/outputs/aar/${rootProject.campaignClassicExtensionAARName}")
             pom {
                 name = rootProject.mavenRepoName
                 description = rootProject.mavenRepoDescription
-                url = 'https://aep-sdks.gitbook.io'
+                url = 'https://developer.adobe.com/client-sdks'
                 licenses {
                     license {
                         name = 'Adobe Proprietary'
@@ -37,9 +43,9 @@ publishing {
                     }
                 }
                 scm {
-                    connection = 'scm:git:github.com//Adobe-Marketing-Cloud/acp-sdks.git'
-                    developerConnection = 'scm:git:ssh://github.com//Adobe-Marketing-Cloud/acp-sdks.git'
-                    url = 'https://github.com/Adobe-Marketing-Cloud/acp-sdks'
+                    connection = 'scm:git:github.com//adobe/aepsdk-campaignclassic-android.git'
+                    developerConnection = 'scm:git:ssh://github.com//adobe/aepsdk-campaignclassic-android.git'
+                    url = 'https://github.com/adobe/aepsdk-campaignclassic-android'
                 }
                 withXml {
                     def dependenciesNode = asNode().appendNode('dependencies')
@@ -55,7 +61,7 @@ publishing {
     repositories {
         maven {
             name = "sonatype"
-            url = "https://oss.sonatype.org/content/repositories/snapshots/"
+            url = version.endsWith('SNAPSHOT') ? "https://oss.sonatype.org/content/repositories/snapshots/" : "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
             credentials {
                 username = System.getenv("SONATYPE_USERNAME")
                 password = System.getenv("SONATYPE_PASSWORD")
@@ -64,8 +70,6 @@ publishing {
     }
 }
 tasks.withType(Javadoc).all { enabled = false }
-publishToMavenLocal.dependsOn('assemblePhone')
-publishReleasePublicationToMavenLocal.dependsOn('assemblePhone')
 publish.dependsOn('assemblePhone')
 
 ext."signing.gnupg.executable"="gpg"
