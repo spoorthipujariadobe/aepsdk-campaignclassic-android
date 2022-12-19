@@ -11,7 +11,6 @@
 package com.adobe.marketing.mobile.campaignclassic
 
 import android.content.Context
-import android.os.Build
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.adobe.marketing.mobile.CampaignClassic
@@ -88,10 +87,12 @@ class CampaignClassicIntegrationTests {
 
         MobileCore.setLogLevel(LoggingMode.VERBOSE)
         val countDownLatch = CountDownLatch(1)
-        MobileCore.registerExtensions(listOf(
-            CampaignClassicExtension::class.java,
-            MonitorExtension::class.java
-        )) {
+        MobileCore.registerExtensions(
+            listOf(
+                CampaignClassicExtension::class.java,
+                MonitorExtension::class.java
+            )
+        ) {
             countDownLatch.countDown()
         }
         Assert.assertTrue(countDownLatch.await(1000, TimeUnit.MILLISECONDS))
@@ -155,7 +156,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -184,7 +185,7 @@ class CampaignClassicIntegrationTests {
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -224,7 +225,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -264,7 +265,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -293,7 +294,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -322,7 +323,7 @@ class CampaignClassicIntegrationTests {
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -351,7 +352,7 @@ class CampaignClassicIntegrationTests {
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -380,7 +381,7 @@ class CampaignClassicIntegrationTests {
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -409,7 +410,7 @@ class CampaignClassicIntegrationTests {
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -437,7 +438,7 @@ class CampaignClassicIntegrationTests {
             Assert.assertEquals("https://testMarketingServer/nms/mobile/1/registerAndroid.jssp", request.url)
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
 
         networkMonitor = null
         val countDownLatch2 = CountDownLatch(1)
@@ -488,7 +489,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
         networkMonitor = null
         val countDownLatch2 = CountDownLatch(1)
         // test
@@ -541,7 +542,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     // =================================================================================================================
@@ -574,7 +575,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -603,7 +604,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -624,7 +625,7 @@ class CampaignClassicIntegrationTests {
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -650,7 +651,7 @@ class CampaignClassicIntegrationTests {
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -676,7 +677,7 @@ class CampaignClassicIntegrationTests {
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -702,7 +703,7 @@ class CampaignClassicIntegrationTests {
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -723,7 +724,7 @@ class CampaignClassicIntegrationTests {
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -749,7 +750,7 @@ class CampaignClassicIntegrationTests {
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -775,7 +776,7 @@ class CampaignClassicIntegrationTests {
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -801,7 +802,7 @@ class CampaignClassicIntegrationTests {
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -827,7 +828,7 @@ class CampaignClassicIntegrationTests {
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -853,7 +854,7 @@ class CampaignClassicIntegrationTests {
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -882,7 +883,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
 
         val countDownLatch2 = CountDownLatch(1)
         networkMonitor = null
@@ -933,7 +934,7 @@ class CampaignClassicIntegrationTests {
             countDownLatch.countDown()
         }
 
-        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     // =================================================================================================================
@@ -966,7 +967,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -995,7 +996,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -1016,7 +1017,7 @@ class CampaignClassicIntegrationTests {
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -1042,7 +1043,7 @@ class CampaignClassicIntegrationTests {
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -1068,7 +1069,7 @@ class CampaignClassicIntegrationTests {
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -1094,7 +1095,7 @@ class CampaignClassicIntegrationTests {
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -1115,7 +1116,7 @@ class CampaignClassicIntegrationTests {
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -1141,7 +1142,7 @@ class CampaignClassicIntegrationTests {
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -1167,7 +1168,7 @@ class CampaignClassicIntegrationTests {
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -1193,7 +1194,7 @@ class CampaignClassicIntegrationTests {
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -1219,7 +1220,7 @@ class CampaignClassicIntegrationTests {
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -1245,7 +1246,7 @@ class CampaignClassicIntegrationTests {
             }
         }
 
-        Assert.assertFalse(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     @Test
@@ -1274,7 +1275,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
 
         val countDownLatch2 = CountDownLatch(1)
         networkMonitor = null
@@ -1325,7 +1326,7 @@ class CampaignClassicIntegrationTests {
             countDownLatch.countDown()
         }
 
-        Assert.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
     }
 
     private fun setupConfiguration(
