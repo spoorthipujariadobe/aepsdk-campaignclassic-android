@@ -49,3 +49,10 @@ assemble-phone-release:
 
 assemble-app:
 		(./code/gradlew -p code/testapp  assemble)
+		
+ci-publish-staging: clean core-assemble-phone-release
+		(./code/gradlew -p code/android-campaignclassic-library publishReleasePublicationToSonatypeRepository --stacktrace)
+
+ci-publish-main: clean core-assemble-phone-release
+		(./code/gradlew -p code/android-campaignclassic-library publishReleasePublicationToSonatypeRepository -Prelease)
+		
