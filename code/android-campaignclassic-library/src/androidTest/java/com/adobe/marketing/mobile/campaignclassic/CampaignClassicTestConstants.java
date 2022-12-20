@@ -31,6 +31,7 @@ final class CampaignClassicTestConstants {
 	static final String MESSAGE_CLICKED_TAGID = "2";
 
 	static final String DATASTORE_KEY = "ADOBEMOBILE_CAMPAIGNCLASSIC";
+	static final String CONFIG_DATA_STORE = "AdobeMobile_ConfigState";
 
 	/*
 	    DataStoreKeys
