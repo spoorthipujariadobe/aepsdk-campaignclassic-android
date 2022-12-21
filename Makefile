@@ -10,6 +10,10 @@
 # governing permissions and limitations under the License.
 #
 
+
+clean:
+	  (./code/gradlew -p code clean)
+
 checkstyle:
 		(./code/gradlew -p code/android-campaignclassic-library checkstyle)
 		
@@ -50,9 +54,9 @@ assemble-phone-release:
 assemble-app:
 		(./code/gradlew -p code/testapp  assemble)
 		
-ci-publish-staging: clean core-assemble-phone-release
+ci-publish-staging: clean assemble-phone-release
 		(./code/gradlew -p code/android-campaignclassic-library publishReleasePublicationToSonatypeRepository --stacktrace)
 
-ci-publish-main: clean core-assemble-phone-release
+ci-publish-main: clean assemble-phone-release
 		(./code/gradlew -p code/android-campaignclassic-library publishReleasePublicationToSonatypeRepository -Prelease)
 		
