@@ -8,7 +8,7 @@
   OF ANY KIND, either express or implied. See the License for the specific language
   governing permissions and limitations under the License.
  */
-package com.adobe.marketing.mobile.campaignclassic
+package com.adobe.marketing.mobile.campaignclassic.internal
 
 import androidx.annotation.VisibleForTesting
 import com.adobe.marketing.mobile.Event
@@ -42,7 +42,9 @@ internal class RegistrationManager {
     constructor(extensionApi: ExtensionApi) {
         this.extensionApi = extensionApi
         deviceInfoService = ServiceProvider.getInstance().deviceInfoService
-        dataStore = ServiceProvider.getInstance().dataStoreService?.getNamedCollection(CampaignClassicConstants.DATASTORE_KEY)
+        dataStore = ServiceProvider.getInstance().dataStoreService?.getNamedCollection(
+            CampaignClassicConstants.DATASTORE_KEY
+        )
         networkService = ServiceProvider.getInstance().networkService
     }
 
@@ -121,7 +123,8 @@ internal class RegistrationManager {
         // retrieve the userKey from the event
         // userKey is a string containing user identifier e.g. email
         val userKey = event.userKey ?: ""
-        val additionalParametersString = CampaignClassicMapSerializer.serializeMap(event.additionalParameters)
+        val additionalParametersString =
+            CampaignClassicMapSerializer.serializeMap(event.additionalParameters)
         val deviceUniqueId = deviceInfoService?.deviceUniqueId
         val deviceUuid = if (deviceUniqueId != null) UUID(
             deviceUniqueId.hashCode().toLong(),

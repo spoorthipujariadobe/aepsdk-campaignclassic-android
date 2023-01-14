@@ -16,7 +16,7 @@ import androidx.annotation.NonNull;
 import java.util.Map;
 import java.util.HashMap;
 
-import com.adobe.marketing.mobile.campaignclassic.CampaignClassicExtension;
+import com.adobe.marketing.mobile.campaignclassic.internal.CampaignClassicExtension;
 import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.util.StringUtils;
 

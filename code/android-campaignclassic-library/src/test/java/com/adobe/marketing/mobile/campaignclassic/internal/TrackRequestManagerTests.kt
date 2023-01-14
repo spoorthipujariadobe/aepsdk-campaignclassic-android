@@ -8,7 +8,7 @@
   OF ANY KIND, either express or implied. See the License for the specific language
   governing permissions and limitations under the License.
  */
-package com.adobe.marketing.mobile.campaignclassic
+package com.adobe.marketing.mobile.campaignclassic.internal
 
 import com.adobe.marketing.mobile.Event
 import com.adobe.marketing.mobile.EventSource
@@ -55,7 +55,10 @@ class TrackRequestManagerTests {
         setConfigurationSharedState()
 
         // test
-        trackManager.handleTrackRequest(getTrackRequestEvent(), CampaignClassicTestConstants.MESSAGE_RECEIVED_TAGID)
+        trackManager.handleTrackRequest(
+            getTrackRequestEvent(),
+            CampaignClassicTestConstants.MESSAGE_RECEIVED_TAGID
+        )
 
         // verify network call
         val networkRequestCaptor = ArgumentCaptor.forClass(NetworkRequest::class.java)
@@ -75,7 +78,10 @@ class TrackRequestManagerTests {
         setConfigurationSharedState()
 
         // test
-        trackManager.handleTrackRequest(getTrackRequestEvent(), CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID)
+        trackManager.handleTrackRequest(
+            getTrackRequestEvent(),
+            CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID
+        )
 
         // verify network call
         val networkRequestCaptor = ArgumentCaptor.forClass(NetworkRequest::class.java)
@@ -102,7 +108,10 @@ class TrackRequestManagerTests {
             }
 
         // test
-        trackManager.handleTrackRequest(getTrackRequestEvent(), CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID)
+        trackManager.handleTrackRequest(
+            getTrackRequestEvent(),
+            CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID
+        )
 
         // verify network call
         Mockito.verify(networkService, Mockito.times(1)).connectAsync(ArgumentMatchers.any(), ArgumentMatchers.any())
@@ -111,7 +120,10 @@ class TrackRequestManagerTests {
     @Test
     fun handleTrackRequest_NotificationClicked_ConfigurationNotSet() {
         // test
-        trackManager.handleTrackRequest(getTrackRequestEvent(), CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID)
+        trackManager.handleTrackRequest(
+            getTrackRequestEvent(),
+            CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID
+        )
 
         // verify no network call
         Mockito.verifyNoInteractions(networkService)
@@ -123,7 +135,10 @@ class TrackRequestManagerTests {
         setConfigurationSharedState(privacyStatus = MobilePrivacyStatus.OPT_OUT)
 
         // test
-        trackManager.handleTrackRequest(getTrackRequestEvent(), CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID)
+        trackManager.handleTrackRequest(
+            getTrackRequestEvent(),
+            CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID
+        )
 
         // verify no network call
         Mockito.verifyNoInteractions(networkService)
@@ -135,7 +150,10 @@ class TrackRequestManagerTests {
         setConfigurationSharedState(privacyStatus = MobilePrivacyStatus.UNKNOWN)
 
         // test
-        trackManager.handleTrackRequest(getTrackRequestEvent(), CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID)
+        trackManager.handleTrackRequest(
+            getTrackRequestEvent(),
+            CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID
+        )
 
         // verify no network call
         Mockito.verifyNoInteractions(networkService)
@@ -147,7 +165,10 @@ class TrackRequestManagerTests {
         setConfigurationSharedState(trackingServer = null)
 
         // test
-        trackManager.handleTrackRequest(getTrackRequestEvent(), CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID)
+        trackManager.handleTrackRequest(
+            getTrackRequestEvent(),
+            CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID
+        )
 
         // verify no network call
         Mockito.verifyNoInteractions(networkService)
@@ -159,7 +180,10 @@ class TrackRequestManagerTests {
         setConfigurationSharedState(trackingServer = "")
 
         // test
-        trackManager.handleTrackRequest(getTrackRequestEvent(), CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID)
+        trackManager.handleTrackRequest(
+            getTrackRequestEvent(),
+            CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID
+        )
 
         // verify no network call
         Mockito.verifyNoInteractions(networkService)
@@ -171,7 +195,10 @@ class TrackRequestManagerTests {
         setConfigurationSharedState()
 
         // test
-        trackManager.handleTrackRequest(getTrackRequestEvent(trackInfo = null), CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID)
+        trackManager.handleTrackRequest(
+            getTrackRequestEvent(trackInfo = null),
+            CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID
+        )
 
         // verify no network call
         Mockito.verifyNoInteractions(networkService)
@@ -183,7 +210,10 @@ class TrackRequestManagerTests {
         setConfigurationSharedState()
 
         // test
-        trackManager.handleTrackRequest(getTrackRequestEvent(trackInfo = emptyMap()), CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID)
+        trackManager.handleTrackRequest(
+            getTrackRequestEvent(trackInfo = emptyMap()),
+            CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID
+        )
 
         // verify no network call
         Mockito.verifyNoInteractions(networkService)
@@ -195,7 +225,10 @@ class TrackRequestManagerTests {
         setConfigurationSharedState()
 
         // test
-        trackManager.handleTrackRequest(getTrackRequestEvent(messageId = "6b6499a8-9d43-4bc5-acf0-b6aeb96846f6"), CampaignClassicTestConstants.MESSAGE_RECEIVED_TAGID)
+        trackManager.handleTrackRequest(
+            getTrackRequestEvent(messageId = "6b6499a8-9d43-4bc5-acf0-b6aeb96846f6"),
+            CampaignClassicTestConstants.MESSAGE_RECEIVED_TAGID
+        )
 
         // verify network call
         val networkRequestCaptor = ArgumentCaptor.forClass(NetworkRequest::class.java)
@@ -215,7 +248,10 @@ class TrackRequestManagerTests {
         setConfigurationSharedState()
 
         // test
-        trackManager.handleTrackRequest(getTrackRequestEvent(messageId = "6b6499a8-9d43-4bc5-acf0-b6aeb96846f6"), CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID)
+        trackManager.handleTrackRequest(
+            getTrackRequestEvent(messageId = "6b6499a8-9d43-4bc5-acf0-b6aeb96846f6"),
+            CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID
+        )
 
         // verify network call
         val networkRequestCaptor = ArgumentCaptor.forClass(NetworkRequest::class.java)
@@ -235,7 +271,10 @@ class TrackRequestManagerTests {
         setConfigurationSharedState()
 
         // test
-        trackManager.handleTrackRequest(getTrackRequestEvent(messageId = "1-1-1-1-1"), CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID)
+        trackManager.handleTrackRequest(
+            getTrackRequestEvent(messageId = "1-1-1-1-1"),
+            CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID
+        )
 
         // verify no network call
         Mockito.verifyNoInteractions(networkService)
@@ -247,7 +286,10 @@ class TrackRequestManagerTests {
         setConfigurationSharedState()
 
         // test
-        trackManager.handleTrackRequest(getTrackRequestEvent(messageId = "a8a"), CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID)
+        trackManager.handleTrackRequest(
+            getTrackRequestEvent(messageId = "a8a"),
+            CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID
+        )
 
         // verify no network call
         Mockito.verifyNoInteractions(networkService)
@@ -259,7 +301,10 @@ class TrackRequestManagerTests {
         setConfigurationSharedState()
 
         // test
-        trackManager.handleTrackRequest(getTrackRequestEvent(messageId = null), CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID)
+        trackManager.handleTrackRequest(
+            getTrackRequestEvent(messageId = null),
+            CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID
+        )
 
         // verify no network call
         Mockito.verifyNoInteractions(networkService)
@@ -271,7 +316,10 @@ class TrackRequestManagerTests {
         setConfigurationSharedState()
 
         // test
-        trackManager.handleTrackRequest(getTrackRequestEvent(messageId = ""), CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID)
+        trackManager.handleTrackRequest(
+            getTrackRequestEvent(messageId = ""),
+            CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID
+        )
 
         // verify no network call
         Mockito.verifyNoInteractions(networkService)
@@ -283,7 +331,10 @@ class TrackRequestManagerTests {
         setConfigurationSharedState()
 
         // test
-        trackManager.handleTrackRequest(getTrackRequestEvent(deliveryId = null), CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID)
+        trackManager.handleTrackRequest(
+            getTrackRequestEvent(deliveryId = null),
+            CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID
+        )
 
         // verify no network call
         Mockito.verifyNoInteractions(networkService)
@@ -295,7 +346,10 @@ class TrackRequestManagerTests {
         setConfigurationSharedState()
 
         // test
-        trackManager.handleTrackRequest(getTrackRequestEvent(deliveryId = ""), CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID)
+        trackManager.handleTrackRequest(
+            getTrackRequestEvent(deliveryId = ""),
+            CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID
+        )
 
         // verify no network call
         Mockito.verifyNoInteractions(networkService)
@@ -307,7 +361,10 @@ class TrackRequestManagerTests {
         setConfigurationSharedState()
 
         // test
-        TrackRequestManager(extensionApi, null).handleTrackRequest(getTrackRequestEvent(), CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID)
+        TrackRequestManager(extensionApi, null).handleTrackRequest(
+            getTrackRequestEvent(),
+            CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID
+        )
 
         // verify
         Mockito.verifyNoInteractions(networkService)
@@ -326,7 +383,10 @@ class TrackRequestManagerTests {
         }
 
         // test
-        trackManager.handleTrackRequest(getTrackRequestEvent(), CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID)
+        trackManager.handleTrackRequest(
+            getTrackRequestEvent(),
+            CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID
+        )
 
         // verify network call
         Mockito.verify(networkService, Mockito.times(1)).connectAsync(ArgumentMatchers.any(), ArgumentMatchers.any())
@@ -338,7 +398,10 @@ class TrackRequestManagerTests {
         setConfigurationSharedState(timeout = 20)
 
         // test
-        trackManager.handleTrackRequest(getTrackRequestEvent(), CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID)
+        trackManager.handleTrackRequest(
+            getTrackRequestEvent(),
+            CampaignClassicTestConstants.MESSAGE_CLICKED_TAGID
+        )
 
         // verify network call is still made with correct payload
         val networkRequestCaptor = ArgumentCaptor.forClass(NetworkRequest::class.java)

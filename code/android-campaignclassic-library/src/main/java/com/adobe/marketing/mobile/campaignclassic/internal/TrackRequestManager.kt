@@ -8,7 +8,7 @@
   OF ANY KIND, either express or implied. See the License for the specific language
   governing permissions and limitations under the License.
  */
-package com.adobe.marketing.mobile.campaignclassic
+package com.adobe.marketing.mobile.campaignclassic.internal
 
 import androidx.annotation.VisibleForTesting
 import com.adobe.marketing.mobile.Event

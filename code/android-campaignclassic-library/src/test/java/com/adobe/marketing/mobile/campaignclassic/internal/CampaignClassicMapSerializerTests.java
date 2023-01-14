@@ -9,7 +9,7 @@
   governing permissions and limitations under the License.
  */
 
-package com.adobe.marketing.mobile.campaignclassic;
+package com.adobe.marketing.mobile.campaignclassic.internal;
 
 import org.junit.Assert;
 import org.junit.Test;

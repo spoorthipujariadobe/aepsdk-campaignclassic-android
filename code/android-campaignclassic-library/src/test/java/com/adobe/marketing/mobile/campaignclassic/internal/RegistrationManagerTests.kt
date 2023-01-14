@@ -8,7 +8,7 @@
   OF ANY KIND, either express or implied. See the License for the specific language
   governing permissions and limitations under the License.
  */
-package com.adobe.marketing.mobile.campaignclassic
+package com.adobe.marketing.mobile.campaignclassic.internal
 
 import com.adobe.marketing.mobile.Event
 import com.adobe.marketing.mobile.EventSource
@@ -154,7 +154,12 @@ class RegistrationManagerTests {
         Mockito.verify(networkService, Mockito.times(1)).connectAsync(ArgumentMatchers.any(), ArgumentMatchers.any())
 
         // verify hashed token is stored
-        Mockito.verify(dataStore, Mockito.times(0)).setString(ArgumentMatchers.eq(CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH), ArgumentMatchers.anyString())
+        Mockito.verify(dataStore, Mockito.times(0)).setString(
+            ArgumentMatchers.eq(
+                CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH
+            ),
+            ArgumentMatchers.anyString()
+        )
     }
 
     @Test
@@ -358,7 +363,12 @@ class RegistrationManagerTests {
         RegistrationManager(extensionApi, deviceInfoService, dataStore, null).registerDevice(getRegisterDeviceEvent())
 
         // verify
-        Mockito.verify(dataStore, Mockito.times(0)).setString(ArgumentMatchers.eq(CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH), ArgumentMatchers.anyString())
+        Mockito.verify(dataStore, Mockito.times(0)).setString(
+            ArgumentMatchers.eq(
+                CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH
+            ),
+            ArgumentMatchers.anyString()
+        )
     }
 
     @Test
@@ -398,7 +408,11 @@ class RegistrationManagerTests {
         registrationManager.clearRegistrationData()
 
         // verify
-        Mockito.verify(dataStore, Mockito.times(1)).remove(ArgumentMatchers.eq(CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH))
+        Mockito.verify(dataStore, Mockito.times(1)).remove(
+            ArgumentMatchers.eq(
+                CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH
+            )
+        )
     }
 
     // =================================================================================================================

@@ -9,38 +9,35 @@
   governing permissions and limitations under the License.
  */
 
-package com.adobe.marketing.mobile.campaignclassic;
+package com.adobe.marketing.mobile.campaignclassic.internal;
 
 /**
- * This class holds all constant values used only by the Campaign Classic extension
+ * This class holds all test constant values used only by the Campaign Classic extension
  */
-final class CampaignClassicConstants {
+final class CampaignClassicTestConstants {
 
-	private CampaignClassicConstants() {}
+	static final String EXTENSION_VERSION = "2.0.0";
 
-	static final String LOG_TAG = "CampaignClassicExtension";
-	static final String EXTENSION_NAME = "com.adobe.module.campaignclassic";
-	static final String FRIENDLY_NAME = "CampaignClassic";
+	private CampaignClassicTestConstants() {}
 
-	static final String REGISTER_API_URL_BASE	= "https://%s/nms/mobile/1/registerAndroid.jssp";
-	static final String TRACKING_API_URL_BASE   	= "https://%s/r/?id=h%s,%s,%s";
+	static final String REGISTER_API_URL_BASE	= "%s/nms/mobile/1/registerAndroid.jssp";
+	static final String TRACKING_API_URL_BASE   	= "%s/r/?id=h%x,%s,%s";
 	static final String REGISTER_PARAM_DEVICE_OS_NAME = "android";
 	static final int DEFAULT_TIMEOUT = 30;
 	static final String REGISTER_PARAMS_FORMAT =
-		"registrationToken=%s&mobileAppUuid=%s&userKey=%s&deviceImei=%s&deviceName=%s&deviceModel=%s&deviceBrand=%s&deviceManufacturer=%s&osName=%s&osVersion=%s&osLanguage=%s&additionalParams=%s";
+			"registrationToken=%s&mobileAppUuid=%s&userKey=%s&deviceImei=%s&deviceName=%s&deviceModel=%s&deviceBrand=%s&deviceManufacturer=%s&osName=%s&osVersion=%s&osLanguage=%s&additionalParams=";
 
 	static final String MESSAGE_RECEIVED_TAGID = "1";
 	static final String MESSAGE_CLICKED_TAGID = "2";
 
 	static final String DATASTORE_KEY = "ADOBEMOBILE_CAMPAIGNCLASSIC";
+	static final String CONFIG_DATA_STORE = "AdobeMobile_ConfigState";
 
-	static final String HEX_CONVERSION_FORMAT_STRING = "%02x";
 	/*
 	    DataStoreKeys
 	 */
 	static class DataStoreKeys {
 		static final String TOKEN_HASH = "ADOBEMOBILE_STOREDDEFAULTS_TOKENHASH";
-		static final String REGISTER_STATUS = "ADOBEMOBILE_STOREDDEFAULTS_REGISTERSTATUS";
 
 		private DataStoreKeys() {}
 	}
@@ -63,6 +60,7 @@ final class CampaignClassicConstants {
 		}
 
 		static final class CampaignClassic {
+
 			static final String REGISTER_DEVICE = "registerdevice";
 			static final String TRACK_RECEIVE = "trackreceive";
 			static final String TRACK_CLICK = "trackclick";
@@ -72,10 +70,6 @@ final class CampaignClassicConstants {
 			static final String DEVICE_TOKEN = "devicetoken";
 			static final String USER_KEY = "userkey";
 			static final String ADDITIONAL_PARAMETERS = "additionalparameters";
-			static final String HTTP_HEADER_KEY_CONTENT_TYPE = "Content-Type";
-			static final String HTTP_HEADER_CONTENT_TYPE_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
-			static final String HTTP_HEADER_CONTENT_TYPE_UTF8_CHARSET = "charset=UTF-8";
-			static final String HTTP_HEADER_KEY_CONTENT_LENGTH = "Content-Length";
 
 			private CampaignClassic() {
 			}

@@ -10,7 +10,7 @@
  */
 
 
-package com.adobe.marketing.mobile.campaignclassic;
+package com.adobe.marketing.mobile.campaignclassic.internal;
 
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;

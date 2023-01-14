@@ -9,7 +9,7 @@
   governing permissions and limitations under the License.
  */
 
-package com.adobe.marketing.mobile.campaignclassic;
+package com.adobe.marketing.mobile.campaignclassic.internal;
 
 /**
  * This class holds all test constant values used only by the Campaign Classic extension
@@ -25,13 +25,12 @@ final class CampaignClassicTestConstants {
 	static final String REGISTER_PARAM_DEVICE_OS_NAME = "android";
 	static final int DEFAULT_TIMEOUT = 30;
 	static final String REGISTER_PARAMS_FORMAT =
-			"registrationToken=%s&mobileAppUuid=%s&userKey=%s&deviceImei=%s&deviceName=%s&deviceModel=%s&deviceBrand=%s&deviceManufacturer=%s&osName=%s&osVersion=%s&osLanguage=%s&additionalParams=";
+		"registrationToken=%s&mobileAppUuid=%s&userKey=%s&deviceImei=%s&deviceName=%s&deviceModel=%s&deviceBrand=%s&deviceManufacturer=%s&osName=%s&osVersion=%s&osLanguage=%s&additionalParams=";
 
 	static final String MESSAGE_RECEIVED_TAGID = "1";
 	static final String MESSAGE_CLICKED_TAGID = "2";
 
 	static final String DATASTORE_KEY = "ADOBEMOBILE_CAMPAIGNCLASSIC";
-	static final String CONFIG_DATA_STORE = "AdobeMobile_ConfigState";
 
 	/*
 	    DataStoreKeys
@@ -60,6 +59,7 @@ final class CampaignClassicTestConstants {
 		}
 
 		static final class CampaignClassic {
+			static final String EXTENSION_NAME = "com.adobe.module.campaignclassic";
 
 			static final String REGISTER_DEVICE = "registerdevice";
 			static final String TRACK_RECEIVE = "trackreceive";
