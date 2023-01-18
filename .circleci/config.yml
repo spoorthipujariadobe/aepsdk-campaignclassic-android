@@ -31,6 +31,8 @@ jobs:
       - run:
           name: Javadoc
           command: make javadoc
+      - store_artifacts:
+          path: code/android-campaignclassic-library/build/libs
       - run:
           name: Download Codecov Uploader
           command: |
