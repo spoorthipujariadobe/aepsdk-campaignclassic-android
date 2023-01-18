@@ -11,6 +11,8 @@
  */
 apply plugin: 'signing'
 apply plugin: 'maven-publish'
+apply plugin: 'org.jetbrains.dokka'
+
 
 def isReleaseBuild() {
     return hasProperty('release')
@@ -19,6 +21,31 @@ def isReleaseBuild() {
 def groupIdForPublish = 'com.adobe.marketing.mobile'
 version = isReleaseBuild() ? rootProject.campaignClassicExtensionVersion : rootProject.campaignClassicExtensionVersion+"-SNAPSHOT"
 
+dokkaJavadoc.configure {
+    dokkaSourceSets {
+        named("main") {
+            noAndroidSdkLink.set(false)
+            perPackageOption {
+                matchingRegex.set(".*\\.internal.*") // proper setting
+                suppress.set(true)
+            }
+        }
+
+        named("phone") {
+            noAndroidSdkLink.set(false)
+            perPackageOption {
+                matchingRegex.set(".*\\.internal.*") // proper setting
+                suppress.set(true)
+            }
+        }
+    }
+}
+
+task javadocJar(type: Jar, dependsOn: dokkaJavadoc) {
+    archiveClassifier.set('javadoc')
+    from dokkaJavadoc.outputDirectory
+}
+
 publishing {
     publications {
         release(MavenPublication) {
@@ -26,6 +53,7 @@ publishing {
             artifactId = rootProject.campaignClassicExtensionName
             version = version
             artifact("$buildDir/outputs/aar/${rootProject.campaignClassicExtensionAARName}")
+            artifact javadocJar
             pom {
                 name = rootProject.mavenRepoName
                 description = rootProject.mavenRepoDescription

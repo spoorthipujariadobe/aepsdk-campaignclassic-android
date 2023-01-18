@@ -40,7 +40,7 @@ functional-test-coverage:
 		(./code/gradlew -p code/android-campaignclassic-library createPhoneDebugAndroidTestCoverageReport)
 
 javadoc:
-		(./code/gradlew -p code/android-campaignclassic-library dokkaJavadoc)
+		(./code/gradlew -p code/android-campaignclassic-library javadocJar)
 
 publish:
 		(./code/gradlew -p code/android-campaignclassic-library publishReleasePublicationToSonatypeRepository)
