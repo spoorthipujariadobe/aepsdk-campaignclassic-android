@@ -46,6 +46,8 @@ jobs:
       - run:
           name: Run Unit Tests
           command: make unit-test-coverage
+      - store_artifacts:
+          path: code/android-campaignclassic-library/build/reports/tests
       - store_test_results:
           path: code/android-campaignclassic-library/build/test-results/testPhoneDebugUnitTest
       - run:
@@ -80,4 +82,9 @@ jobs:
               shasum -a $i -c <(curl -s "https://raw.githubusercontent.com/codecov/codecov-bash/${VERSION}/SHA${i}SUM" | grep -w "codecov")
             done
             bash ./codecov -v -X s3 -c -D "./code/android-campaignclassic-library/build/reports/coverage/androidTest/phone/debug" -F functional-tests
-
+            
+      - store_artifacts:
+          path: code/android-campaignclassic-library/build/reports/androidTests
+      
+      - store_test_results:
+          path: code/android-campaignclassic-library/build/outputs/androidTest-results
