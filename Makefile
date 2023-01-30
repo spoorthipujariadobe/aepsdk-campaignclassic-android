@@ -18,10 +18,10 @@ checkstyle:
 		(./code/gradlew -p code/android-campaignclassic-library checkstyle)
 		
 check-format:
-		(./code/gradlew -p code/android-campaignclassic-library ktlintCheck)
+		(./code/gradlew -p code/android-campaignclassic-library spotlessCheck)
 		
 format:
-		(./code/gradlew -p code/android-campaignclassic-library ktlintFormat)
+		(./code/gradlew -p code/android-campaignclassic-library spotlessApply)
 		
 format-license:
 		(./code/gradlew -p code licenseFormat)

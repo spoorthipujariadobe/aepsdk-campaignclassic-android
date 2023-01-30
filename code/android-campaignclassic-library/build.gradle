@@ -12,7 +12,7 @@
 plugins {
     id 'com.android.library'
     id 'kotlin-android'
-    id 'org.jlleitschuh.gradle.ktlint'
+    id 'com.diffplug.spotless'
 }
 
 android {
@@ -79,4 +79,23 @@ dependencies {
     // instrumentation tests
     androidTestImplementation 'androidx.test.ext:junit:1.1.4'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
+}
+
+spotless {
+    java {
+        toggleOffOn("format:off", "format:on")
+        target "src/*/java/**/*.java"
+        googleJavaFormat('1.8').aosp().reflowLongStrings()
+        importOrder()
+        removeUnusedImports()
+        endWithNewline()
+        formatAnnotations()
+        licenseHeaderFile "../../config/formatter/header.txt"
+    }
+    kotlin {
+        target "src/*/java/**/*.kt"
+        ktlint('0.47.0')
+        endWithNewline()
+        licenseHeaderFile "../../config/formatter/header.txt"
+    }
 }
