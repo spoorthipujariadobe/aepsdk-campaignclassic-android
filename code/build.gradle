@@ -14,20 +14,17 @@ import com.hierynomus.gradle.license.tasks.LicenseFormat
 buildscript {
     repositories {
         google()
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
         mavenCentral()
+        maven { url "https://plugins.gradle.org/m2/" }
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:7.2.2'
         classpath "org.jacoco:org.jacoco.core:0.8.7"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.10"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.20"
         classpath 'com.google.gms:google-services:4.3.14'
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:${dokka_version}"
-
-        // ktlint Functional Interface identification works only from 10.1.0 or later
-        classpath "org.jlleitschuh.gradle:ktlint-gradle:10.1.0"
+        classpath "com.diffplug.spotless:spotless-plugin-gradle:6.12.0"
     }
 }
 
@@ -39,19 +36,8 @@ allprojects {
     repositories {
         mavenCentral()
         google()
-        maven { url "https://jitpack.io"  }
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         mavenLocal()
-        flatDir {
-            dirs 'libs'
-        }
-    }
-    apply plugin: 'maven-publish'
-    if (project.hasProperty("sonatypeUser") && project.hasProperty("sonatypePass")) {
-        ext["ossrhUsername"] = "$sonatypeUser"
-        ext["ossrhPassword"] = "$sonatypePass"
-    } else {
-        ext["ossrhUsername"] = ""
-        ext["ossrhPassword"] = ""
     }
 }
 

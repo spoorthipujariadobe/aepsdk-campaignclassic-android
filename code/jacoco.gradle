@@ -11,6 +11,14 @@
  */
  apply plugin: 'jacoco'
 
+tasks.withType(Test) {
+    testLogging {
+        showStandardStreams = true
+    }
+    jacoco.includeNoLocationClasses = true
+    jacoco.excludes = ['jdk.internal.*']
+}
+
 task unitTestsCoverageReport(type: JacocoReport, dependsOn: "testPhoneDebugUnitTest") {
     def excludeRegex = ['**/ADB*.class', '**/BuildConfig.class']
     def javaClasses = fileTree(dir: "${project.buildDir}/intermediates/javac/phoneDebug/classes", excludes: excludeRegex)

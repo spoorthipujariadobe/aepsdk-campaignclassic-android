@@ -1,0 +1,132 @@
+# Adobe Campaign Classic
+
+## Configure Campaign Classic extension in the Data Collection UI
+
+1. In the Data Collection UI, click the **Extensions** tab.
+2. On the **Catalog** tab, locate the **Adobe Campaign Classic** extension, and click **Install**.
+3. Type in the settings for your extension.
+4. Click **Save**.
+5. Complete the publishing process to update the SDK configuration.
+
+   For more information about publishing, see the [publishing overview](https://experienceleague.adobe.com/docs/launch/using/publish/overview.html).
+> **Note**
+> You can retrieve your Campaign Classic registration or tracking endpoint URLs in the Campaign Classic interface under the **Tools > Advanced > Deployment wizard** menu. The endpoint for push notifications is usually the same as the URL that is used for web forms and surveys.
+
+#### Registration endpoints
+
+Type the registration endpoint URL(s) for your Campaign Classic instances. You can specify up to three unique endpoints for your development, staging, and production environments.
+
+> **Warning**
+> For this extension, the registration endpoint URLs should be entered **without** a prefixing `https://.`
+
+#### Tracking endpoints
+
+Type the tracking endpoint URL(s) for your Campaign Classic instances. Like the registration URLs, you can specify up to three unique endpoints for your development, staging, and production environments.
+
+> **Warning**
+> For this extension, the tracking endpoint URLs should be entered **without** a prefixing `https://.`
+
+#### Integration key (Android)
+
+You can specify up to three unique Android integration keys for your development, staging, and production environments. Android integration keys are generated after creating a service that contains Android applications using the [Campaign Classic client console](https://experienceleague.adobe.com/docs/campaign-classic/using/installing-campaign-classic/connect-to-campaign/installing-the-client-console.html). For more information on where to find the integration key, see the tutorial on [configuring the mobile application in Adobe Campaign](https://experienceleague.adobe.com/docs/campaign-classic/using/sending-messages/sending-push-notifications/configure-the-mobile-app/configuring-the-mobile-application-android.html).
+
+#### Request timeout
+
+The request timeout is the amount of time, in seconds, to wait for a response from the registration or tracking endpoint before timing out. The SDK default timeout value is 30 seconds.
+
+## Add Campaign Classic to your app
+
+The Campaign Classic extension depends on the Core and Lifecycle extensions:
+
+* [Mobile Core](https://github.com/adobe/aepsdk-core-android)
+* [Lifecycle](https://github.com/adobe/aepsdk-core-android)
+
+1. Add the Campaign Classic extension to your project using the app's Gradle file.
+
+   ```gradle
+   implementation 'com.adobe.marketing.mobile:core:2.+'
+   implementation 'com.adobe.marketing.mobile:lifecycle:2.+'
+   implementation 'com.adobe.marketing.mobile:campaignclassic:2.+'
+   ```
+   
+> **Warning**
+> Using dynamic dependency versions is not recommended for production apps. Refer to this [page](https://github.com/adobe/aepsdk-core-android/blob/main/Documentation/GradleDependencies.md) for managing gradle dependencies.
+
+2. Import the Campaign Classic, Mobile Core, and Lifecycle extensions in your application class.
+
+   #### Java
+   ```java
+   import com.adobe.marketing.mobile.MobileCore;
+   import com.adobe.marketing.mobile.CampaignClassic;
+   import com.adobe.marketing.mobile.Lifecycle;
+   ```
+   
+   #### Kotlin
+   ```kotlin
+   import com.adobe.marketing.mobile.MobileCore
+   import com.adobe.marketing.mobile.CampaignClassic
+   import com.adobe.marketing.mobile.Lifecycle
+   ```
+
+### Register Campaign Classic with Mobile Core
+
+In your app's `OnCreate` method, register the Campaign Classic and Lifecycle extensions:
+
+#### Java
+```java
+public class CampaignClassicTestApp extends Application {
+
+    private final String ENVIRONMENT_FILE_ID = "YOUR_APP_ENVIRONMENT_ID";
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        MobileCore.setApplication(this);
+        MobileCore.configureWithAppID(ENVIRONMENT_FILE_ID);
+        
+        MobileCore.registerExtensions(
+            Arrays.asList(CampaignClassic.EXTENSION, Lifecycle.EXTENSION),
+            o -> Log.d("MainApp", "Adobe Experience Platform Campaign Classic Mobile SDK was initialized.")
+        );
+    }
+}
+```
+
+#### Kotlin
+```kotlin
+class MainApp : Application() {
+
+  private var ENVIRONMENT_FILE_ID: String = "YOUR_APP_ENVIRONMENT_ID"
+
+    override fun onCreate() {
+        super.onCreate()
+
+        MobileCore.setApplication(this)
+        MobileCore.configureWithAppID(ENVIRONMENT_FILE_ID)
+
+        MobileCore.registerExtensions(
+          listOf(CampaignClassic.EXTENSION, Lifecycle.EXTENSION)
+        ) {
+          Log.d("MainApp", "Adobe Experience Platform Campaign Classic Mobile SDK was initialized")
+        }
+    }
+
+}
+```
+
+## Configuration keys
+
+To update SDK configuration programmatically, use the following information to change your Campaign Classic configuration values. For more information, see the [Configuration API reference](https://github.com/adobe/aepsdk-core-android).
+
+| Key | Required | Description | Data Type |
+| :--- | :--- | :--- | :--- |
+| `build.environment` | Yes | Specifies which environment to use (prod, dev, or staging) when sending registration and tracking information. It is also used to specify which mobile app integration key to use. | String |
+| `campaignclassic.timeout` | No | Specifies the amount of time to wait for a response from the Campaign Classic registration or tracking server. | Integer |
+| `campaignclassic.marketingServer` | Yes | Sets the marketing server, which receives registration requests. | String |
+| `campaignclassic.trackingServer` | Yes | Sets the tracking server, which receives tracking requests. | String |
+| `campaignclassic.ios.integrationKey` | Yes | Sets the iOS mobile app integration key, which links the app to an iOS application campaign in Campaign Classic. | String |
+| `campaignclassic.android.integrationKey` | Yes | Sets the Android mobile app integration key, which links the app to an Android application campaign in Campaign Classic. | String |
+
+## Next Steps
+
+- Get familiar with the various APIs offered by the Adobe Campaign Classic SDK by checking out the [Campaign Classic API reference](./api-reference.md).
