@@ -10,53 +10,54 @@
 # governing permissions and limitations under the License.
 #
 
+EXTENSION-LIBRARY-FOLDER-NAME = campaignclassic
 
 clean:
 	  (./code/gradlew -p code clean)
 
 checkstyle:
-		(./code/gradlew -p code/campaignclassic checkstyle)
+		(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) checkstyle)
 
 check-format:
-		(./code/gradlew -p code/campaignclassic spotlessCheck)
+		(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) spotlessCheck)
 		
 format:
-		(./code/gradlew -p code/campaignclassic spotlessApply)
+		(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) spotlessApply)
 		
 format-license:
 		(./code/gradlew -p code licenseFormat)
 
 unit-test:
-		(./code/gradlew -p code/campaignclassic testPhoneDebugUnitTest)
+		(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) testPhoneDebugUnitTest)
 
 unit-test-coverage:
-		(./code/gradlew -p code/campaignclassic createPhoneDebugUnitTestCoverageReport)
+		(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) createPhoneDebugUnitTestCoverageReport)
 
 functional-test:
-		(./code/gradlew -p code/campaignclassic uninstallPhoneDebugAndroidTest)
-		(./code/gradlew -p code/campaignclassic connectedPhoneDebugAndroidTest)
+		(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) uninstallPhoneDebugAndroidTest)
+		(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) connectedPhoneDebugAndroidTest)
 
 functional-test-coverage:
-		(./code/gradlew -p code/campaignclassic createPhoneDebugAndroidTestCoverageReport)
+		(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) createPhoneDebugAndroidTestCoverageReport)
 
 javadoc:
-		(./code/gradlew -p code/campaignclassic javadocJar)
+		(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) javadocJar)
 
 publish:
-		(./code/gradlew -p code/campaignclassic publishReleasePublicationToSonatypeRepository)
+		(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) publishReleasePublicationToSonatypeRepository)
 
 assemble-phone:
-		(./code/gradlew -p code/campaignclassic assemblePhone)
+		(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) assemblePhone)
 		
 assemble-phone-release:
-		(./code/gradlew -p code/campaignclassic assemblePhoneRelease)
+		(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) assemblePhoneRelease)
 
 assemble-app:
 		(./code/gradlew -p code/testapp  assemble)
 		
 ci-publish-staging: clean assemble-phone-release
-		(./code/gradlew -p code/campaignclassic publishReleasePublicationToSonatypeRepository --stacktrace)
+		(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) publishReleasePublicationToSonatypeRepository --stacktrace)
 
 ci-publish-main: clean assemble-phone-release
-		(./code/gradlew -p code/campaignclassic publishReleasePublicationToSonatypeRepository -Prelease)
+		(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) publishReleasePublicationToSonatypeRepository -Prelease)
 		

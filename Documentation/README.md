@@ -1,4 +1,4 @@
-# Campaign classic extension documentation
+# Campaign Classic extension documentation
 
 ## Contents
 - [Getting started](getting-started.md)

@@ -9,20 +9,22 @@
 5. Complete the publishing process to update the SDK configuration.
 
    For more information about publishing, see the [publishing overview](https://experienceleague.adobe.com/docs/launch/using/publish/overview.html).
-
-> ℹ️ You can retrieve your Campaign Classic registration or tracking endpoint URLs in the Campaign Classic interface under the **Tools > Advanced > Deployment wizard** menu. The endpoint for push notifications is usually the same as the URL that is used for web forms and surveys.
+> **Note**
+> You can retrieve your Campaign Classic registration or tracking endpoint URLs in the Campaign Classic interface under the **Tools > Advanced > Deployment wizard** menu. The endpoint for push notifications is usually the same as the URL that is used for web forms and surveys.
 
 #### Registration endpoints
 
 Type the registration endpoint URL(s) for your Campaign Classic instances. You can specify up to three unique endpoints for your development, staging, and production environments.
 
-> ⚠️ For this extension, the registration endpoint URLs should be entered **without** a prefixing `https://.`
+> **Warning**
+> For this extension, the registration endpoint URLs should be entered **without** a prefixing `https://.`
 
 #### Tracking endpoints
 
 Type the tracking endpoint URL(s) for your Campaign Classic instances. Like the registration URLs, you can specify up to three unique endpoints for your development, staging, and production environments.
 
-> ⚠️ For this extension, the tracking endpoint URLs should be entered **without** a prefixing `https://.`
+> **Warning**
+> For this extension, the tracking endpoint URLs should be entered **without** a prefixing `https://.`
 
 #### Integration key (Android)
 
@@ -37,8 +39,9 @@ The request timeout is the amount of time, in seconds, to wait for a response fr
 1. Add the Campaign Classic extension to your project using the app's Gradle file.
 
    ```gradle
-   implementation 'com.adobe.marketing.mobile:sdk-core:1.+'
-   implementation 'com.adobe.marketing.mobile:campaignclassic:1.+'
+   implementation 'com.adobe.marketing.mobile:core:2.+'
+   implementation 'com.adobe.marketing.mobile:lifecycle:2.+'
+   implementation 'com.adobe.marketing.mobile:campaignclassic:2.+'
    ```
 
 2. Import the Campaign Classic, Mobile Core, and Lifecycle extensions in your application class.
@@ -105,7 +108,7 @@ class MainApp : Application() {
 
 ## Configuration keys
 
-To update SDK configuration programmatically, use the following information to change your Campaign Classic configuration values. For more information, see the [Configuration API reference](https://aep-sdks.gitbook.io/docs/using-mobile-extensions/mobile-core/configuration/configuration-api-reference).
+To update SDK configuration programmatically, use the following information to change your Campaign Classic configuration values. For more information, see the [Configuration API reference](https://github.com/adobe/aepsdk-core-android).
 
 | Key | Required | Description | Data Type |
 | :--- | :--- | :--- | :--- |

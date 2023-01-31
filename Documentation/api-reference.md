@@ -33,7 +33,8 @@ String campaignClassicExtensionVersion = CampaignClassic.extensionVersion();
 
 The `registerDevice` API lets you register a user device with Campaign Classic.
 
-> ℹ️ To prepare your app to handle push notifications, see the tutorial on [setting up a Firebase Cloud Messaging client app on Android](https://firebase.google.com/docs/cloud-messaging/android/client). After you receive the Firebase Cloud Messaging (FCM) SDK registration token, send this token and the device information to Campaign Classic by using the `registerDevice` API.
+> **Note**
+> To prepare your app to handle push notifications, see the tutorial on [setting up a Firebase Cloud Messaging client app on Android](https://firebase.google.com/docs/cloud-messaging/android/client). After you receive the Firebase Cloud Messaging (FCM) SDK registration token, send this token and the device information to Campaign Classic by using the `registerDevice` API.
 
 The `registerDevice` API registers a device with your Campaign Classic registration server. It takes the FCM registration token as a parameter with a user key that identifies a user, such as an email address or a login name. You can also provide a map of the custom key-value pairs that you want to associate with the registration.
 
@@ -74,7 +75,8 @@ The `trackNotificationReceive` API sends the received push notification's tracki
 
 ### Java
 
-> ℹ️ If `trackInfo` is null or does not contain the necessary tracking identifiers, `messageId` (`_mId`) and `deliveryId` (`_dId`), a track request is **not** sent.
+> **Note**
+> If `trackInfo` is null or does not contain the necessary tracking identifiers, `messageId` (`_mId`) and `deliveryId` (`_dId`), a track request is **not** sent.
 
 **Syntax**
 
@@ -110,7 +112,8 @@ The `trackNotificationClick` API sends the clicked push notification's tracking 
 
 ### Java
 
-> ℹ️ If `trackInfo` is null, or does not contain the necessary tracking identifiers, `messageId` (`_mId`) and `deliveryId` (`_dId`), a track request is **not** sent.
+> **Note**
+> If `trackInfo` is null, or does not contain the necessary tracking identifiers, `messageId` (`_mId`) and `deliveryId` (`_dId`), a track request is **not** sent.
  
 **Syntax**
 
