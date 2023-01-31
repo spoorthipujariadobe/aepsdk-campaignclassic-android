@@ -15,48 +15,48 @@ clean:
 	  (./code/gradlew -p code clean)
 
 checkstyle:
-		(./code/gradlew -p code/android-campaignclassic-library checkstyle)
-		
+		(./code/gradlew -p code/campaignclassic checkstyle)
+
 check-format:
-		(./code/gradlew -p code/android-campaignclassic-library spotlessCheck)
+		(./code/gradlew -p code/campaignclassic spotlessCheck)
 		
 format:
-		(./code/gradlew -p code/android-campaignclassic-library spotlessApply)
+		(./code/gradlew -p code/campaignclassic spotlessApply)
 		
 format-license:
 		(./code/gradlew -p code licenseFormat)
 
 unit-test:
-		(./code/gradlew -p code/android-campaignclassic-library testPhoneDebugUnitTest)
+		(./code/gradlew -p code/campaignclassic testPhoneDebugUnitTest)
 
 unit-test-coverage:
-		(./code/gradlew -p code/android-campaignclassic-library createPhoneDebugUnitTestCoverageReport)
+		(./code/gradlew -p code/campaignclassic createPhoneDebugUnitTestCoverageReport)
 
 functional-test:
-		(./code/gradlew -p code/android-campaignclassic-library uninstallPhoneDebugAndroidTest)
-		(./code/gradlew -p code/android-campaignclassic-library connectedPhoneDebugAndroidTest)
+		(./code/gradlew -p code/campaignclassic uninstallPhoneDebugAndroidTest)
+		(./code/gradlew -p code/campaignclassic connectedPhoneDebugAndroidTest)
 
 functional-test-coverage:
-		(./code/gradlew -p code/android-campaignclassic-library createPhoneDebugAndroidTestCoverageReport)
+		(./code/gradlew -p code/campaignclassic createPhoneDebugAndroidTestCoverageReport)
 
 javadoc:
-		(./code/gradlew -p code/android-campaignclassic-library javadocJar)
+		(./code/gradlew -p code/campaignclassic javadocJar)
 
 publish:
-		(./code/gradlew -p code/android-campaignclassic-library publishReleasePublicationToSonatypeRepository)
+		(./code/gradlew -p code/campaignclassic publishReleasePublicationToSonatypeRepository)
 
 assemble-phone:
-		(./code/gradlew -p code/android-campaignclassic-library assemblePhone)
+		(./code/gradlew -p code/campaignclassic assemblePhone)
 		
 assemble-phone-release:
-		(./code/gradlew -p code/android-campaignclassic-library assemblePhoneRelease)
+		(./code/gradlew -p code/campaignclassic assemblePhoneRelease)
 
 assemble-app:
 		(./code/gradlew -p code/testapp  assemble)
 		
 ci-publish-staging: clean assemble-phone-release
-		(./code/gradlew -p code/android-campaignclassic-library publishReleasePublicationToSonatypeRepository --stacktrace)
+		(./code/gradlew -p code/campaignclassic publishReleasePublicationToSonatypeRepository --stacktrace)
 
 ci-publish-main: clean assemble-phone-release
-		(./code/gradlew -p code/android-campaignclassic-library publishReleasePublicationToSonatypeRepository -Prelease)
+		(./code/gradlew -p code/campaignclassic publishReleasePublicationToSonatypeRepository -Prelease)
 		

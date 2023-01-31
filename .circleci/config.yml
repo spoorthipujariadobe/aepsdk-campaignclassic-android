@@ -1,3 +1,15 @@
+#
+# Copyright 2023 Adobe. All rights reserved.
+# This file is licensed to you under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License. You may obtain a copy
+# of the License at http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under
+# the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+# OF ANY KIND, either express or implied. See the License for the specific language
+# governing permissions and limitations under the License.
+#
+
 version: 2.1
 orbs:
   android: circleci/android@2.0
@@ -32,7 +44,7 @@ jobs:
           name: Javadoc
           command: make javadoc
       - store_artifacts:
-          path: code/android-campaignclassic-library/build/libs
+          path: code/campaignclassic/build/libs
       - run:
           name: Download Codecov Uploader
           command: |
@@ -47,9 +59,9 @@ jobs:
           name: Run Unit Tests
           command: make unit-test-coverage
       - store_artifacts:
-          path: code/android-campaignclassic-library/build/reports/tests
+          path: code/campaignclassic/build/reports/tests
       - store_test_results:
-          path: code/android-campaignclassic-library/build/test-results/testPhoneDebugUnitTest
+          path: code/campaignclassic/build/test-results/testPhoneDebugUnitTest
       - run:
           name: Upload Core unit test coverage
           command: |
@@ -81,10 +93,10 @@ jobs:
               shasum -a $i -c --ignore-missing <(curl -s "https://raw.githubusercontent.com/codecov/codecov-bash/${VERSION}/SHA${i}SUM") ||
               shasum -a $i -c <(curl -s "https://raw.githubusercontent.com/codecov/codecov-bash/${VERSION}/SHA${i}SUM" | grep -w "codecov")
             done
-            bash ./codecov -v -X s3 -c -D "./code/android-campaignclassic-library/build/reports/coverage/androidTest/phone/debug" -F functional-tests
+            bash ./codecov -v -X s3 -c -D "./code/campaignclassic/build/reports/coverage/androidTest/phone/debug" -F functional-tests
             
       - store_artifacts:
-          path: code/android-campaignclassic-library/build/reports/androidTests
+          path: code/campaignclassic/build/reports/androidTests
       
       - store_test_results:
-          path: code/android-campaignclassic-library/build/outputs/androidTest-results
+          path: code/campaignclassic/build/outputs/androidTest-results

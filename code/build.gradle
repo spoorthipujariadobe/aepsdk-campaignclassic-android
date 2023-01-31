@@ -32,23 +32,6 @@ plugins {
     id 'com.github.hierynomus.license' version '0.16.1' apply true
 }
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-        maven { url "https://plugins.gradle.org/m2/" }
-    }
-    apply plugin: 'maven-publish'
-    if (project.hasProperty("sonatypeUser") && project.hasProperty("sonatypePass")) {
-        ext["ossrhUsername"] = "$sonatypeUser"
-        ext["ossrhPassword"] = "$sonatypePass"
-    } else {
-        ext["ossrhUsername"] = ""
-        ext["ossrhPassword"] = ""
-    }
-}
-
 license {
     header rootProject.file('../config/formatter/header.txt')
     ext.year = Calendar.getInstance().get(Calendar.YEAR)
