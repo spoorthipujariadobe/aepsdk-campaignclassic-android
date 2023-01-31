@@ -10,25 +10,19 @@
 
    For more information about publishing, see the [publishing overview](https://experienceleague.adobe.com/docs/launch/using/publish/overview.html).
 
-{% hint style="info" %}
-You can retrieve your Campaign Classic registration or tracking endpoint URLs in the Campaign Classic interface under the **Tools > Advanced > Deployment wizard** menu. The endpoint for push notifications is usually the same as the URL that is used for web forms and surveys.
-{% endhint %}
+> ℹ️ You can retrieve your Campaign Classic registration or tracking endpoint URLs in the Campaign Classic interface under the **Tools > Advanced > Deployment wizard** menu. The endpoint for push notifications is usually the same as the URL that is used for web forms and surveys.
 
 #### Registration endpoints
 
 Type the registration endpoint URL(s) for your Campaign Classic instances. You can specify up to three unique endpoints for your development, staging, and production environments.
 
-{% hint style="warning" %}
-For this extension, the registration endpoint URLs should be entered **without** a prefixing `https://.`
-{% endhint %}
+> ⚠️ For this extension, the registration endpoint URLs should be entered **without** a prefixing `https://.`
 
 #### Tracking endpoints
 
 Type the tracking endpoint URL(s) for your Campaign Classic instances. Like the registration URLs, you can specify up to three unique endpoints for your development, staging, and production environments.
 
-{% hint style="warning" %}
-For this extension, the tracking endpoint URLs should be entered **without** a prefixing `https://.`
-{% endhint %}
+> ⚠️ For this extension, the tracking endpoint URLs should be entered **without** a prefixing `https://.`
 
 #### Integration key (Android)
 

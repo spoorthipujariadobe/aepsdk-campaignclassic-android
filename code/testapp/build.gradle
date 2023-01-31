@@ -47,8 +47,8 @@ android {
 }
 
 dependencies {
-    implementation 'com.adobe.marketing.mobile:campaignclassic:2.0.0-SNAPSHOT'
-    implementation 'com.adobe.marketing.mobile:core:2.0.0-SNAPSHOT'
+    implementation project(":${rootProject.moduleProjectName}")
+    implementation 'com.adobe.marketing.mobile:core:2.0.0'
     implementation 'androidx.work:work-runtime-ktx:2.7.1'
     implementation "androidx.activity:activity:1.6.1"
     implementation "androidx.fragment:fragment:1.5.5"
