@@ -9,22 +9,6 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-pluginManagement {
- repositories {
-  gradlePluginPortal()
-  google()
-  mavenCentral()
- }
-}
-dependencyResolutionManagement {
- repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
- repositories {
-  google()
-  mavenCentral()
-  maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
- }
-}
-
  include ':campaignclassic', ':testapp'
 
-rootProject.name = "campaignclassic-sdk"
+rootProject.name = "aepsdk-campaignclassic-android"

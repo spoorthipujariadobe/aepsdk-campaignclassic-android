@@ -32,6 +32,15 @@ plugins {
     id 'com.github.hierynomus.license' version '0.16.1' apply true
 }
 
+allprojects {
+    repositories {
+        mavenCentral()
+        google()
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+        mavenLocal()
+    }
+}
+
 license {
     header rootProject.file('../config/formatter/header.txt')
     ext.year = Calendar.getInstance().get(Calendar.YEAR)
