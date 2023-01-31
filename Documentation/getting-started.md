@@ -36,6 +36,11 @@ The request timeout is the amount of time, in seconds, to wait for a response fr
 
 ## Add Campaign Classic to your app
 
+The Campaign Classic extension depends on the Core and Lifecycle extensions:
+
+* [Mobile Core](https://github.com/adobe/aepsdk-core-android)
+* [Lifecycle](https://github.com/adobe/aepsdk-core-android)
+
 1. Add the Campaign Classic extension to your project using the app's Gradle file.
 
    ```gradle
@@ -43,6 +48,9 @@ The request timeout is the amount of time, in seconds, to wait for a response fr
    implementation 'com.adobe.marketing.mobile:lifecycle:2.+'
    implementation 'com.adobe.marketing.mobile:campaignclassic:2.+'
    ```
+   
+> **Warning**
+> Using dynamic dependency versions is not recommended for production apps. Refer to this [page](https://github.com/adobe/aepsdk-core-android/blob/main/Documentation/GradleDependencies.md) for managing gradle dependencies.
 
 2. Import the Campaign Classic, Mobile Core, and Lifecycle extensions in your application class.
 

@@ -16,6 +16,12 @@ Refer to the [getting started](./Documentation/getting-started.md) guide for set
 
 ***Run demo application*** Once you open the project in Android Studio (see above), select the `testapp` runnable and your favorite emulator and run the program.
 
+## Related Projects
+
+| Project                                                                              | Description                                                                                          |
+| ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| [Core extensions](https://github.com/adobe/aepsdk-core-android)                      | The Mobile Core represents the foundation of the Adobe Experience Platform mobile SDK.               |
+
 ## Documentation
 
 Additional documentation about API usage and SDK architecture can be found under the [Documentation](./Documentation) directory.
