@@ -64,7 +64,7 @@ public class CampaignClassic {
      *
      * @return {@code String} containing the current version
      */
-    public static String extensionVersion() {
+    @NonNull public static String extensionVersion() {
         return EXTENSION_VERSION;
     }
 
