@@ -67,7 +67,7 @@ apply from: 'release.gradle'
 
 dependencies {
     //noinspection GradleDependency
-    implementation 'androidx.appcompat:appcompat:1.4.2'
+    implementation 'androidx.annotation:annotation:1.0.0'
     implementation 'com.adobe.marketing.mobile:core:2.0.0'
     testImplementation 'junit:junit:4.13.2'
     testImplementation "org.mockito:mockito-core:4.5.1"
