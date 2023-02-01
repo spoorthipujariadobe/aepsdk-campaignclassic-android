@@ -20,7 +20,7 @@ The `extensionVersion` API returns the version of the Campaign Classic extension
 **Syntax**
 
 ```java
-public static String extensionVersion();
+@NonNull public static String extensionVersion();
 ```
 
 **Example**
