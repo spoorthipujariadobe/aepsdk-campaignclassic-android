@@ -50,7 +50,7 @@ The Campaign Classic extension depends on the Core and Lifecycle extensions:
    ```
    
 > **Warning**
-> Using dynamic dependency versions is not recommended for production apps. Refer to this [page](https://github.com/adobe/aepsdk-core-android/blob/main/Documentation/GradleDependencies.md) for managing gradle dependencies.
+> Using dynamic dependency versions is not recommended for production apps. Refer to this [page](https://github.com/adobe/aepsdk-core-android/blob/main/Documentation/MobileCore/gradle-dependencies.md) for managing gradle dependencies.
 
 2. Import the Campaign Classic, Mobile Core, and Lifecycle extensions in your application class.
 
