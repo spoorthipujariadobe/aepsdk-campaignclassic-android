@@ -63,6 +63,7 @@ final class CampaignClassicConstants {
 
         static final class CampaignClassic {
             static final String REGISTER_DEVICE = "registerdevice";
+            static final String REGISTRATION_STATUS = "registrationstatus";
             static final String TRACK_RECEIVE = "trackreceive";
             static final String TRACK_CLICK = "trackclick";
             static final String TRACK_INFO = "trackinfo";

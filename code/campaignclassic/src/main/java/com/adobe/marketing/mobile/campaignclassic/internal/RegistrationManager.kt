@@ -12,6 +12,8 @@ package com.adobe.marketing.mobile.campaignclassic.internal
 
 import androidx.annotation.VisibleForTesting
 import com.adobe.marketing.mobile.Event
+import com.adobe.marketing.mobile.EventSource
+import com.adobe.marketing.mobile.EventType
 import com.adobe.marketing.mobile.ExtensionApi
 import com.adobe.marketing.mobile.MobilePrivacyStatus
 import com.adobe.marketing.mobile.services.DeviceInforming
@@ -275,10 +277,12 @@ internal class RegistrationManager {
         )
 
         // send registration request
+        var registrationSuccessful = false
         Log.trace(CampaignClassicConstants.LOG_TAG, SELF_TAG, "sendRegistrationRequest - Registration request was sent with url $requestUrl")
         networkService.connectAsync(networkRequest) {
             if (it.responseCode == HttpURLConnection.HTTP_OK) {
                 Log.debug(CampaignClassicConstants.LOG_TAG, SELF_TAG, "sendRegistrationRequest - Registration successful.")
+                registrationSuccessful = true
                 updateDataStoreWithRegistrationInfo(registrationHash)
             } else {
                 Log.debug(
@@ -289,6 +293,19 @@ internal class RegistrationManager {
             }
             it.close()
         }
+        dispatchRegistrationStatus(registrationSuccessful)
+    }
+
+    private fun dispatchRegistrationStatus(registrationStatus: Boolean) {
+        extensionApi.dispatch(
+            Event.Builder("Device Registration Status", EventType.CAMPAIGN, EventSource.RESPONSE_CONTENT)
+                .setEventData(
+                    mapOf(
+                        CampaignClassicConstants.EventDataKeys.CampaignClassic.REGISTRATION_STATUS to registrationStatus
+                    )
+                )
+                .build()
+        )
     }
 
     private fun buildHeaders(payload: String): Map<String, String> {
