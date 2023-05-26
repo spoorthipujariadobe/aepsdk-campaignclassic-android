@@ -181,7 +181,7 @@ class CampaignClassicIntegrationTests {
             )
         )
         // verify registration status event dispatched with status true
-        Thread.sleep(100)
+        Thread.sleep(250)
         val registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
         Assert.assertEquals(1, registrationStatusEvents.size)
         Assert.assertEquals(true, registrationStatusEvents.get(0).registrationStatus)
@@ -216,7 +216,7 @@ class CampaignClassicIntegrationTests {
 
         Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
         // verify no registration status event dispatched
-        Thread.sleep(100)
+        Thread.sleep(250)
         val registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
         Assert.assertEquals(0, registrationStatusEvents.size)
     }
@@ -270,7 +270,7 @@ class CampaignClassicIntegrationTests {
             )
         )
         // verify registration status event dispatched with status true
-        Thread.sleep(100)
+        Thread.sleep(250)
         val registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
         Assert.assertEquals(1, registrationStatusEvents.size)
         Assert.assertEquals(true, registrationStatusEvents.get(0).registrationStatus)
@@ -325,7 +325,7 @@ class CampaignClassicIntegrationTests {
             )
         )
         // verify registration status event dispatched with status true
-        Thread.sleep(100)
+        Thread.sleep(250)
         val registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
         Assert.assertEquals(1, registrationStatusEvents.size)
         Assert.assertEquals(true, registrationStatusEvents.get(0).registrationStatus)
@@ -368,7 +368,7 @@ class CampaignClassicIntegrationTests {
             )
         )
         // verify registration status event dispatched with status true
-        Thread.sleep(100)
+        Thread.sleep(250)
         val registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
         Assert.assertEquals(1, registrationStatusEvents.size)
         Assert.assertEquals(true, registrationStatusEvents.get(0).registrationStatus)
@@ -403,7 +403,7 @@ class CampaignClassicIntegrationTests {
 
         Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
         // verify no registration status event dispatched
-        Thread.sleep(100)
+        Thread.sleep(250)
         val registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
         Assert.assertEquals(0, registrationStatusEvents.size)
     }
@@ -437,7 +437,7 @@ class CampaignClassicIntegrationTests {
 
         Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
         // verify no registration status event dispatched
-        Thread.sleep(100)
+        Thread.sleep(250)
         val registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
         Assert.assertEquals(0, registrationStatusEvents.size)
     }
@@ -471,7 +471,7 @@ class CampaignClassicIntegrationTests {
 
         Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
         // verify no registration status event dispatched
-        Thread.sleep(100)
+        Thread.sleep(250)
         val registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
         Assert.assertEquals(0, registrationStatusEvents.size)
     }
@@ -505,7 +505,7 @@ class CampaignClassicIntegrationTests {
 
         Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
         // verify no registration status event dispatched
-        Thread.sleep(100)
+        Thread.sleep(250)
         val registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
         Assert.assertEquals(0, registrationStatusEvents.size)
     }
@@ -536,7 +536,7 @@ class CampaignClassicIntegrationTests {
 
         Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
         // verify no registration status event dispatched
-        Thread.sleep(100)
+        Thread.sleep(250)
         val registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
         Assert.assertEquals(0, registrationStatusEvents.size)
     }
@@ -578,7 +578,7 @@ class CampaignClassicIntegrationTests {
             )
         )
         // verify registration status event dispatched with status true
-        Thread.sleep(100)
+        Thread.sleep(250)
         var registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
         Assert.assertEquals(1, registrationStatusEvents.size)
         Assert.assertEquals(true, registrationStatusEvents.get(0).registrationStatus)
@@ -613,7 +613,7 @@ class CampaignClassicIntegrationTests {
             )
         )
         // verify no registration status event dispatched
-        Thread.sleep(100)
+        Thread.sleep(250)
         registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
         Assert.assertEquals(0, registrationStatusEvents.size)
     }
@@ -650,7 +650,7 @@ class CampaignClassicIntegrationTests {
         }
         Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
         // verify registration status event dispatched with status true
-        Thread.sleep(100)
+        Thread.sleep(250)
         var registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
         Assert.assertEquals(1, registrationStatusEvents.size)
         Assert.assertEquals(true, registrationStatusEvents.get(0).registrationStatus)
@@ -689,7 +689,7 @@ class CampaignClassicIntegrationTests {
             )
         )
         // verify registration status event dispatched with status true
-        Thread.sleep(100)
+        Thread.sleep(250)
         registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
         Assert.assertEquals(1, registrationStatusEvents.size)
         Assert.assertEquals(true, registrationStatusEvents.get(0).registrationStatus)
@@ -733,7 +733,7 @@ class CampaignClassicIntegrationTests {
             )
         )
         // verify no registration status event dispatched
-        Thread.sleep(100)
+        Thread.sleep(250)
         val registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
         Assert.assertEquals(0, registrationStatusEvents.size)
     }
