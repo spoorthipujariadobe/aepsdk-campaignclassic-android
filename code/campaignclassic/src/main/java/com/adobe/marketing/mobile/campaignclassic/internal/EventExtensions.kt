@@ -139,3 +139,15 @@ private val Event.trackingInfo: Map<String, String>?
         CampaignClassicConstants.EventDataKeys.CampaignClassic.TRACK_INFO,
         null
     )
+
+/**
+ * @return registrationStatus [Boolean] from the event data if available and not empty, false otherwise
+ */
+internal val Event.registrationStatus: Boolean
+    get() {
+        return DataReader.optBoolean(
+            eventData,
+            CampaignClassicConstants.EventDataKeys.CampaignClassic.REGISTRATION_STATUS,
+            false
+        )
+    }
