@@ -732,10 +732,11 @@ class CampaignClassicIntegrationTests {
                 null
             )
         )
-        // verify no registration status event dispatched
+        // verify registration status event dispatched with status false
         Thread.sleep(250)
         val registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
-        Assert.assertEquals(0, registrationStatusEvents.size)
+        Assert.assertEquals(1, registrationStatusEvents.size)
+        Assert.assertEquals(false, registrationStatusEvents.get(0).registrationStatus)
     }
 
     // =================================================================================================================
