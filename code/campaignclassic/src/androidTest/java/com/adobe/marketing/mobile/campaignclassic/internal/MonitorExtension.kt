@@ -10,6 +10,7 @@
 */
 package com.adobe.marketing.mobile.campaignclassic.internal
 
+import com.adobe.marketing.mobile.Event
 import com.adobe.marketing.mobile.EventSource
 import com.adobe.marketing.mobile.EventType
 import com.adobe.marketing.mobile.Extension
@@ -21,8 +22,18 @@ internal typealias ConfigurationMonitor = (firstValidConfiguration: Map<String, 
 internal class MonitorExtension(extensionApi: ExtensionApi) : Extension(extensionApi) {
     companion object {
         private var configurationMonitor: ConfigurationMonitor? = null
+        private var capturedRegistrationEvents: MutableList<Event> = mutableListOf()
+
         internal fun configurationAwareness(callback: ConfigurationMonitor) {
             configurationMonitor = callback
+        }
+
+        internal fun getCapturedRegistrationEvents(): MutableList<Event> {
+            return capturedRegistrationEvents
+        }
+
+        internal fun resetCapturedRegistrationEvents() {
+            capturedRegistrationEvents.clear()
         }
     }
 
@@ -42,6 +53,10 @@ internal class MonitorExtension(extensionApi: ExtensionApi) : Extension(extensio
             configuration?.let {
                 configurationMonitor?.let { it(configuration) }
             }
+        }
+
+        api.registerEventListener(EventType.CAMPAIGN, EventSource.RESPONSE_CONTENT) { event ->
+            capturedRegistrationEvents.add(event)
         }
     }
 }
