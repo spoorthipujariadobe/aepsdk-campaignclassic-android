@@ -2,10 +2,12 @@ package com.adobe.campaignclassictestapp;
 
 import com.adobe.marketing.mobile.AdobeCallback;
 import com.adobe.marketing.mobile.CampaignClassic;
+import com.adobe.marketing.mobile.Event;
+import com.adobe.marketing.mobile.EventSource;
+import com.adobe.marketing.mobile.EventType;
 import com.adobe.marketing.mobile.Extension;
 import com.adobe.marketing.mobile.MobileCore;
 import com.adobe.marketing.mobile.LoggingMode;
-import com.adobe.marketing.mobile.MobilePrivacyStatus;
 
 import android.app.Application;
 import android.util.Log;
@@ -29,6 +31,13 @@ public class CampaignClassicTestApp extends Application {
 				@Override
 				public void call(Object o) {
 					MobileCore.configureWithAppID("");
+					// test campaign response event dispatch
+					MobileCore.registerEventListener(EventType.CAMPAIGN, EventSource.RESPONSE_CONTENT, new AdobeCallback<Event>() {
+						@Override
+						public void call(Event event) {
+							Log.d("ACCRegistrationStatus", event.getEventData().get("registrationstatus").toString());
+						}
+					});
 				}
 			});
 			Thread.sleep(1000);
