@@ -31,7 +31,7 @@ public class CampaignClassicTestApp extends Application {
 				@Override
 				public void call(Object o) {
 					MobileCore.configureWithAppID("");
-					// test campaign response event dispatch
+					// listen for campaign response event
 					MobileCore.registerEventListener(EventType.CAMPAIGN, EventSource.RESPONSE_CONTENT, new AdobeCallback<Event>() {
 						@Override
 						public void call(Event event) {
