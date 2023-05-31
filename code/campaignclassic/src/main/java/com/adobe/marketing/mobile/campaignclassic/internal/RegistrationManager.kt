@@ -89,6 +89,7 @@ internal class RegistrationManager {
                 "registerDevice - Failed to process device registration request," +
                     "device token is not available."
             )
+            dispatchRegistrationStatus(false)
             return
         }
 
@@ -101,6 +102,7 @@ internal class RegistrationManager {
                 "registerDevice - Failed to process device registration request," +
                     "MobilePrivacyStatus is not optedIn."
             )
+            dispatchRegistrationStatus(false)
             return
         }
 
@@ -112,6 +114,7 @@ internal class RegistrationManager {
                 "registerDevice - Failed to process device registration request," +
                     "Marketing server is not configured."
             )
+            dispatchRegistrationStatus(false)
             return
         }
 
@@ -122,6 +125,7 @@ internal class RegistrationManager {
                 "registerDevice - Failed to process device registration request," +
                     "Integration key is not configured."
             )
+            dispatchRegistrationStatus(false)
             return
         }
 
@@ -160,6 +164,7 @@ internal class RegistrationManager {
                 "registerDevice - Not sending device registration request," +
                     "there is no change in registration info."
             )
+            dispatchRegistrationStatus(true)
             return
         }
 
@@ -262,6 +267,7 @@ internal class RegistrationManager {
                 SELF_TAG,
                 "sendRegistrationRequest - Cannot send request, Network service is not available."
             )
+            dispatchRegistrationStatus(false)
             return
         }
 
@@ -277,12 +283,11 @@ internal class RegistrationManager {
         )
 
         // send registration request
-        var registrationSuccessful = false
         Log.trace(CampaignClassicConstants.LOG_TAG, SELF_TAG, "sendRegistrationRequest - Registration request was sent with url $requestUrl")
         networkService.connectAsync(networkRequest) {
             if (it.responseCode == HttpURLConnection.HTTP_OK) {
                 Log.debug(CampaignClassicConstants.LOG_TAG, SELF_TAG, "sendRegistrationRequest - Registration successful.")
-                registrationSuccessful = true
+                dispatchRegistrationStatus(true)
                 updateDataStoreWithRegistrationInfo(registrationHash)
             } else {
                 Log.debug(
@@ -290,10 +295,10 @@ internal class RegistrationManager {
                     SELF_TAG,
                     "sendRegistrationRequest - Unsuccessful Registration request with connection status ${it.responseCode}"
                 )
+                dispatchRegistrationStatus(false)
             }
             it.close()
         }
-        dispatchRegistrationStatus(registrationSuccessful)
     }
 
     private fun dispatchRegistrationStatus(registrationStatus: Boolean) {
