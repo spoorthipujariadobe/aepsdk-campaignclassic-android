@@ -87,22 +87,30 @@ class CampaignClassicIntegrationTests {
             countDownLatch.countDown()
         }
         Assert.assertTrue(countDownLatch.await(1000, TimeUnit.MILLISECONDS))
-        dataStore = ServiceProvider.getInstance().dataStoreService?.getNamedCollection(CampaignClassicTestConstants.DATASTORE_KEY)
+        dataStore = ServiceProvider.getInstance().dataStoreService?.getNamedCollection(
+            CampaignClassicTestConstants.DATASTORE_KEY
+        )
     }
 
     @After
     fun reset() {
         dataStore?.removeAll()
 
-        val configDataStore = ServiceProvider.getInstance().dataStoreService?.getNamedCollection(CampaignClassicTestConstants.CONFIG_DATA_STORE)
+        val configDataStore = ServiceProvider.getInstance().dataStoreService?.getNamedCollection(
+            CampaignClassicTestConstants.CONFIG_DATA_STORE
+        )
         configDataStore?.removeAll()
 
         SDKHelper.resetSDK()
+        MonitorExtension.resetCapturedRegistrationEvents()
     }
 
     @Test
     fun testExtensionVersion() {
-        Assert.assertEquals(CampaignClassicTestConstants.EXTENSION_VERSION, CampaignClassic.extensionVersion())
+        Assert.assertEquals(
+            CampaignClassicTestConstants.EXTENSION_VERSION,
+            CampaignClassic.extensionVersion()
+        )
     }
 
     // =================================================================================================================
@@ -132,10 +140,16 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             // verify network request url
-            Assert.assertEquals("https://testMarketingServer/nms/mobile/1/registerAndroid.jssp", request.url)
+            Assert.assertEquals(
+                "https://testMarketingServer/nms/mobile/1/registerAndroid.jssp",
+                request.url
+            )
 
             // verify header
-            Assert.assertEquals("application/x-www-form-urlencoded;charset=UTF-8", request.headers["Content-Type"])
+            Assert.assertEquals(
+                "application/x-www-form-urlencoded;charset=UTF-8",
+                request.headers["Content-Type"]
+            )
 
             // verify payload
             val payload = String(request.body, Charsets.UTF_8)
@@ -160,7 +174,17 @@ class CampaignClassicIntegrationTests {
             countDownLatch.countDown()
         }
         Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertNotNull(dataStore?.getString(CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH, null))
+        Assert.assertNotNull(
+            dataStore?.getString(
+                CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH,
+                null
+            )
+        )
+        // verify registration status event dispatched with status true
+        Thread.sleep(250)
+        val registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
+        Assert.assertEquals(1, registrationStatusEvents.size)
+        Assert.assertEquals(true, registrationStatusEvents.get(0).registrationStatus)
     }
 
     @Test
@@ -191,6 +215,10 @@ class CampaignClassicIntegrationTests {
         }
 
         Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
+        // verify no registration status event dispatched
+        Thread.sleep(250)
+        val registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
+        Assert.assertEquals(0, registrationStatusEvents.size)
     }
 
     @Test
@@ -216,7 +244,10 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             // verify network request url
-            Assert.assertEquals("https://testMarketingServer/nms/mobile/1/registerAndroid.jssp", request.url)
+            Assert.assertEquals(
+                "https://testMarketingServer/nms/mobile/1/registerAndroid.jssp",
+                request.url
+            )
 
             // verify payload
             val payload = String(request.body, Charsets.UTF_8)
@@ -232,7 +263,17 @@ class CampaignClassicIntegrationTests {
             countDownLatch.countDown()
         }
         Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertNotNull(dataStore?.getString(CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH, null))
+        Assert.assertNotNull(
+            dataStore?.getString(
+                CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH,
+                null
+            )
+        )
+        // verify registration status event dispatched with status true
+        Thread.sleep(250)
+        val registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
+        Assert.assertEquals(1, registrationStatusEvents.size)
+        Assert.assertEquals(true, registrationStatusEvents.get(0).registrationStatus)
     }
 
     @Test
@@ -258,7 +299,10 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             // verify network request url
-            Assert.assertEquals("https://testMarketingServer/nms/mobile/1/registerAndroid.jssp", request.url)
+            Assert.assertEquals(
+                "https://testMarketingServer/nms/mobile/1/registerAndroid.jssp",
+                request.url
+            )
 
             // verify payload
             val payload = String(request.body, Charsets.UTF_8)
@@ -274,7 +318,17 @@ class CampaignClassicIntegrationTests {
             countDownLatch.countDown()
         }
         Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertNotNull(dataStore?.getString(CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH, null))
+        Assert.assertNotNull(
+            dataStore?.getString(
+                CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH,
+                null
+            )
+        )
+        // verify registration status event dispatched with status true
+        Thread.sleep(250)
+        val registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
+        Assert.assertEquals(1, registrationStatusEvents.size)
+        Assert.assertEquals(true, registrationStatusEvents.get(0).registrationStatus)
     }
 
     @Test
@@ -291,7 +345,10 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             // verify network request url
-            Assert.assertEquals("https://testMarketingServer/nms/mobile/1/registerAndroid.jssp", request.url)
+            Assert.assertEquals(
+                "https://testMarketingServer/nms/mobile/1/registerAndroid.jssp",
+                request.url
+            )
 
             // verify payload
             val payload = String(request.body, Charsets.UTF_8)
@@ -304,7 +361,17 @@ class CampaignClassicIntegrationTests {
             countDownLatch.countDown()
         }
         Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertNotNull(dataStore?.getString(CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH, null))
+        Assert.assertNotNull(
+            dataStore?.getString(
+                CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH,
+                null
+            )
+        )
+        // verify registration status event dispatched with status true
+        Thread.sleep(250)
+        val registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
+        Assert.assertEquals(1, registrationStatusEvents.size)
+        Assert.assertEquals(true, registrationStatusEvents.get(0).registrationStatus)
     }
 
     @Test
@@ -335,6 +402,11 @@ class CampaignClassicIntegrationTests {
         }
 
         Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
+        // verify registration status event dispatched with status false
+        Thread.sleep(250)
+        val registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
+        Assert.assertEquals(1, registrationStatusEvents.size)
+        Assert.assertEquals(false, registrationStatusEvents.get(0).registrationStatus)
     }
 
     @Test
@@ -365,6 +437,11 @@ class CampaignClassicIntegrationTests {
         }
 
         Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
+        // verify registration status event dispatched with status false
+        Thread.sleep(250)
+        val registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
+        Assert.assertEquals(1, registrationStatusEvents.size)
+        Assert.assertEquals(false, registrationStatusEvents.get(0).registrationStatus)
     }
 
     @Test
@@ -395,6 +472,11 @@ class CampaignClassicIntegrationTests {
         }
 
         Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
+        // verify registration status event dispatched with status false
+        Thread.sleep(250)
+        val registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
+        Assert.assertEquals(1, registrationStatusEvents.size)
+        Assert.assertEquals(false, registrationStatusEvents.get(0).registrationStatus)
     }
 
     @Test
@@ -425,6 +507,11 @@ class CampaignClassicIntegrationTests {
         }
 
         Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
+        // verify registration status event dispatched with status false
+        Thread.sleep(250)
+        val registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
+        Assert.assertEquals(1, registrationStatusEvents.size)
+        Assert.assertEquals(false, registrationStatusEvents.get(0).registrationStatus)
     }
 
     @Test
@@ -452,6 +539,10 @@ class CampaignClassicIntegrationTests {
         }
 
         Assert.assertFalse(countDownLatch.await(1, TimeUnit.SECONDS))
+        // verify no registration status event dispatched
+        Thread.sleep(250)
+        val registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
+        Assert.assertEquals(0, registrationStatusEvents.size)
     }
 
     @Test
@@ -477,13 +568,27 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             // verify network request url
-            Assert.assertEquals("https://testMarketingServer/nms/mobile/1/registerAndroid.jssp", request.url)
+            Assert.assertEquals(
+                "https://testMarketingServer/nms/mobile/1/registerAndroid.jssp",
+                request.url
+            )
             countDownLatch.countDown()
         }
         Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertNotNull(dataStore?.getString(CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH, null))
+        Assert.assertNotNull(
+            dataStore?.getString(
+                CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH,
+                null
+            )
+        )
+        // verify registration status event dispatched with status true
+        Thread.sleep(250)
+        var registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
+        Assert.assertEquals(1, registrationStatusEvents.size)
+        Assert.assertEquals(true, registrationStatusEvents.get(0).registrationStatus)
 
         networkMonitor = null
+        MonitorExtension.resetCapturedRegistrationEvents()
         val countDownLatch2 = CountDownLatch(1)
         // test
         CampaignClassic.registerDevice(
@@ -505,7 +610,17 @@ class CampaignClassicIntegrationTests {
         }
 
         Assert.assertFalse(countDownLatch2.await(1, TimeUnit.SECONDS))
-        Assert.assertNotNull(dataStore?.getString(CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH, null))
+        Assert.assertNotNull(
+            dataStore?.getString(
+                CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH,
+                null
+            )
+        )
+        // verify registration status event dispatched with status true as previous registration with same data was successful
+        Thread.sleep(250)
+        registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
+        Assert.assertEquals(1, registrationStatusEvents.size)
+        Assert.assertEquals(true, registrationStatusEvents.get(0).registrationStatus)
     }
 
     @Test
@@ -531,12 +646,23 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             // verify network request url
-            Assert.assertEquals("https://testMarketingServer/nms/mobile/1/registerAndroid.jssp", request.url)
+            Assert.assertEquals(
+                "https://testMarketingServer/nms/mobile/1/registerAndroid.jssp",
+                request.url
+            )
 
             countDownLatch.countDown()
         }
         Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        // verify registration status event dispatched with status true
+        Thread.sleep(250)
+        var registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
+        Assert.assertEquals(1, registrationStatusEvents.size)
+        Assert.assertEquals(true, registrationStatusEvents.get(0).registrationStatus)
+
         networkMonitor = null
+        MonitorExtension.resetCapturedRegistrationEvents()
+
         val countDownLatch2 = CountDownLatch(1)
         // test
         CampaignClassic.registerDevice(
@@ -553,12 +679,25 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             // verify network request url
-            Assert.assertEquals("https://testMarketingServer/nms/mobile/1/registerAndroid.jssp", request.url)
+            Assert.assertEquals(
+                "https://testMarketingServer/nms/mobile/1/registerAndroid.jssp",
+                request.url
+            )
 
             countDownLatch2.countDown()
         }
         Assert.assertTrue(countDownLatch2.await(1, TimeUnit.SECONDS))
-        Assert.assertNotNull(dataStore?.getString(CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH, null))
+        Assert.assertNotNull(
+            dataStore?.getString(
+                CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH,
+                null
+            )
+        )
+        // verify registration status event dispatched with status true
+        Thread.sleep(250)
+        registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
+        Assert.assertEquals(1, registrationStatusEvents.size)
+        Assert.assertEquals(true, registrationStatusEvents.get(0).registrationStatus)
     }
 
     @Test
@@ -592,7 +731,17 @@ class CampaignClassicIntegrationTests {
             countDownLatch.countDown()
         }
         Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
-        Assert.assertNull(dataStore?.getString(CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH, null))
+        Assert.assertNull(
+            dataStore?.getString(
+                CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH,
+                null
+            )
+        )
+        // verify registration status event dispatched with status false
+        Thread.sleep(250)
+        val registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
+        Assert.assertEquals(1, registrationStatusEvents.size)
+        Assert.assertEquals(false, registrationStatusEvents.get(0).registrationStatus)
     }
 
     // =================================================================================================================
@@ -951,7 +1100,12 @@ class CampaignClassicIntegrationTests {
         networkMonitor = { request ->
             // verify network request url
             Assert.assertEquals(
-                "https://testTrackingServer/r/?id=h${java.lang.String.format("%x",12345)},testDeliveryId,1",
+                "https://testTrackingServer/r/?id=h${
+                java.lang.String.format(
+                    "%x",
+                    12345
+                )
+                },testDeliveryId,1",
                 request.url
             )
 
@@ -974,7 +1128,12 @@ class CampaignClassicIntegrationTests {
         networkMonitor = { request ->
             // verify network request url
             Assert.assertEquals(
-                "https://testTrackingServer/r/?id=h${java.lang.String.format("%x",12345)},testDeliveryId,1",
+                "https://testTrackingServer/r/?id=h${
+                java.lang.String.format(
+                    "%x",
+                    12345
+                )
+                },testDeliveryId,1",
                 request.url
             )
 
@@ -1002,7 +1161,12 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             Assert.assertEquals(
-                "https://testTrackingServerFailed/r/?id=h${java.lang.String.format("%x",12345)},testDeliveryId,1",
+                "https://testTrackingServerFailed/r/?id=h${
+                java.lang.String.format(
+                    "%x",
+                    12345
+                )
+                },testDeliveryId,1",
                 request.url
             )
             countDownLatch.countDown()
@@ -1035,7 +1199,12 @@ class CampaignClassicIntegrationTests {
         networkMonitor = { request ->
             // verify network request url
             Assert.assertEquals(
-                "https://testTrackingServer/r/?id=h${java.lang.String.format("%x",12345)},testDeliveryId,2",
+                "https://testTrackingServer/r/?id=h${
+                java.lang.String.format(
+                    "%x",
+                    12345
+                )
+                },testDeliveryId,2",
                 request.url
             )
 
@@ -1366,7 +1535,12 @@ class CampaignClassicIntegrationTests {
         networkMonitor = { request ->
             // verify network request url
             Assert.assertEquals(
-                "https://testTrackingServer/r/?id=h${java.lang.String.format("%x",12345)},testDeliveryId,2",
+                "https://testTrackingServer/r/?id=h${
+                java.lang.String.format(
+                    "%x",
+                    12345
+                )
+                },testDeliveryId,2",
                 request.url
             )
 
@@ -1389,7 +1563,12 @@ class CampaignClassicIntegrationTests {
         networkMonitor = { request ->
             // verify network request url
             Assert.assertEquals(
-                "https://testTrackingServer/r/?id=h${java.lang.String.format("%x",12345)},testDeliveryId,2",
+                "https://testTrackingServer/r/?id=h${
+                java.lang.String.format(
+                    "%x",
+                    12345
+                )
+                },testDeliveryId,2",
                 request.url
             )
 
@@ -1417,7 +1596,12 @@ class CampaignClassicIntegrationTests {
         // verify
         networkMonitor = { request ->
             Assert.assertEquals(
-                "https://testTrackingServerFailed/r/?id=h${java.lang.String.format("%x",12345)},testDeliveryId,2",
+                "https://testTrackingServerFailed/r/?id=h${
+                java.lang.String.format(
+                    "%x",
+                    12345
+                )
+                },testDeliveryId,2",
                 request.url
             )
             countDownLatch.countDown()
