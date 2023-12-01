@@ -12,12 +12,15 @@
 
 package com.adobe.marketing.mobile;
 
+import static com.adobe.marketing.mobile.CampaignPushConstants.LOG_TAG;
+
 import android.app.Notification;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationManagerCompat;
 
+import com.adobe.marketing.mobile.services.Log;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -28,6 +31,8 @@ import com.google.firebase.messaging.RemoteMessage;
  * handle display and tracking of Campaign Classic push notifications.
  */
 public class AEPMessagingService extends FirebaseMessagingService {
+    static final String SELF_TAG = "AEPMessagingService";
+
     @Override
     public void onNewToken(final @NonNull String token) {
         super.onNewToken(token);
@@ -42,7 +47,14 @@ public class AEPMessagingService extends FirebaseMessagingService {
 
     public static boolean handleRemoteMessage(final @NonNull Context context, final @NonNull RemoteMessage remoteMessage) {
         final NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
-        final AEPPushPayload payload = new AEPPushPayload(remoteMessage);
+        AEPPushPayload payload;
+        try {
+            payload = new AEPPushPayload(remoteMessage);
+        } catch (final IllegalArgumentException exception) {
+            Log.error(LOG_TAG, SELF_TAG, "Failed to create push payload object, an illegal argument exception occurred: %s", exception.getLocalizedMessage());
+            return false;
+        }
+
         final Notification notification = AEPPushNotificationBuilder.buildPushNotification(payload, context);
 
         // display notification

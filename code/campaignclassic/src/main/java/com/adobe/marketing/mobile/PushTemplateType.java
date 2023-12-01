@@ -11,35 +11,35 @@
  */
 package com.adobe.marketing.mobile;
 
-public enum PushTemplateType {
-    LEGACY(-1),
-    BASIC(0),
-    AUTO_CAROUSEL(1),
-    MANUAL_CAROUSEL(2),
-    INPUT_BOX(3),
-    UNKNOWN(4);
+enum PushTemplateType {
+    LEGACY("-1"),
+    BASIC("0"),
+    AUTO_CAROUSEL("1"),
+    MANUAL_CAROUSEL("2"),
+    INPUT_BOX("3"),
+    UNKNOWN("4");
 
-    final int value;
+    final String value;
 
-    PushTemplateType(final int value) {
+    PushTemplateType(final String value) {
         this.value = value;
     }
 
-    public int getValue() {
+    String getValue() {
         return value;
     }
 
-    public static PushTemplateType fromInt(final int value) {
+    static PushTemplateType fromString(final String value) {
         switch (value) {
-            case -1:
+            case "-1":
                 return PushTemplateType.LEGACY;
-            case 0:
+            case "0":
                 return PushTemplateType.BASIC;
-            case 1:
+            case "1":
                 return PushTemplateType.AUTO_CAROUSEL;
-            case 2:
+            case "2":
                 return PushTemplateType.MANUAL_CAROUSEL;
-            case 3:
+            case "3":
                 return PushTemplateType.INPUT_BOX;
             default:
                 return PushTemplateType.UNKNOWN;

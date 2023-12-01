@@ -32,7 +32,78 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AEPPushTemplate {
+class AEPPushTemplate {
+
+    /**
+     * Enum to denote the type of action
+     */
+    enum ActionType {
+        DEEPLINK, WEBURL, DISMISS, OPENAPP, NONE
+    }
+
+    /**
+     * Class representing the action button with label, link and type
+     */
+    class ActionButton {
+        private final String label;
+        private final String link;
+        private final ActionType type;
+
+
+        ActionButton(final String label, final String link, final String type) {
+            this.label = label;
+            this.link = link;
+            this.type = getActionTypeFromString(type);
+        }
+
+        String getLabel() {
+            return label;
+        }
+
+        String getLink() {
+            return link;
+        }
+
+        ActionType getType() {
+            return type;
+        }
+    }
+
+    static final class ActionButtonType {
+        static final String DEEPLINK = "DEEPLINK";
+        static final String WEBURL = "WEBURL";
+        static final String DISMISS = "DISMISS";
+        static final String OPENAPP = "OPENAPP";
+    }
+
+    static final class ActionButtons {
+        static final String LABEL = "label";
+        static final String URI = "uri";
+        static final String TYPE = "type";
+    }
+
+
+    static final class NotificationPriority {
+        static int from(final String priority) {
+            if (priority == null) return Notification.PRIORITY_DEFAULT;
+            final Integer resolvedPriority = notificationPriorityMap.get(priority);
+            if (resolvedPriority == null) return Notification.PRIORITY_DEFAULT;
+            return resolvedPriority;
+        }
+
+        static final String PRIORITY_DEFAULT = "PRIORITY_DEFAULT";
+        static final String PRIORITY_MIN = "PRIORITY_MIN";
+        static final String PRIORITY_LOW = "PRIORITY_LOW";
+        static final String PRIORITY_HIGH = "PRIORITY_HIGH";
+        static final String PRIORITY_MAX = "PRIORITY_MAX";
+    }
+
+    static final class NotificationVisibility {
+        static final String PUBLIC = "PUBLIC";
+        static final String PRIVATE = "PRIVATE";
+        static final String SECRET = "SECRET";
+    }
+
     static final String SELF_TAG = "AEPPushTemplate";
     // Legacy push payload values
     private static final int ACTION_BUTTON_CAPACITY = 3;
@@ -57,8 +128,6 @@ public class AEPPushTemplate {
     // push template payload values
     // Required, Version of the payload assigned by the authoring UI.
     private int payloadVersion = 0; // default to 0 of legacy
-    // Optional, Informs the reader of what properties may exist in the template object. Value matches pushTemplate enum below. 1 represents a "carousel" template.
-    private PushTemplateType pushTemplateType = PushTemplateType.LEGACY; // default to legacy
     // Optional, Body of the message shown in the expanded message layout (setCustomBigContentView)
     private String expandedBodyText;
     // Optional, Text color for adb_body. Represented as six character hex, e.g. 00FF00
@@ -72,11 +141,11 @@ public class AEPPushTemplate {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     static final Map<String, Integer> notificationImportanceMap = new HashMap<String, Integer>() {{
-        put(NotificationPriorities.PRIORITY_MIN, NotificationManager.IMPORTANCE_MIN);
-        put(NotificationPriorities.PRIORITY_LOW, NotificationManager.IMPORTANCE_LOW);
-        put(NotificationPriorities.PRIORITY_DEFAULT, NotificationManager.IMPORTANCE_DEFAULT);
-        put(NotificationPriorities.PRIORITY_HIGH, NotificationManager.IMPORTANCE_HIGH);
-        put(NotificationPriorities.PRIORITY_MAX, NotificationManager.IMPORTANCE_MAX);
+        put(NotificationPriority.PRIORITY_MIN, NotificationManager.IMPORTANCE_MIN);
+        put(NotificationPriority.PRIORITY_LOW, NotificationManager.IMPORTANCE_LOW);
+        put(NotificationPriority.PRIORITY_DEFAULT, NotificationManager.IMPORTANCE_DEFAULT);
+        put(NotificationPriority.PRIORITY_HIGH, NotificationManager.IMPORTANCE_HIGH);
+        put(NotificationPriority.PRIORITY_MAX, NotificationManager.IMPORTANCE_MAX);
     }};
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -87,40 +156,12 @@ public class AEPPushTemplate {
     }};
 
     static final Map<String, Integer> notificationPriorityMap = new HashMap<String, Integer>() {{
-        put(NotificationPriorities.PRIORITY_MIN, Notification.PRIORITY_MIN);
-        put(NotificationPriorities.PRIORITY_LOW, Notification.PRIORITY_LOW);
-        put(NotificationPriorities.PRIORITY_DEFAULT, Notification.PRIORITY_DEFAULT);
-        put(NotificationPriorities.PRIORITY_HIGH, Notification.PRIORITY_HIGH);
-        put(NotificationPriorities.PRIORITY_MAX, Notification.PRIORITY_MAX);
+        put(NotificationPriority.PRIORITY_MIN, Notification.PRIORITY_MIN);
+        put(NotificationPriority.PRIORITY_LOW, Notification.PRIORITY_LOW);
+        put(NotificationPriority.PRIORITY_DEFAULT, Notification.PRIORITY_DEFAULT);
+        put(NotificationPriority.PRIORITY_HIGH, Notification.PRIORITY_HIGH);
+        put(NotificationPriority.PRIORITY_MAX, Notification.PRIORITY_MAX);
     }};
-
-    static final class ActionButtonType {
-        static final String DEEPLINK = "DEEPLINK";
-        static final String WEBURL = "WEBURL";
-        static final String DISMISS = "DISMISS";
-        static final String OPENAPP = "OPENAPP";
-    }
-
-    static final class ActionButtons {
-        static final String LABEL = "label";
-        static final String URI = "uri";
-        static final String TYPE = "type";
-    }
-
-
-    static final class NotificationPriorities {
-        static final String PRIORITY_DEFAULT = "PRIORITY_DEFAULT";
-        static final String PRIORITY_MIN = "PRIORITY_MIN";
-        static final String PRIORITY_LOW = "PRIORITY_LOW";
-        static final String PRIORITY_HIGH = "PRIORITY_HIGH";
-        static final String PRIORITY_MAX = "PRIORITY_MAX";
-    }
-
-    static final class NotificationVisibility {
-        static final String PUBLIC = "PUBLIC";
-        static final String PRIVATE = "PRIVATE";
-        static final String SECRET = "SECRET";
-    }
 
     AEPPushTemplate(@NonNull final Map<String, String> messageData) {
         this.data = messageData;
@@ -165,7 +206,7 @@ public class AEPPushTemplate {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             this.notificationImportance = getNotificationImportanceFromString(data.get(CampaignPushConstants.PushPayloadKeys.NOTIFICATION_PRIORITY));
         } else {
-            this.notificationPriority = getNotificationPriorityFromString(data.get(CampaignPushConstants.PushPayloadKeys.NOTIFICATION_PRIORITY));
+            this.notificationPriority = NotificationPriority.from(data.get(CampaignPushConstants.PushPayloadKeys.NOTIFICATION_PRIORITY));
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -176,87 +217,83 @@ public class AEPPushTemplate {
         this.actionButtons = getActionButtonsFromString(data.get(CampaignPushConstants.PushPayloadKeys.ACTION_BUTTONS));
     }
 
-    public PushTemplateType getPushTemplateType() {
-        return pushTemplateType;
-    }
-
-    public String getTitle() {
+    String getTitle() {
         return title;
     }
 
-    public String getBody() {
+    String getBody() {
         return body;
     }
 
-    public String getSound() {
+    String getSound() {
         return sound;
     }
 
-    public int getBadgeCount() {
+    int getBadgeCount() {
         return badgeCount;
     }
 
-    public int getNotificationPriority() {
+    int getNotificationPriority() {
         return notificationPriority;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public int getNotificationVisibility() {
+    int getNotificationVisibility() {
         return notificationVisibility;
     }
 
-    public int getNotificationImportance() {
+    int getNotificationImportance() {
         return notificationImportance;
     }
 
-    public String getChannelId() {
+    String getChannelId() {
         return channelId;
     }
 
-    public String getIcon() {
+    String getIcon() {
         return icon;
     }
 
-    public String getImageUrl() {
+    String getImageUrl() {
         return imageUrl;
     }
 
-    public String getMessageId() {
+    String getMessageId() {
         return messageId;
     }
 
-    public String getDeliveryId() {
+    String getDeliveryId() {
         return deliveryId;
     }
 
-    public String getExpandedBodyText() {
+    String getExpandedBodyText() {
         return expandedBodyText;
     }
 
-    public String getExpandedBodyTextColor() {
+    String getExpandedBodyTextColor() {
         return expandedBodyTextColor;
     }
 
-    public String getTitleTextColor() {
+    String getTitleTextColor() {
         return titleTextColor;
     }
 
-    public String getSmallIconColor() {
+    String getSmallIconColor() {
         return smallIconColor;
     }
 
-    public String getNotificationBackgroundColor() {
+    String getNotificationBackgroundColor() {
         return notificationBackgroundColor;
     }
 
     /**
      * @return an {@link AEPPushTemplate.ActionType}
      */
-    public AEPPushTemplate.ActionType getActionType() {
+    AEPPushTemplate.ActionType getActionType() {
         return actionType;
     }
 
-    public String getActionUri() {
+    String getActionUri() {
         return actionUri;
     }
 
@@ -265,15 +302,15 @@ public class AEPPushTemplate {
      *
      * @return List of {@link AEPPushTemplate.ActionButton}
      */
-    public List<AEPPushTemplate.ActionButton> getActionButtons() {
+    List<AEPPushTemplate.ActionButton> getActionButtons() {
         return actionButtons;
     }
 
-    public Map<String, String> getData() {
+    Map<String, String> getData() {
         return data;
     }
 
-    public int getPayloadVersion() {
+    int getPayloadVersion() {
         return payloadVersion;
     }
 
@@ -338,49 +375,6 @@ public class AEPPushTemplate {
         }
     }
 
-    /**
-     * Enum to denote the type of action
-     */
-    public enum ActionType {
-        DEEPLINK, WEBURL, DISMISS, OPENAPP, NONE
-    }
-
-    /**
-     * Class representing the action button with label, link and type
-     */
-    public class ActionButton {
-        private final String label;
-        private final String link;
-        private final ActionType type;
-
-
-        public ActionButton(final String label, final String link, final String type) {
-            this.label = label;
-            this.link = link;
-            this.type = getActionTypeFromString(type);
-        }
-
-        public String getLabel() {
-            return label;
-        }
-
-        public String getLink() {
-            return link;
-        }
-
-        public ActionType getType() {
-            return type;
-        }
-    }
-
-    private int getNotificationPriorityFromString(final String priority) {
-        if (priority == null) return Notification.PRIORITY_DEFAULT;
-        final Integer resolvedPriority = notificationPriorityMap.get(priority);
-        if (resolvedPriority == null) return Notification.PRIORITY_DEFAULT;
-        return resolvedPriority;
-    }
-
-
     @RequiresApi(api = Build.VERSION_CODES.N)
     private int getNotificationImportanceFromString(final String priority) {
         if (StringUtils.isNullOrEmpty(priority)) return Notification.PRIORITY_DEFAULT;
@@ -389,11 +383,13 @@ public class AEPPushTemplate {
         return resolvedImportance;
     }
 
-    // Returns the notification visibility from the string
-    // If the string is null or not a valid visibility, returns Notification.VISIBILITY_PRIVATE
-    //
-    // @param visibility string representing the visibility of the notification
-    // @return int representing the visibility of the notification
+    /**
+     * Returns the notification visibility from the string.
+     * If the string is null or not a valid visibility, returns Notification.VISIBILITY_PRIVATE.
+     *
+     * @param visibility {@link String} representing the visibility of the notification
+     * @return {@code int} representing the visibility of the notification
+     */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private int getNotificationVisibilityFromString(final String visibility) {
         if (StringUtils.isNullOrEmpty(visibility)) return Notification.VISIBILITY_PRIVATE;

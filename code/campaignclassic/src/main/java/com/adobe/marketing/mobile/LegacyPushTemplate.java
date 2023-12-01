@@ -15,7 +15,7 @@ import androidx.annotation.NonNull;
 
 import java.util.Map;
 
-public class LegacyPushTemplate extends AEPPushTemplate {
+class LegacyPushTemplate extends AEPPushTemplate {
     LegacyPushTemplate(@NonNull final Map<String, String> messageData) {
         super(messageData);
     }

@@ -17,17 +17,17 @@ import com.adobe.marketing.mobile.util.DataReader;
 
 import java.util.Map;
 
-public class InputBoxPushTemplate extends AEPPushTemplate {
+class InputBoxPushTemplate extends AEPPushTemplate {
     // Optional, Placeholder text for the text input field
-    private String inputFieldText;
+    private final String inputFieldText;
     // Optional, Once feedback has been submitted, use this text as the notification's body
-    private String feedbackReceivedText;
+    private final String feedbackReceivedText;
     // Optional, Once feedback has been submitted, use this as the notification's image
-    private String feedbackReceivedImage;
+    private final String feedbackReceivedImage;
     // Optional, If present, show a "remind later" button using the value provided as its label
-    private String remindLaterText;
+    private final String remindLaterText;
     // Optional, If present, schedule this notification to be re-delivered at this epoch timestamp (in seconds) provided.
-    private long remindLaterTimestamp;
+    private final long remindLaterTimestamp;
 
     InputBoxPushTemplate(@NonNull final Map<String, String> messageData) {
         super(messageData);
@@ -38,23 +38,23 @@ public class InputBoxPushTemplate extends AEPPushTemplate {
         this.feedbackReceivedImage = DataReader.optString(messageData, CampaignPushConstants.PushPayloadKeys.FEEDBACK_RECEIVED_IMAGE, "");
     }
 
-    public String getRemindLaterText() {
+    String getRemindLaterText() {
         return remindLaterText;
     }
 
-    public long getRemindLaterTimestamp() {
+    long getRemindLaterTimestamp() {
         return remindLaterTimestamp;
     }
 
-    public String getInputFieldText() {
+    String getInputFieldText() {
         return inputFieldText;
     }
 
-    public String getFeedbackReceivedText() {
+    String getFeedbackReceivedText() {
         return feedbackReceivedText;
     }
 
-    public String getFeedbackReceivedImage() {
+    String getFeedbackReceivedImage() {
         return feedbackReceivedImage;
     }
 }

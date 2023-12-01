@@ -22,13 +22,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class CarouselPushTemplate extends AEPPushTemplate {
+class CarouselPushTemplate extends AEPPushTemplate {
     // Optional, Determines how the carousel will be operated. Valid values are "auto" or "manual". Default is "auto".
-    private String carouselOperationMode; // auto or manual
+    private final String carouselOperationMode; // auto or manual
+    // Required, One or more Items in the carousel defined by the CarouselItem class
+    private final ArrayList<CarouselItem> carouselItems = new ArrayList<>();
     // Required, "default" or "filmstrip"
     private String carouselLayoutType;
-    // Required, One or more Items in the carousel defined by the CarouselItem class
-    private ArrayList<CarouselItem> carouselItems = new ArrayList<>();
 
     class CarouselItem {
         // Required, URI to an image to be shown for the carousel item
@@ -37,6 +37,7 @@ public class CarouselPushTemplate extends AEPPushTemplate {
         private final String captionText;
         // Optional, URI to handle when the item is touched by the user. If no uri is provided for the item, adb_uri will be handled instead.
         private final String interactionUri;
+
         CarouselItem(final String imageUri, final String captionText, final String interactionUri) {
             this.imageUri = imageUri;
             this.captionText = captionText;
@@ -56,36 +57,47 @@ public class CarouselPushTemplate extends AEPPushTemplate {
         }
     }
 
-    public String getCarouselOperationMode() {
+    String getCarouselOperationMode() {
         return carouselOperationMode;
     }
 
-    public String getCarouselLayoutType() {
+    String getCarouselLayoutType() {
         return carouselLayoutType;
     }
 
-    public ArrayList<CarouselPushTemplate.CarouselItem> getCarouselItems() {
+    ArrayList<CarouselPushTemplate.CarouselItem> getCarouselItems() {
         return carouselItems;
     }
 
     CarouselPushTemplate(@NonNull final Map<String, String> messageData) {
         super(messageData);
         this.carouselOperationMode = DataReader.optString(messageData, CampaignPushConstants.PushPayloadKeys.CAROUSEL_OPERATION_MODE, "");
+
         try {
             this.carouselLayoutType = DataReader.getString(messageData, CampaignPushConstants.PushPayloadKeys.CAROUSEL_LAYOUT);
-            final List<Map<String, String>> carouselItemMaps = DataReader.getTypedListOfMap(String.class, messageData, CampaignPushConstants.PushPayloadKeys.CAROUSEL_ITEMS);
-            for (final Map<String, String> carouselItemMap : carouselItemMaps) {
-                final String carouselImage = carouselItemMap.get(CampaignPushConstants.PushPayloadKeys.CAROUSEL_ITEM_IMAGE);
-                if (StringUtils.isNullOrEmpty(carouselImage)) {
-                    break;
-                }
-                final String text = carouselItemMap.get(CampaignPushConstants.PushPayloadKeys.CAROUSEL_ITEM_TEXT);
-                final String uri = carouselItemMap.get(CampaignPushConstants.PushPayloadKeys.CAROUSEL_ITEM_URI);
-                final CarouselItem carouselItem = new CarouselItem(carouselImage, text, uri);
-                carouselItems.add(carouselItem);
-            }
         } catch (final DataReaderException dataReaderException) {
-            Log.debug(CampaignPushConstants.LOG_TAG, SELF_TAG, "Required fields \"adb_car_layout\" or \"adb_items\" not found.");
+            Log.debug(CampaignPushConstants.LOG_TAG, SELF_TAG, "Required fields \"adb_car_layout\"  not found.");
+            return;
         }
+
+        List<Map<String, String>> carouselItemMaps;
+        try {
+            carouselItemMaps = DataReader.getTypedListOfMap(String.class, messageData, CampaignPushConstants.PushPayloadKeys.CAROUSEL_ITEMS);
+        } catch (final DataReaderException dataReaderException) {
+            Log.debug(CampaignPushConstants.LOG_TAG, SELF_TAG, "Required fields \"adb_items\"  not found.");
+            return;
+        }
+
+        for (final Map<String, String> carouselItemMap : carouselItemMaps) {
+            final String carouselImage = carouselItemMap.get(CampaignPushConstants.PushPayloadKeys.CAROUSEL_ITEM_IMAGE);
+            if (StringUtils.isNullOrEmpty(carouselImage)) {
+                break;
+            }
+            final String text = carouselItemMap.get(CampaignPushConstants.PushPayloadKeys.CAROUSEL_ITEM_TEXT);
+            final String uri = carouselItemMap.get(CampaignPushConstants.PushPayloadKeys.CAROUSEL_ITEM_URI);
+            final CarouselItem carouselItem = new CarouselItem(carouselImage, text, uri);
+            carouselItems.add(carouselItem);
+        }
+
     }
 }
