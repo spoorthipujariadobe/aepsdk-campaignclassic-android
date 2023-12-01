@@ -21,18 +21,13 @@ import androidx.core.app.NotificationManagerCompat;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * This class is the entry point for all push notifications received from Firebase.
  * <p>
- * Once the MessagingService is registered in the AndroidManifest.xml.
- * This class will automatically handle display and tracking of Adobe Journey Optimizer push notifications.
+ * Once the AEPMessagingService is registered in the AndroidManifest.xml, this class will automatically
+ * handle display and tracking of Campaign Classic push notifications.
  */
 public class AEPMessagingService extends FirebaseMessagingService {
-    final static List<Integer> hashedMessageIds = new ArrayList<>();
-
     @Override
     public void onNewToken(final @NonNull String token) {
         super.onNewToken(token);
@@ -48,30 +43,10 @@ public class AEPMessagingService extends FirebaseMessagingService {
     public static boolean handleRemoteMessage(final @NonNull Context context, final @NonNull RemoteMessage remoteMessage) {
         final NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
         final AEPPushPayload payload = new AEPPushPayload(remoteMessage);
-        final PushTemplate pushTemplate = payload.getPushTemplate();
-        Notification notification;
-
-        switch (pushTemplate) {
-            case BASIC:
-                notification = AEPPushNotificationBuilder.createBasicTemplatePushNotification(payload, context);
-                break;
-//                case AUTO_CAROUSEL:
-//                    createAutoCarouselPushNotification(payload, notificationManager);
-//                    break;
-//                case MANUAL_CAROUSEL:
-//                    createManualCarouselPushNotification(payload, notificationManager);
-//                    break;
-//                case INPUT_BOX:
-//                    createInputBoxPushNotification(payload, notificationManager);
-//                    break;
-            default:
-                notification = AEPPushNotificationBuilder.build(payload, context);
-        }
+        final Notification notification = AEPPushNotificationBuilder.buildPushNotification(payload, context);
 
         // display notification
-        final int hashedMessageId = remoteMessage.getMessageId().hashCode();
-        hashedMessageIds.add(hashedMessageId);
-        notificationManager.notify(hashedMessageId, notification);
+        notificationManager.notify(remoteMessage.getMessageId().hashCode(), notification);
         return true;
     }
 }

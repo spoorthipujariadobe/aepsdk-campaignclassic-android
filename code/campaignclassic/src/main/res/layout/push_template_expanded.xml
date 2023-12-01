@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/basic_expanded_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/notification_title"
+        style="@style/TextAppearance.Compat.Notification.Title"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:text="@string/title_string"
+        android:layout_gravity="start"
+        android:textAlignment="viewStart"/>
+
+    <TextView
+        android:id="@+id/notification_body_ext"
+        style="@style/TextAppearance.Compat.Notification.Line2"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_gravity="start"
+        android:text="@string/body_string"
+        android:textAlignment="viewStart"
+        android:layout_below="@id/notification_title"/>
+
+    <ImageView
+        android:id="@+id/template_image"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_gravity="center"
+        android:layout_below="@id/notification_body_ext"/>
+</RelativeLayout>
