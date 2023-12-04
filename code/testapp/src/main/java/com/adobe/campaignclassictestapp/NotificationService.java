@@ -14,6 +14,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
+import com.adobe.marketing.mobile.AEPMessagingService;
 import com.adobe.marketing.mobile.CampaignClassic;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -43,29 +44,34 @@ public class NotificationService extends FirebaseMessagingService {
 
 	@Override
 	public void onMessageReceived(RemoteMessage remoteMessage) {
-		super.onMessageReceived(remoteMessage);
 		Log.d(LOG_TAG, "From: " + remoteMessage.getFrom());
-		displayNotification(remoteMessage);
-
-		// Check if message contains a data payload.
-		if (remoteMessage.getData().size() > 0) {
-			Log.d(LOG_TAG, "Message data payload: " + remoteMessage.getData());
+		if (AEPMessagingService.handleRemoteMessage(this, remoteMessage)) {
+			// Campaign extension has handled the notification
+		} else {
+			// Handle notification from other sources
 		}
 
-		// Check if message contains a notification payload.
-		if (remoteMessage.getNotification() != null) {
-			Log.d(LOG_TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
-			Log.d(LOG_TAG, "Message Notification channel id: " + remoteMessage.getNotification().getChannelId());
-			Log.d(LOG_TAG, "Message Notification icon: " + remoteMessage.getNotification().getIcon());
-			Log.d(LOG_TAG, "Message Notification sound: " + remoteMessage.getNotification().getSound());
-			Log.d(LOG_TAG, "Message Notification color: " + remoteMessage.getNotification().getColor());
-			Log.d(LOG_TAG, "Message Notification tag: " + remoteMessage.getNotification().getTag());
-			Log.d(LOG_TAG, "Message Notification image: " + remoteMessage.getNotification().getImageUrl());
-			Log.d(LOG_TAG, "Message Notification count: " + remoteMessage.getNotification().getNotificationCount());
-			Log.d(LOG_TAG, "Message Notification sticky: " + remoteMessage.getNotification().getSticky());
-			Log.d(LOG_TAG, "Message Notification priority: " + remoteMessage.getNotification().getNotificationPriority());
-			Log.d(LOG_TAG, "Message Notification visibility: " + remoteMessage.getNotification().getVisibility());
-		}
+//		displayNotification(remoteMessage);
+//
+//		// Check if message contains a data payload.
+//		if (remoteMessage.getData().size() > 0) {
+//			Log.d(LOG_TAG, "Message data payload: " + remoteMessage.getData());
+//		}
+//
+//		// Check if message contains a notification payload.
+//		if (remoteMessage.getNotification() != null) {
+//			Log.d(LOG_TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
+//			Log.d(LOG_TAG, "Message Notification channel id: " + remoteMessage.getNotification().getChannelId());
+//			Log.d(LOG_TAG, "Message Notification icon: " + remoteMessage.getNotification().getIcon());
+//			Log.d(LOG_TAG, "Message Notification sound: " + remoteMessage.getNotification().getSound());
+//			Log.d(LOG_TAG, "Message Notification color: " + remoteMessage.getNotification().getColor());
+//			Log.d(LOG_TAG, "Message Notification tag: " + remoteMessage.getNotification().getTag());
+//			Log.d(LOG_TAG, "Message Notification image: " + remoteMessage.getNotification().getImageUrl());
+//			Log.d(LOG_TAG, "Message Notification count: " + remoteMessage.getNotification().getNotificationCount());
+//			Log.d(LOG_TAG, "Message Notification sticky: " + remoteMessage.getNotification().getSticky());
+//			Log.d(LOG_TAG, "Message Notification priority: " + remoteMessage.getNotification().getNotificationPriority());
+//			Log.d(LOG_TAG, "Message Notification visibility: " + remoteMessage.getNotification().getVisibility());
+//		}
 	}
 
 	private void displayNotification(RemoteMessage remoteMessage) {
