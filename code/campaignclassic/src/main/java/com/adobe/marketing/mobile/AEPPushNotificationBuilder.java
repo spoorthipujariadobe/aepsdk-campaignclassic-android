@@ -71,20 +71,15 @@ class AEPPushNotificationBuilder {
                 final BasicPushTemplate basicPushTemplate = new BasicPushTemplate(messageData);
                 notification = createBasicTemplatePushNotification(basicPushTemplate, context);
                 break;
-//            case AUTO_CAROUSEL:
+//            case CAROUSEL:
 //                final CarouselPushTemplate carouselPushTemplate = new CarouselPushTemplate(messageData);
 //                notification = createAutoCarouselTemplatePushNotification(payload, context);
-//                break;
-//            case MANUAL_CAROUSEL:
-//                final CarouselPushTemplate carouselPushTemplate = new CarouselPushTemplate(messageData);
-//                notification = createManualCarouselTemplatePushNotification(payload, context);
 //                break;
 //            case INPUT_BOX:
 //                final InputBoxPushTemplate inputBoxPushTemplate = new InputBoxPushTemplate(messageData);
 //                notification = createInputBoxTemplatePushNotification(payload, context);
 //                break;
             case UNKNOWN:
-            case LEGACY:
             default:
                 final AEPPushTemplate aepPushTemplate = new AEPPushTemplate(messageData);
                 notification = createLegacyPushNotification(aepPushTemplate, context);
