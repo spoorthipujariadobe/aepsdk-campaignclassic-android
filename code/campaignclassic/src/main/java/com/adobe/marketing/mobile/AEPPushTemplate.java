@@ -16,6 +16,7 @@ import android.app.NotificationManager;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import com.adobe.marketing.mobile.services.Log;
@@ -110,7 +111,7 @@ class AEPPushTemplate {
     private final String title;
     private final String body;
     private final String sound;
-    private int badgeCount;
+    private int badgeCount = 0;
     private int notificationPriority = Notification.PRIORITY_DEFAULT;
     private int notificationImportance = NotificationManager.IMPORTANCE_DEFAULT;
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -196,16 +197,16 @@ class AEPPushTemplate {
 
         // optional push template data
         this.payloadVersion = Integer.parseInt(DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.VERSION, CampaignPushConstants.DefaultValues.LEGACY_PAYLOAD_VERSION_STRING));
-        this.sound = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.SOUND, "");
-        this.imageUrl = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.IMAGE_URL, "");
-        this.channelId = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.CHANNEL_ID, "");
-        this.actionUri = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.ACTION_URI, "");
-        this.icon = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.ICON, "");
-        this.expandedBodyText = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.EXPANDED_BODY_TEXT, "");
-        this.expandedBodyTextColor = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.EXPANDED_BODY_TEXT_COLOR, "");
-        this.titleTextColor = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.TITLE_TEXT_COLOR, "");
-        this.smallIconColor = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.SMALL_ICON_COLOR, "");
-        this.notificationBackgroundColor = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.NOTIFICATION_BACKGROUND_COLOR, "");
+        this.sound = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.SOUND, null);
+        this.imageUrl = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.IMAGE_URL, null);
+        this.channelId = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.CHANNEL_ID, null);
+        this.actionUri = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.ACTION_URI, null);
+        this.icon = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.ICON, null);
+        this.expandedBodyText = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.EXPANDED_BODY_TEXT, null);
+        this.expandedBodyTextColor = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.EXPANDED_BODY_TEXT_COLOR, null);
+        this.titleTextColor = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.TITLE_TEXT_COLOR, null);
+        this.smallIconColor = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.SMALL_ICON_COLOR, null);
+        this.notificationBackgroundColor = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.NOTIFICATION_BACKGROUND_COLOR, null);
 
         try {
             final String count = data.get(CampaignPushConstants.PushPayloadKeys.BADGE_NUMBER);
@@ -230,14 +231,17 @@ class AEPPushTemplate {
         this.actionButtons = getActionButtonsFromString(data.get(CampaignPushConstants.PushPayloadKeys.ACTION_BUTTONS));
     }
 
+    @NonNull
     String getTitle() {
         return title;
     }
 
+    @NonNull
     String getBody() {
         return body;
     }
 
+    @Nullable
     String getSound() {
         return sound;
     }
@@ -259,42 +263,52 @@ class AEPPushTemplate {
         return notificationImportance;
     }
 
+    @Nullable
     String getChannelId() {
         return channelId;
     }
 
+    @Nullable
     String getIcon() {
         return icon;
     }
 
+    @Nullable
     String getImageUrl() {
         return imageUrl;
     }
 
+    @NonNull
     String getMessageId() {
         return messageId;
     }
 
+    @NonNull
     String getDeliveryId() {
         return deliveryId;
     }
 
+    @Nullable
     String getExpandedBodyText() {
         return expandedBodyText;
     }
 
+    @Nullable
     String getExpandedBodyTextColor() {
         return expandedBodyTextColor;
     }
 
+    @Nullable
     String getTitleTextColor() {
         return titleTextColor;
     }
 
+    @Nullable
     String getSmallIconColor() {
         return smallIconColor;
     }
 
+    @Nullable
     String getNotificationBackgroundColor() {
         return notificationBackgroundColor;
     }
@@ -302,10 +316,12 @@ class AEPPushTemplate {
     /**
      * @return an {@link AEPPushTemplate.ActionType}
      */
+    @Nullable
     AEPPushTemplate.ActionType getActionType() {
         return actionType;
     }
 
+    @Nullable
     String getActionUri() {
         return actionUri;
     }
@@ -315,10 +331,12 @@ class AEPPushTemplate {
      *
      * @return List of {@link AEPPushTemplate.ActionButton}
      */
+    @Nullable
     List<AEPPushTemplate.ActionButton> getActionButtons() {
         return actionButtons;
     }
 
+    @NonNull
     Map<String, String> getData() {
         return data;
     }
@@ -409,10 +427,5 @@ class AEPPushTemplate {
         final Integer resolvedVisibility = notificationVisibilityMap.get(visibility);
         if (resolvedVisibility == null) return Notification.VISIBILITY_PRIVATE;
         return resolvedVisibility;
-    }
-
-    // Check if the push notification is silent push notification.
-    boolean isSilentPushMessage() {
-        return data != null && title == null && body == null;
     }
 }

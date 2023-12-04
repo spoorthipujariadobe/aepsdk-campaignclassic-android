@@ -12,6 +12,7 @@
 package com.adobe.marketing.mobile;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.util.DataReader;
@@ -57,14 +58,17 @@ class CarouselPushTemplate extends AEPPushTemplate {
         }
     }
 
+    @NonNull
     String getCarouselOperationMode() {
         return carouselOperationMode;
     }
 
+    @NonNull
     String getCarouselLayoutType() {
         return carouselLayoutType;
     }
 
+    @NonNull
     ArrayList<CarouselPushTemplate.CarouselItem> getCarouselItems() {
         return carouselItems;
     }

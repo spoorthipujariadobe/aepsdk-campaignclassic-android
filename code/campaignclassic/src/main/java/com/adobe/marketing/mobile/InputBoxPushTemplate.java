@@ -12,6 +12,7 @@
 package com.adobe.marketing.mobile;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.adobe.marketing.mobile.util.DataReader;
 
@@ -38,6 +39,7 @@ class InputBoxPushTemplate extends AEPPushTemplate {
         this.feedbackReceivedImage = DataReader.optString(messageData, CampaignPushConstants.PushPayloadKeys.FEEDBACK_RECEIVED_IMAGE, "");
     }
 
+    @Nullable
     String getRemindLaterText() {
         return remindLaterText;
     }
@@ -46,14 +48,17 @@ class InputBoxPushTemplate extends AEPPushTemplate {
         return remindLaterTimestamp;
     }
 
+    @Nullable
     String getInputFieldText() {
         return inputFieldText;
     }
 
+    @Nullable
     String getFeedbackReceivedText() {
         return feedbackReceivedText;
     }
 
+    @Nullable
     String getFeedbackReceivedImage() {
         return feedbackReceivedImage;
     }

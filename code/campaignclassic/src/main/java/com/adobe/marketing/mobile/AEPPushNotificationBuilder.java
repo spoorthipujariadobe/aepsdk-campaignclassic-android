@@ -11,8 +11,6 @@
  */
 package com.adobe.marketing.mobile;
 
-import static com.adobe.marketing.mobile.CampaignPushConstants.LOG_TAG;
-
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -27,7 +25,6 @@ import android.os.Build;
 import android.widget.RemoteViews;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
@@ -39,7 +36,6 @@ import com.adobe.marketing.mobile.campaignclassic.R.id;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Random;
 
 /**
@@ -64,18 +60,17 @@ class AEPPushNotificationBuilder {
      * @param context the application {@link Context}
      * @return the notification
      */
-    @Nullable
+    @NonNull
     static Notification buildPushNotification(final AEPPushPayload payload,
-                                              final Context context) {
+                                              final Context context) throws IllegalArgumentException {
         Notification notification;
         final Map<String, String> messageData = payload.getMessageData();
-        final PushTemplateType pushTemplateType = PushTemplateType.fromString((Objects.requireNonNull(messageData.get(CampaignPushConstants.PushPayloadKeys.TEMPLATE_TYPE))));
-        try {
-            switch (pushTemplateType) {
-                case BASIC:
-                    final BasicPushTemplate basicPushTemplate = new BasicPushTemplate(messageData);
-                    notification = createBasicTemplatePushNotification(basicPushTemplate, context);
-                    break;
+        final PushTemplateType pushTemplateType = PushTemplateType.fromString(messageData.get(CampaignPushConstants.PushPayloadKeys.TEMPLATE_TYPE));
+        switch (pushTemplateType) {
+            case BASIC:
+                final BasicPushTemplate basicPushTemplate = new BasicPushTemplate(messageData);
+                notification = createBasicTemplatePushNotification(basicPushTemplate, context);
+                break;
 //            case AUTO_CAROUSEL:
 //                final CarouselPushTemplate carouselPushTemplate = new CarouselPushTemplate(messageData);
 //                notification = createAutoCarouselTemplatePushNotification(payload, context);
@@ -88,16 +83,12 @@ class AEPPushNotificationBuilder {
 //                final InputBoxPushTemplate inputBoxPushTemplate = new InputBoxPushTemplate(messageData);
 //                notification = createInputBoxTemplatePushNotification(payload, context);
 //                break;
-                case UNKNOWN:
-                case LEGACY:
-                default:
-                    final AEPPushTemplate aepPushTemplate = new AEPPushTemplate(messageData);
-                    notification = createLegacyPushNotification(aepPushTemplate, context);
-                    break;
-            }
-        } catch (final IllegalArgumentException exception) {
-            Log.error(LOG_TAG, SELF_TAG, "Failed to create a Notification from the provided AEPPushPayload, an illegal argument exception occurred: %s", exception.getLocalizedMessage());
-            return null;
+            case UNKNOWN:
+            case LEGACY:
+            default:
+                final AEPPushTemplate aepPushTemplate = new AEPPushTemplate(messageData);
+                notification = createLegacyPushNotification(aepPushTemplate, context);
+                break;
         }
 
         return notification;

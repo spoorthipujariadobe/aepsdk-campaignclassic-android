@@ -34,31 +34,30 @@ public class AEPMessagingService extends FirebaseMessagingService {
     static final String SELF_TAG = "AEPMessagingService";
 
     @Override
-    public void onNewToken(final @NonNull String token) {
+    public void onNewToken(@NonNull final String token) {
         super.onNewToken(token);
         MobileCore.setPushIdentifier(token);
     }
 
     @Override
-    public void onMessageReceived(final @NonNull RemoteMessage remoteMessage) {
+    public void onMessageReceived(@NonNull final RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
         handleRemoteMessage(this, remoteMessage);
     }
 
-    public static boolean handleRemoteMessage(final @NonNull Context context, final @NonNull RemoteMessage remoteMessage) {
+    public static boolean handleRemoteMessage(@NonNull final Context context, @NonNull final RemoteMessage remoteMessage) {
         final NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
-        AEPPushPayload payload;
         try {
-            payload = new AEPPushPayload(remoteMessage);
+            final AEPPushPayload payload = new AEPPushPayload(remoteMessage);
+            final Notification notification = AEPPushNotificationBuilder.buildPushNotification(payload, context);
+
+            // display notification
+            notificationManager.notify(remoteMessage.getMessageId().hashCode(), notification);
         } catch (final IllegalArgumentException exception) {
             Log.error(LOG_TAG, SELF_TAG, "Failed to create push payload object, an illegal argument exception occurred: %s", exception.getLocalizedMessage());
             return false;
         }
 
-        final Notification notification = AEPPushNotificationBuilder.buildPushNotification(payload, context);
-
-        // display notification
-        notificationManager.notify(remoteMessage.getMessageId().hashCode(), notification);
         return true;
     }
 }
