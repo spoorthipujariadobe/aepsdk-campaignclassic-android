@@ -20,7 +20,7 @@ final class CampaignPushConstants {
 
     static final String LOG_TAG = "CampaignClassicExtension";
 
-    class NotificationAction {
+    final class NotificationAction {
         static final String DISMISSED = "Notification Dismissed";
         static final String OPENED = "Notification Opened";
         static final String BUTTON_CLICKED = "Notification Button Clicked";
@@ -29,8 +29,8 @@ final class CampaignPushConstants {
         }
     }
 
-    class Tracking {
-        class Keys {
+    final class Tracking {
+        final class Keys {
             static final String ACTION_ID = "actionId";
             static final String ACTION_URI = "actionUri";
             static final String DELIVERY_ID = "_dId";
@@ -41,6 +41,15 @@ final class CampaignPushConstants {
         }
 
         private Tracking() {
+        }
+    }
+
+    final class DefaultValues {
+        static final String LEGACY_PAYLOAD_VERSION_STRING = "0";
+        static final String AUTO_CAROUSEL_MODE = "auto";
+        static final String MANUAL_CAROUSEL_MODE = "manual";
+
+        private DefaultValues() {
         }
     }
 

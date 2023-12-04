@@ -69,26 +69,25 @@ class CarouselPushTemplate extends AEPPushTemplate {
         return carouselItems;
     }
 
-    CarouselPushTemplate(@NonNull final Map<String, String> messageData) {
+    CarouselPushTemplate(@NonNull final Map<String, String> messageData) throws IllegalArgumentException {
         super(messageData);
-        this.carouselOperationMode = DataReader.optString(messageData, CampaignPushConstants.PushPayloadKeys.CAROUSEL_OPERATION_MODE, "");
 
         try {
             this.carouselLayoutType = DataReader.getString(messageData, CampaignPushConstants.PushPayloadKeys.CAROUSEL_LAYOUT);
         } catch (final DataReaderException dataReaderException) {
-            Log.debug(CampaignPushConstants.LOG_TAG, SELF_TAG, "Required fields \"adb_car_layout\"  not found.");
-            return;
+            throw new IllegalArgumentException("Required field \"adb_car_layout\" not found.");
         }
 
         List<Map<String, String>> carouselItemMaps;
         try {
             carouselItemMaps = DataReader.getTypedListOfMap(String.class, messageData, CampaignPushConstants.PushPayloadKeys.CAROUSEL_ITEMS);
         } catch (final DataReaderException dataReaderException) {
-            Log.debug(CampaignPushConstants.LOG_TAG, SELF_TAG, "Required fields \"adb_items\"  not found.");
-            return;
+            throw new IllegalArgumentException("Required field \"adb_items\" not found.");
         }
 
+        this.carouselOperationMode = DataReader.optString(messageData, CampaignPushConstants.PushPayloadKeys.CAROUSEL_OPERATION_MODE, CampaignPushConstants.DefaultValues.AUTO_CAROUSEL_MODE);
         for (final Map<String, String> carouselItemMap : carouselItemMaps) {
+            // the image uri is required, do not create a CarouselItem if it is missing
             final String carouselImage = carouselItemMap.get(CampaignPushConstants.PushPayloadKeys.CAROUSEL_ITEM_IMAGE);
             if (StringUtils.isNullOrEmpty(carouselImage)) {
                 break;

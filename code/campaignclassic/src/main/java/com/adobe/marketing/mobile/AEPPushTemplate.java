@@ -107,37 +107,37 @@ class AEPPushTemplate {
     static final String SELF_TAG = "AEPPushTemplate";
     // Legacy push payload values
     private static final int ACTION_BUTTON_CAPACITY = 3;
-    private String title;
-    private String body;
-    private String sound;
+    private final String title;
+    private final String body;
+    private final String sound;
     private int badgeCount;
     private int notificationPriority = Notification.PRIORITY_DEFAULT;
     private int notificationImportance = NotificationManager.IMPORTANCE_DEFAULT;
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private int notificationVisibility = Notification.VISIBILITY_PRIVATE;
-    private String channelId;
-    private String icon;
-    private String imageUrl;
-    private AEPPushTemplate.ActionType actionType;
-    private String actionUri;
-    private List<AEPPushTemplate.ActionButton> actionButtons = new ArrayList<>(ACTION_BUTTON_CAPACITY);
-    private Map<String, String> data;
-    private String messageId;
-    private String deliveryId;
+    private final String channelId;
+    private final String icon;
+    private final String imageUrl;
+    private final AEPPushTemplate.ActionType actionType;
+    private final String actionUri;
+    private final List<AEPPushTemplate.ActionButton> actionButtons;
+    private final Map<String, String> data;
+    private final String messageId;
+    private final String deliveryId;
 
     // push template payload values
     // Required, Version of the payload assigned by the authoring UI.
-    private int payloadVersion = 0; // default to 0 of legacy
+    private final int payloadVersion;
     // Optional, Body of the message shown in the expanded message layout (setCustomBigContentView)
-    private String expandedBodyText;
+    private final String expandedBodyText;
     // Optional, Text color for adb_body. Represented as six character hex, e.g. 00FF00
-    private String expandedBodyTextColor;
+    private final String expandedBodyTextColor;
     // Optional, Text color for adb_title. Represented as six character hex, e.g. 00FF00
-    private String titleTextColor;
+    private final String titleTextColor;
     // Optional, Color for the notification's small icon. Represented as six character hex, e.g. 00FF00
-    private String smallIconColor;
+    private final String smallIconColor;
     // Optional, Color for the notification's background. Represented as six character hex, e.g. 00FF00
-    private String notificationBackgroundColor;
+    private final String notificationBackgroundColor;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     static final Map<String, Integer> notificationImportanceMap = new HashMap<String, Integer>() {{
@@ -163,24 +163,26 @@ class AEPPushTemplate {
         put(NotificationPriority.PRIORITY_MAX, Notification.PRIORITY_MAX);
     }};
 
-    AEPPushTemplate(@NonNull final Map<String, String> messageData) {
+    AEPPushTemplate(@NonNull final Map<String, String> messageData) throws IllegalArgumentException {
         this.data = messageData;
         if (data == null) {
-            Log.debug(CampaignPushConstants.LOG_TAG, SELF_TAG, "Payload extraction failed because data provided is null");
-            return;
+            throw new IllegalArgumentException("Payload extraction failed because data provided is null.");
         }
 
         // fast fail if required data is not present
         try {
-            this.payloadVersion = Integer.parseInt(DataReader.getString(data, CampaignPushConstants.PushPayloadKeys.VERSION));
             this.messageId = DataReader.getString(data, CampaignPushConstants.Tracking.Keys.MESSAGE_ID);
+        } catch (final DataReaderException dataReaderException) {
+            throw new IllegalArgumentException("Required field \"_mId\" not found.");
+        }
+        try {
             this.deliveryId = DataReader.getString(data, CampaignPushConstants.Tracking.Keys.DELIVERY_ID);
         } catch (final DataReaderException dataReaderException) {
-            Log.debug(CampaignPushConstants.LOG_TAG, SELF_TAG, "Required data not found, cannot create a AEPPushTemplate object.");
-            return;
+            throw new IllegalArgumentException("Required field \"_dId\" not found.");
         }
 
         // optional push template data
+        this.payloadVersion = Integer.parseInt(DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.VERSION, CampaignPushConstants.DefaultValues.LEGACY_PAYLOAD_VERSION_STRING));
         this.title = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.TITLE, "");
         this.body = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.BODY, "");
         this.sound = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.SOUND, "");
