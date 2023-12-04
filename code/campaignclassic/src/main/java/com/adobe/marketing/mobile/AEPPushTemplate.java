@@ -171,10 +171,23 @@ class AEPPushTemplate {
 
         // fast fail if required data is not present
         try {
+            this.title = DataReader.getString(data, CampaignPushConstants.PushPayloadKeys.TITLE);
+        } catch (final DataReaderException dataReaderException) {
+            throw new IllegalArgumentException("Required field \"adb_title\" not found.");
+        }
+
+        try {
+            this.body = DataReader.getString(data, CampaignPushConstants.PushPayloadKeys.BODY);
+        } catch (final DataReaderException dataReaderException) {
+            throw new IllegalArgumentException("Required field \"adb_body\" not found.");
+        }
+
+        try {
             this.messageId = DataReader.getString(data, CampaignPushConstants.Tracking.Keys.MESSAGE_ID);
         } catch (final DataReaderException dataReaderException) {
             throw new IllegalArgumentException("Required field \"_mId\" not found.");
         }
+
         try {
             this.deliveryId = DataReader.getString(data, CampaignPushConstants.Tracking.Keys.DELIVERY_ID);
         } catch (final DataReaderException dataReaderException) {
@@ -183,8 +196,6 @@ class AEPPushTemplate {
 
         // optional push template data
         this.payloadVersion = Integer.parseInt(DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.VERSION, CampaignPushConstants.DefaultValues.LEGACY_PAYLOAD_VERSION_STRING));
-        this.title = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.TITLE, "");
-        this.body = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.BODY, "");
         this.sound = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.SOUND, "");
         this.imageUrl = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.IMAGE_URL, "");
         this.channelId = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.CHANNEL_ID, "");
