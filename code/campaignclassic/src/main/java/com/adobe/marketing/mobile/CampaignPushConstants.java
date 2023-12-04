@@ -11,12 +11,12 @@
 package com.adobe.marketing.mobile;
 
 /**
- * This class holds all constant values used only by the Campaign Classic extension for handling push notifications
+ * This class holds all constant values used only by the Campaign Classic extension for handling
+ * push notifications
  */
 final class CampaignPushConstants {
 
-    private CampaignPushConstants() {
-    }
+    private CampaignPushConstants() {}
 
     static final String LOG_TAG = "CampaignClassicExtension";
 
@@ -25,8 +25,7 @@ final class CampaignPushConstants {
         static final String OPENED = "Notification Opened";
         static final String BUTTON_CLICKED = "Notification Button Clicked";
 
-        private NotificationAction() {
-        }
+        private NotificationAction() {}
     }
 
     final class Tracking {
@@ -36,12 +35,10 @@ final class CampaignPushConstants {
             static final String DELIVERY_ID = "_dId";
             static final String MESSAGE_ID = "_mId";
 
-            private Keys() {
-            }
+            private Keys() {}
         }
 
-        private Tracking() {
-        }
+        private Tracking() {}
     }
 
     final class DefaultValues {
@@ -49,8 +46,7 @@ final class CampaignPushConstants {
         static final String AUTO_CAROUSEL_MODE = "auto";
         static final String MANUAL_CAROUSEL_MODE = "manual";
 
-        private DefaultValues() {
-        }
+        private DefaultValues() {}
     }
 
     final class PushPayloadKeys {
@@ -85,7 +81,6 @@ final class CampaignPushConstants {
         public static final String FEEDBACK_RECEIVED_TEXT = "adb_feedback_txt";
         public static final String FEEDBACK_RECEIVED_IMAGE = "adb_feedback_img";
 
-        private PushPayloadKeys() {
-        }
+        private PushPayloadKeys() {}
     }
 }
