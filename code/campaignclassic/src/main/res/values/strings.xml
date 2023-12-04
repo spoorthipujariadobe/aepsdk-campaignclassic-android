@@ -13,4 +13,6 @@
 -->
 <resources>
     <string name="app_name">campaignclassiclibrary</string>
+    <string name="title_string">title string</string>
+    <string name="body_string">body string</string>
 </resources>

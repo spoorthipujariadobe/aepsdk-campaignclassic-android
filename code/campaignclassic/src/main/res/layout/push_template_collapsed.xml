@@ -12,7 +12,7 @@
         android:layout_height="20dp"
         android:layout_gravity="start"
         android:textAlignment="viewStart"
-        android:text="small_notification_title_string" />
+        android:text="@string/title_string" />
 
     <TextView
         android:id="@+id/notification_body"
@@ -22,7 +22,7 @@
         android:layout_gravity="start"
         android:textAlignment="viewStart"
         android:layout_below="@id/notification_title"
-        android:text="small_notification_body_string" />
+        android:text="@string/body_string" />
 
     <ImageView
         android:id="@+id/template_image"
