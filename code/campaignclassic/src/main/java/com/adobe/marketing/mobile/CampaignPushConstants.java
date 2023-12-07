@@ -44,7 +44,7 @@ final class CampaignPushConstants {
     final class DefaultValues {
         static final String LEGACY_PAYLOAD_VERSION_STRING = "0";
         static final String AUTO_CAROUSEL_MODE = "auto";
-        static final String MANUAL_CAROUSEL_MODE = "manual";
+        static final String FILMSTRIP_CAROUSEL_MODE = "filmstrip";
 
         private DefaultValues() {}
     }
@@ -67,7 +67,7 @@ final class CampaignPushConstants {
         public static final String CAROUSEL_LAYOUT = "adb_car_layout";
         public static final String CAROUSEL_ITEMS = "adb_items";
         public static final String CAROUSEL_ITEM_IMAGE = "img";
-        public static final String CAROUSEL_ITEM_TEXT = "text";
+        public static final String CAROUSEL_ITEM_TEXT = "txt";
         public static final String CAROUSEL_ITEM_URI = "uri";
         public static final String EXPANDED_BODY_TEXT = "adb_body_ex";
         public static final String EXPANDED_BODY_TEXT_COLOR = "adb_clr_body";

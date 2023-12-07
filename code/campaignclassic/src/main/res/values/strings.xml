@@ -13,6 +13,7 @@
 -->
 <resources>
     <string name="app_name">campaignclassiclibrary</string>
-    <string name="title_string">title string</string>
-    <string name="body_string">body string</string>
+    <string name="title_string">This is the title.</string>
+    <string name="body_string">This is the body.</string>
+    <string name="caption_string">This is a caption.</string>
 </resources>

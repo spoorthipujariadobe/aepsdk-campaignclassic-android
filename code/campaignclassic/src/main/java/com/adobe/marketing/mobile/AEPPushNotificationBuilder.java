@@ -18,17 +18,12 @@ import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.os.Build;
-import android.widget.RemoteViews;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
-import com.adobe.marketing.mobile.campaignclassic.R.id;
-import com.adobe.marketing.mobile.campaignclassic.R.layout;
 import com.adobe.marketing.mobile.services.Log;
-import com.adobe.marketing.mobile.services.ServiceProvider;
 import com.adobe.marketing.mobile.util.StringUtils;
 import java.util.List;
 import java.util.Map;
@@ -67,198 +62,22 @@ class AEPPushNotificationBuilder {
         switch (pushTemplateType) {
             case BASIC:
                 final BasicPushTemplate basicPushTemplate = new BasicPushTemplate(messageData);
-                notification = createBasicTemplatePushNotification(basicPushTemplate, context);
+                notification = BasicTemplateNotificationBuilder.build(basicPushTemplate, context);
                 break;
-                //            case CAROUSEL:
-                //                final CarouselPushTemplate carouselPushTemplate = new
-                // CarouselPushTemplate(messageData);
-                //                notification = createAutoCarouselTemplatePushNotification(payload,
-                // context);
-                //                break;
-                //            case INPUT_BOX:
-                //                final InputBoxPushTemplate inputBoxPushTemplate = new
-                // InputBoxPushTemplate(messageData);
-                //                notification = createInputBoxTemplatePushNotification(payload,
-                // context);
-                //                break;
+            case CAROUSEL:
+                final CarouselPushTemplate carouselPushTemplate =
+                        new CarouselPushTemplate(messageData);
+                notification =
+                        CarouselTemplateNotificationBuilder.build(carouselPushTemplate, context);
+                break;
             case UNKNOWN:
             default:
                 final AEPPushTemplate aepPushTemplate = new AEPPushTemplate(messageData);
-                notification = createLegacyPushNotification(aepPushTemplate, context);
+                notification = LegacyNotificationBuilder.build(aepPushTemplate, context);
                 break;
         }
 
         return notification;
-    }
-
-    @NonNull static Notification createLegacyPushNotification(
-            final AEPPushTemplate pushTemplate, final Context context) {
-        final String channelId = createChannelAndGetChannelID(pushTemplate, context);
-        final NotificationCompat.Builder builder =
-                new NotificationCompat.Builder(context, channelId)
-                        .setContentTitle(pushTemplate.getTitle())
-                        .setContentText(pushTemplate.getBody())
-                        .setNumber(pushTemplate.getBadgeCount())
-                        .setPriority(pushTemplate.getNotificationPriority())
-                        .setAutoCancel(true);
-
-        setLargeIcon(builder, pushTemplate);
-        setSmallIcon(
-                builder,
-                pushTemplate,
-                context); // Small Icon must be present, otherwise the notification will not be
-        // displayed.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            setVisibility(builder, pushTemplate);
-        }
-        addActionButtons(builder, pushTemplate, context); // Add action buttons if any
-        setSound(builder, pushTemplate, context);
-        setNotificationClickAction(builder, pushTemplate, context);
-        setNotificationDeleteAction(builder, pushTemplate, context);
-
-        return builder.build();
-    }
-
-    @NonNull static Notification createBasicTemplatePushNotification(
-            final BasicPushTemplate pushTemplate, final Context context) {
-        final String channelId = createChannelAndGetChannelID(pushTemplate, context);
-        final String packageName =
-                ServiceProvider.getInstance()
-                        .getAppContextService()
-                        .getApplication()
-                        .getPackageName();
-        final RemoteViews smallLayout =
-                new RemoteViews(packageName, layout.push_template_collapsed);
-        final RemoteViews expandedLayout =
-                new RemoteViews(packageName, layout.push_template_expanded);
-
-        // get push payload data
-        final String imageUrl = pushTemplate.getImageUrl();
-        if (!StringUtils.isNullOrEmpty(imageUrl)) {
-            final Bitmap image = CampaignPushUtils.download(imageUrl);
-            if (image != null) {
-                smallLayout.setImageViewBitmap(id.template_image, image);
-                expandedLayout.setImageViewBitmap(id.template_image, image);
-            }
-        }
-
-        smallLayout.setTextViewText(id.notification_title, pushTemplate.getTitle());
-        smallLayout.setTextViewText(id.notification_body, pushTemplate.getBody());
-        expandedLayout.setTextViewText(id.notification_title, pushTemplate.getTitle());
-        expandedLayout.setTextViewText(
-                id.notification_body_ext, pushTemplate.getExpandedBodyText());
-
-        try {
-            // get custom color from hex string and set it the notification background
-            final String backgroundColorHex = pushTemplate.getNotificationBackgroundColor();
-            if (!StringUtils.isNullOrEmpty(backgroundColorHex)) {
-                smallLayout.setInt(
-                        id.basic_small_layout,
-                        "setBackgroundColor",
-                        Color.parseColor("#" + backgroundColorHex));
-                expandedLayout.setInt(
-                        id.basic_expanded_layout,
-                        "setBackgroundColor",
-                        Color.parseColor("#" + backgroundColorHex));
-            }
-        } catch (final IllegalArgumentException exception) {
-            Log.trace(
-                    CampaignPushConstants.LOG_TAG,
-                    SELF_TAG,
-                    "Unrecognized hex string passed to Color.parseColor(), custom color will not"
-                            + " be applied to the notification background.");
-        }
-
-        try {
-            // get custom color from hex string and set it the notification title
-            final String titleColorHex = pushTemplate.getTitleTextColor();
-            if (!StringUtils.isNullOrEmpty(titleColorHex)) {
-                smallLayout.setInt(
-                        id.basic_small_layout,
-                        "setTextColor",
-                        Color.parseColor("#" + titleColorHex));
-                expandedLayout.setInt(
-                        id.basic_expanded_layout,
-                        "setTextColor",
-                        Color.parseColor("#" + titleColorHex));
-            }
-        } catch (final IllegalArgumentException exception) {
-            Log.trace(
-                    CampaignPushConstants.LOG_TAG,
-                    SELF_TAG,
-                    "Unrecognized hex string passed to Color.parseColor(), custom color will not"
-                            + " be applied to the notification title text.");
-        }
-
-        try {
-            // get custom color from hex string and set it the notification body text
-            final String bodyColorHex = pushTemplate.getExpandedBodyTextColor();
-            if (!StringUtils.isNullOrEmpty(bodyColorHex)) {
-                smallLayout.setInt(
-                        id.basic_small_layout,
-                        "setTextColor",
-                        Color.parseColor("#" + bodyColorHex));
-                expandedLayout.setInt(
-                        id.basic_expanded_layout,
-                        "setTextColor",
-                        Color.parseColor("#" + bodyColorHex));
-            }
-        } catch (final IllegalArgumentException exception) {
-            Log.trace(
-                    CampaignPushConstants.LOG_TAG,
-                    SELF_TAG,
-                    "Unrecognized hex string passed to Color.parseColor(), custom color will not"
-                            + " be applied to the notification body text.");
-        }
-
-        // Create the notification
-        final NotificationCompat.Builder builder =
-                new NotificationCompat.Builder(context, channelId)
-                        .setContentTitle(pushTemplate.getTitle())
-                        .setContentText(pushTemplate.getBody())
-                        .setNumber(pushTemplate.getBadgeCount())
-                        .setAutoCancel(true)
-                        .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
-                        .setCustomContentView(smallLayout)
-                        .setCustomBigContentView(expandedLayout);
-
-        setSmallIcon(
-                builder,
-                pushTemplate,
-                context); // Small Icon must be present, otherwise the notification will not be
-        // displayed.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            setVisibility(builder, pushTemplate);
-        }
-        addActionButtons(builder, pushTemplate, context); // Add action buttons if any
-        setSound(builder, pushTemplate, context);
-        setNotificationClickAction(builder, pushTemplate, context);
-        setNotificationDeleteAction(builder, pushTemplate, context);
-
-        try {
-            // sets the icon color
-            final String smallIconColor = pushTemplate.getSmallIconColor();
-            if (!StringUtils.isNullOrEmpty(smallIconColor)) {
-                builder.setColorized(true).setColor(Color.parseColor(smallIconColor));
-            }
-        } catch (final IllegalArgumentException exception) {
-            Log.trace(
-                    CampaignPushConstants.LOG_TAG,
-                    SELF_TAG,
-                    "Unrecognized hex string passed to Color.parseColor(), custom color will not"
-                            + " be applied to the notification icon.");
-        }
-
-        // if API level is below 26 (prior to notification channels) then notification priority is
-        // set on the notification builder
-        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.O) {
-            builder.setPriority(Notification.PRIORITY_HIGH)
-                    .setVibrate(
-                            new long[0]); // hack to enable heads up notifications as a HUD style
-            // notification requires a tone or vibration
-        }
-
-        return builder.build();
     }
 
     /**
@@ -274,7 +93,7 @@ class AEPPushNotificationBuilder {
      * @param context the application {@link Context}
      * @return the channel ID
      */
-    @NonNull private static String createChannelAndGetChannelID(
+    @NonNull static String createChannelAndGetChannelID(
             final AEPPushTemplate pushTemplate, final Context context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             // For Android versions below O, no channel is created. Just return the obtained channel
@@ -345,7 +164,7 @@ class AEPPushNotificationBuilder {
      * @param context the application {@link Context}
      * @param builder the notification builder
      */
-    private static void setSmallIcon(
+    static void setSmallIcon(
             final NotificationCompat.Builder builder,
             final AEPPushTemplate pushTemplate,
             final Context context) {
@@ -380,7 +199,7 @@ class AEPPushNotificationBuilder {
      *     push notification
      * @param context the application {@link Context}
      */
-    private static void setSound(
+    static void setSound(
             final NotificationCompat.Builder notificationBuilder,
             final AEPPushTemplate pushTemplate,
             final Context context) {
@@ -402,7 +221,7 @@ class AEPPushNotificationBuilder {
      * @param pushTemplate {@link AEPPushTemplate} containing the message data from the received
      *     push notification
      */
-    private static void setLargeIcon(
+    static void setLargeIcon(
             final NotificationCompat.Builder notificationBuilder,
             final AEPPushTemplate pushTemplate) {
         // Quick bail out if there is no image url
@@ -432,7 +251,7 @@ class AEPPushNotificationBuilder {
      *     push notification
      * @param context the application {@link Context}
      */
-    private static void setNotificationClickAction(
+    static void setNotificationClickAction(
             final NotificationCompat.Builder notificationBuilder,
             final AEPPushTemplate pushTemplate,
             final Context context) {
@@ -459,7 +278,7 @@ class AEPPushNotificationBuilder {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private static void setVisibility(
+    static void setVisibility(
             final NotificationCompat.Builder notificationBuilder,
             final AEPPushTemplate pushTemplate) {
         final int visibility = pushTemplate.getNotificationVisibility();
@@ -492,7 +311,7 @@ class AEPPushNotificationBuilder {
      *     push notification
      * @param context the application {@link Context}
      */
-    private static void addActionButtons(
+    static void addActionButtons(
             final NotificationCompat.Builder builder,
             final AEPPushTemplate pushTemplate,
             final Context context) {
@@ -570,7 +389,7 @@ class AEPPushNotificationBuilder {
      *     push notification
      * @param context the application {@link Context}
      */
-    private static void setNotificationDeleteAction(
+    static void setNotificationDeleteAction(
             final NotificationCompat.Builder builder,
             final AEPPushTemplate pushTemplate,
             final Context context) {
