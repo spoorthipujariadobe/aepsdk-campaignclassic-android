@@ -15,7 +15,6 @@
         style="@style/TextAppearance.Compat.Notification.Title"
         android:layout_width="wrap_content"
         android:layout_height="20dp"
-        android:text="@string/caption_string"
         android:layout_below="@id/carousel_item_image_view"
         android:layout_centerHorizontal="true"
         android:layout_gravity="center" />

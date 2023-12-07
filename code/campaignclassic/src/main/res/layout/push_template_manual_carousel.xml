@@ -10,17 +10,15 @@
         style="@style/TextAppearance.Compat.Notification.Title"
         android:layout_width="wrap_content"
         android:layout_height="20dp"
-        android:text="@string/title_string"
         android:layout_gravity="start"
         android:textAlignment="viewStart"/>
 
     <TextView
-        android:id="@+id/notification_body_ext"
+        android:id="@+id/notification_body_expanded"
         style="@style/TextAppearance.Compat.Notification.Line2"
         android:layout_width="wrap_content"
         android:layout_height="30dp"
         android:layout_gravity="start"
-        android:text="@string/body_string"
         android:textAlignment="viewStart"
         android:layout_below="@id/notification_title"/>
 
@@ -29,10 +27,17 @@
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:layout_gravity="center"
-        android:layout_below="@id/notification_body_ext"
+        android:layout_below="@id/notification_body_expanded"
         android:inAnimation="@android:anim/slide_in_left"
         android:outAnimation="@android:anim/slide_out_right">
     </ViewFlipper>
+
+    <ImageButton
+        android:id="@+id/leftImageButton"
+        android:layout_width="30dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="100dp"
+        android:background="@drawable/SkipLeft" />
 
     <ImageButton
         android:id="@+id/rightImageButton"
@@ -41,12 +46,5 @@
         android:layout_marginTop="100dp"
         android:layout_alignEnd="@id/manual_carousel_view_flipper"
         android:layout_gravity="right"
-        android:background="@drawable/right" />
-
-    <ImageButton
-        android:id="@+id/leftImageButton"
-        android:layout_width="30dp"
-        android:layout_height="60dp"
-        android:layout_marginTop="100dp"
-        android:background="@drawable/left" />
+        android:background="@drawable/SkipRight" />
 </RelativeLayout>

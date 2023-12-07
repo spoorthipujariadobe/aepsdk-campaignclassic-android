@@ -13,7 +13,6 @@ package com.adobe.marketing.mobile;
 import android.app.Notification;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.os.Build;
 import android.widget.RemoteViews;
 import androidx.annotation.NonNull;
@@ -74,19 +73,12 @@ public class CarouselTemplateNotificationBuilder {
             final String imageUri = item.getImageUri();
             if (!StringUtils.isNullOrEmpty(imageUri)) {
                 if (UrlUtils.isValidUrl(imageUri)) { // we need to download the images first
-                    final Bitmap image = CampaignPushUtils.download(item.getImageUri());
-                    RemoteViews carouselItem =
+                    final RemoteViews carouselItem =
                             new RemoteViews(packageName, R.layout.push_template_carousel_item);
-                    carouselItem.setImageViewBitmap(R.id.carousel_item_image_view, image);
-                    carouselItem.setTextViewText(R.id.carousel_item_caption, item.getCaptionText());
-                    expandedLayout.addView(R.id.auto_carousel_view_flipper, carouselItem);
-                } else { // if we don't have a url check for bundled app assets
-                    final int imageId =
-                            context.getResources()
-                                    .getIdentifier(item.getImageUri(), "drawable", packageName);
-                    RemoteViews carouselItem =
-                            new RemoteViews(packageName, R.layout.push_template_carousel_item);
-                    carouselItem.setImageViewResource(R.id.carousel_item_image_view, imageId);
+                    final Bitmap image = CampaignPushUtils.download(imageUri);
+                    // scale down the bitmap as we don't need the full size image
+                    final Bitmap scaledBitmap = Bitmap.createScaledBitmap(image, 300, 200, false);
+                    carouselItem.setImageViewBitmap(R.id.carousel_item_image_view, scaledBitmap);
                     carouselItem.setTextViewText(R.id.carousel_item_caption, item.getCaptionText());
                     expandedLayout.addView(R.id.auto_carousel_view_flipper, carouselItem);
                 }
@@ -97,70 +89,52 @@ public class CarouselTemplateNotificationBuilder {
         smallLayout.setTextViewText(R.id.notification_body, pushTemplate.getBody());
         expandedLayout.setTextViewText(R.id.notification_title, pushTemplate.getTitle());
         expandedLayout.setTextViewText(
-                R.id.notification_body_ext, pushTemplate.getExpandedBodyText());
+                R.id.notification_body_expanded, pushTemplate.getExpandedBodyText());
 
-        try {
-            // get custom color from hex string and set it the notification background
-            final String backgroundColorHex = pushTemplate.getNotificationBackgroundColor();
-            if (!StringUtils.isNullOrEmpty(backgroundColorHex)) {
-                smallLayout.setInt(
-                        R.id.basic_small_layout,
-                        "setBackgroundColor",
-                        Color.parseColor("#" + backgroundColorHex));
-                expandedLayout.setInt(
-                        R.id.carousel_container_layout,
-                        "setBackgroundColor",
-                        Color.parseColor("#" + backgroundColorHex));
-            }
-        } catch (final IllegalArgumentException exception) {
-            Log.trace(
-                    CampaignPushConstants.LOG_TAG,
-                    SELF_TAG,
-                    "Unrecognized hex string passed to Color.parseColor(), custom color will not"
-                            + " be applied to the notification background.");
-        }
+        // get custom color from hex string and set it the notification background
+        final String backgroundColorHex = pushTemplate.getNotificationBackgroundColor();
+        AEPPushNotificationBuilder.setElementColor(
+                smallLayout,
+                R.id.basic_small_layout,
+                "#" + backgroundColorHex,
+                "setBackgroundColor",
+                "notification background");
+        AEPPushNotificationBuilder.setElementColor(
+                expandedLayout,
+                R.id.carousel_container_layout,
+                "#" + backgroundColorHex,
+                "setBackgroundColor",
+                "notification background");
 
-        try {
-            // get custom color from hex string and set it the notification title
-            final String titleColorHex = pushTemplate.getTitleTextColor();
-            if (!StringUtils.isNullOrEmpty(titleColorHex)) {
-                smallLayout.setInt(
-                        R.id.notification_title,
-                        "setTextColor",
-                        Color.parseColor("#" + titleColorHex));
-                expandedLayout.setInt(
-                        R.id.notification_title,
-                        "setTextColor",
-                        Color.parseColor("#" + titleColorHex));
-            }
-        } catch (final IllegalArgumentException exception) {
-            Log.trace(
-                    CampaignPushConstants.LOG_TAG,
-                    SELF_TAG,
-                    "Unrecognized hex string passed to Color.parseColor(), custom color will not"
-                            + " be applied to the notification title text.");
-        }
+        // get custom color from hex string and set it the notification title
+        final String titleColorHex = pushTemplate.getTitleTextColor();
+        AEPPushNotificationBuilder.setElementColor(
+                smallLayout,
+                R.id.notification_title,
+                "#" + titleColorHex,
+                "setTextColor",
+                "notification title");
+        AEPPushNotificationBuilder.setElementColor(
+                expandedLayout,
+                R.id.notification_title,
+                "#" + titleColorHex,
+                "setTextColor",
+                "notification title");
 
-        try {
-            // get custom color from hex string and set it the notification body text
-            final String bodyColorHex = pushTemplate.getExpandedBodyTextColor();
-            if (!StringUtils.isNullOrEmpty(bodyColorHex)) {
-                smallLayout.setInt(
-                        R.id.notification_body,
-                        "setTextColor",
-                        Color.parseColor("#" + bodyColorHex));
-                expandedLayout.setInt(
-                        R.id.notification_body_ext,
-                        "setTextColor",
-                        Color.parseColor("#" + bodyColorHex));
-            }
-        } catch (final IllegalArgumentException exception) {
-            Log.trace(
-                    CampaignPushConstants.LOG_TAG,
-                    SELF_TAG,
-                    "Unrecognized hex string passed to Color.parseColor(), custom color will not"
-                            + " be applied to the notification body text.");
-        }
+        // get custom color from hex string and set it the notification body text
+        final String bodyColorHex = pushTemplate.getExpandedBodyTextColor();
+        AEPPushNotificationBuilder.setElementColor(
+                smallLayout,
+                R.id.notification_body,
+                "#" + bodyColorHex,
+                "setTextColor",
+                "notification body text");
+        AEPPushNotificationBuilder.setElementColor(
+                smallLayout,
+                R.id.notification_body_expanded,
+                "#" + bodyColorHex,
+                "setTextColor",
+                "notification body text");
 
         // Create the notification
         final NotificationCompat.Builder builder =
@@ -182,20 +156,6 @@ public class CarouselTemplateNotificationBuilder {
             AEPPushNotificationBuilder.setVisibility(builder, pushTemplate);
         }
         AEPPushNotificationBuilder.setSound(builder, pushTemplate, context);
-
-        try {
-            // sets the icon color
-            final String smallIconColor = pushTemplate.getSmallIconColor();
-            if (!StringUtils.isNullOrEmpty(smallIconColor)) {
-                builder.setColorized(true).setColor(Color.parseColor("#" + smallIconColor));
-            }
-        } catch (final IllegalArgumentException exception) {
-            Log.trace(
-                    CampaignPushConstants.LOG_TAG,
-                    SELF_TAG,
-                    "Unrecognized hex string passed to Color.parseColor(), custom color will not"
-                            + " be applied to the notification icon.");
-        }
 
         // if API level is below 26 (prior to notification channels) then notification priority is
         // set on the notification builder

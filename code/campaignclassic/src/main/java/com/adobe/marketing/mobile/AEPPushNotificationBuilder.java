@@ -18,8 +18,10 @@ import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.os.Build;
+import android.widget.RemoteViews;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
@@ -171,6 +173,20 @@ class AEPPushNotificationBuilder {
         final int iconFromPayload =
                 CampaignPushUtils.getSmallIconWithResourceName(pushTemplate.getIcon(), context);
         final int iconFromMobileCore = MobileCore.getSmallIconResourceID();
+
+        try {
+            // sets the icon color if provided
+            final String smallIconColor = pushTemplate.getSmallIconColor();
+            if (!StringUtils.isNullOrEmpty(smallIconColor)) {
+                builder.setColorized(true).setColor(Color.parseColor(smallIconColor));
+            }
+        } catch (final IllegalArgumentException exception) {
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "Unrecognized hex string passed to Color.parseColor(), custom color will not"
+                            + " be applied to the notification icon.");
+        }
 
         if (isValidIcon(iconFromPayload)) {
             builder.setSmallIcon(iconFromPayload);
@@ -436,5 +452,25 @@ class AEPPushNotificationBuilder {
      */
     private static boolean isValidIcon(final int icon) {
         return icon > 0;
+    }
+
+    static void setElementColor(
+            final RemoteViews remoteView,
+            final int elementId,
+            final String colorHex,
+            final String methodName,
+            final String viewFriendlyName) {
+        try {
+            if (!StringUtils.isNullOrEmpty(colorHex)) {
+                remoteView.setInt(elementId, methodName, Color.parseColor(colorHex));
+            }
+        } catch (final IllegalArgumentException exception) {
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "Unrecognized hex string passed to Color.parseColor(), custom color will not"
+                            + " be applied to"
+                            + viewFriendlyName);
+        }
     }
 }
