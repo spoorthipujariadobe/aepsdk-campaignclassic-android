@@ -56,7 +56,7 @@ class AEPPushNotificationBuilder {
      */
     @NonNull static Notification buildPushNotification(final AEPPushPayload payload, final Context context)
             throws IllegalArgumentException {
-        Notification notification;
+        NotificationCompat.Builder builder;
         final Map<String, String> messageData = payload.getMessageData();
         final PushTemplateType pushTemplateType =
                 PushTemplateType.fromString(
@@ -64,22 +64,23 @@ class AEPPushNotificationBuilder {
         switch (pushTemplateType) {
             case BASIC:
                 final BasicPushTemplate basicPushTemplate = new BasicPushTemplate(messageData);
-                notification = BasicTemplateNotificationBuilder.build(basicPushTemplate, context);
+                builder = BasicTemplateNotificationBuilder.construct(basicPushTemplate, context);
                 break;
             case CAROUSEL:
                 final CarouselPushTemplate carouselPushTemplate =
                         new CarouselPushTemplate(messageData);
-                notification =
-                        CarouselTemplateNotificationBuilder.build(carouselPushTemplate, context);
+                builder =
+                        CarouselTemplateNotificationBuilder.construct(
+                                carouselPushTemplate, context);
                 break;
             case UNKNOWN:
             default:
                 final AEPPushTemplate aepPushTemplate = new AEPPushTemplate(messageData);
-                notification = LegacyNotificationBuilder.build(aepPushTemplate, context);
+                builder = LegacyNotificationBuilder.construct(aepPushTemplate, context);
                 break;
         }
 
-        return notification;
+        return builder.build();
     }
 
     /**
@@ -454,12 +455,34 @@ class AEPPushNotificationBuilder {
         return icon > 0;
     }
 
+    /**
+     * Sets a provided color hex string to a UI element contained in a specified {@code RemoteViews}
+     * view.
+     *
+     * @param remoteView {@link RemoteViews} object containing a UI element to be updated
+     * @param elementId {@code int} containing the resource id of the UI element
+     * @param colorHex {@code String} containing the color hex string
+     * @param methodName {@code String} containing the method to be called on the UI element to
+     *     update the color
+     * @param viewFriendlyName {@code String} containing the friendly name of the view to be used
+     *     for logging purposes
+     */
     static void setElementColor(
             final RemoteViews remoteView,
             final int elementId,
             final String colorHex,
             final String methodName,
             final String viewFriendlyName) {
+        if (StringUtils.isNullOrEmpty(methodName)) {
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "Null or empty method name provided, custom color will not"
+                            + " be applied to"
+                            + viewFriendlyName);
+            return;
+        }
+
         try {
             if (!StringUtils.isNullOrEmpty(colorHex)) {
                 remoteView.setInt(elementId, methodName, Color.parseColor(colorHex));
