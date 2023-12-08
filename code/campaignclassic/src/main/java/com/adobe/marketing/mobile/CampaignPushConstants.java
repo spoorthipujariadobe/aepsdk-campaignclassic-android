@@ -43,13 +43,39 @@ final class CampaignPushConstants {
 
     final class DefaultValues {
         static final String LEGACY_PAYLOAD_VERSION_STRING = "0";
-        static final int CAROUSEL_MINIMUM_IMAGE_COUNT = 1;
-        static final int CAROUSEL_MAX_BITMAP_WIDTH = 300;
-        static final int CAROUSEL_MAX_BITMAP_HEIGHT = 200;
         static final String AUTO_CAROUSEL_MODE = "auto";
         static final String FILMSTRIP_CAROUSEL_MODE = "filmstrip";
+        static final int AUTO_CAROUSEL_MINIMUM_IMAGE_COUNT = 1;
+        static final int FILMSTRIP_CAROUSEL_MINIMUM_IMAGE_COUNT = 3;
+        static final int CAROUSEL_MAX_BITMAP_WIDTH = 300;
+        static final int CAROUSEL_MAX_BITMAP_HEIGHT = 200;
 
         private DefaultValues() {}
+    }
+
+    final class IntentActions {
+        static final String FILMSTRIP_LEFT_CLICKED = "filmstrip_left";
+        static final String FILMSTRIP_RIGHT_CLICKED = "filmstrip_right";
+
+        private IntentActions() {}
+    }
+
+    final class IntentKeys {
+        static final String BACKGROUND_COLOR = "bgColor";
+        static final String TITLE_COLOR = "titleColor";
+        static final String BODY_COLOR = "bodyColor";
+        static final String LEFT_IMAGE = "leftImage";
+        static final String CENTER_IMAGE = "centerImage";
+        static final String RIGHT_IMAGE = "rightImage";
+        static final String LEFT_CAPTION = "leftCaption";
+        static final String CENTER_CAPTION = "centerCaption";
+        static final String RIGHT_CAPTION = "rightCaption";
+        static final String SMALL_TITLE_TEXT = "smallLayoutTitleText";
+        static final String SMALL_BODY_TEXT = "smallLayoutBodyText";
+        static final String EXPANDED_BODY_TEXT = "smallLayoutBodyText";
+        static final String CHANNEL_ID = "channelId";
+
+        private IntentKeys() {}
     }
 
     final class PushPayloadKeys {
