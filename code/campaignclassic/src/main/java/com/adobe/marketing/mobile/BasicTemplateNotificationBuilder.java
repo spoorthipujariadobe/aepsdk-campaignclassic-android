@@ -10,7 +10,6 @@
 */
 package com.adobe.marketing.mobile;
 
-import android.app.Notification;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -25,7 +24,8 @@ import com.adobe.marketing.mobile.util.StringUtils;
 public class BasicTemplateNotificationBuilder {
     private static final String SELF_TAG = "BasicTemplateNotificationBuilder";
 
-    @NonNull static Notification build(final BasicPushTemplate pushTemplate, final Context context) {
+    @NonNull static NotificationCompat.Builder construct(
+            final BasicPushTemplate pushTemplate, final Context context) {
         Log.trace(
                 CampaignPushConstants.LOG_TAG,
                 SELF_TAG,
@@ -129,12 +129,11 @@ public class BasicTemplateNotificationBuilder {
         // if API level is below 26 (prior to notification channels) then notification priority is
         // set on the notification builder
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.O) {
-            builder.setPriority(Notification.PRIORITY_HIGH)
+            builder.setPriority(NotificationCompat.PRIORITY_HIGH)
                     .setVibrate(
                             new long[0]); // hack to enable heads up notifications as a HUD style
             // notification requires a tone or vibration
         }
-
-        return builder.build();
+        return builder;
     }
 }

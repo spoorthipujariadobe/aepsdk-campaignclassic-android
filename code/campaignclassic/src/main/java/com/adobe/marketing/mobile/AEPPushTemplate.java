@@ -10,12 +10,12 @@
 */
 package com.adobe.marketing.mobile;
 
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.core.app.NotificationCompat;
 import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.util.DataReader;
 import com.adobe.marketing.mobile.util.DataReaderException;
@@ -79,9 +79,9 @@ class AEPPushTemplate {
 
     static final class NotificationPriority {
         static int from(final String priority) {
-            if (priority == null) return Notification.PRIORITY_DEFAULT;
+            if (priority == null) return NotificationCompat.PRIORITY_DEFAULT;
             final Integer resolvedPriority = notificationPriorityMap.get(priority);
-            if (resolvedPriority == null) return Notification.PRIORITY_DEFAULT;
+            if (resolvedPriority == null) return NotificationCompat.PRIORITY_DEFAULT;
             return resolvedPriority;
         }
 
@@ -105,11 +105,11 @@ class AEPPushTemplate {
     private final String body;
     private final String sound;
     private int badgeCount = 0;
-    private int notificationPriority = Notification.PRIORITY_DEFAULT;
+    private int notificationPriority = NotificationCompat.PRIORITY_DEFAULT;
     private int notificationImportance = NotificationManager.IMPORTANCE_DEFAULT;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private int notificationVisibility = Notification.VISIBILITY_PRIVATE;
+    private int notificationVisibility = NotificationCompat.VISIBILITY_PRIVATE;
 
     private final String channelId;
     private final String icon;
@@ -155,20 +155,20 @@ class AEPPushTemplate {
     static final Map<String, Integer> notificationVisibilityMap =
             new HashMap<String, Integer>() {
                 {
-                    put(NotificationVisibility.PRIVATE, Notification.VISIBILITY_PRIVATE);
-                    put(NotificationVisibility.PUBLIC, Notification.VISIBILITY_PUBLIC);
-                    put(NotificationVisibility.SECRET, Notification.VISIBILITY_SECRET);
+                    put(NotificationVisibility.PRIVATE, NotificationCompat.VISIBILITY_PRIVATE);
+                    put(NotificationVisibility.PUBLIC, NotificationCompat.VISIBILITY_PUBLIC);
+                    put(NotificationVisibility.SECRET, NotificationCompat.VISIBILITY_SECRET);
                 }
             };
 
     static final Map<String, Integer> notificationPriorityMap =
             new HashMap<String, Integer>() {
                 {
-                    put(NotificationPriority.PRIORITY_MIN, Notification.PRIORITY_MIN);
-                    put(NotificationPriority.PRIORITY_LOW, Notification.PRIORITY_LOW);
-                    put(NotificationPriority.PRIORITY_DEFAULT, Notification.PRIORITY_DEFAULT);
-                    put(NotificationPriority.PRIORITY_HIGH, Notification.PRIORITY_HIGH);
-                    put(NotificationPriority.PRIORITY_MAX, Notification.PRIORITY_MAX);
+                    put(NotificationPriority.PRIORITY_MIN, NotificationCompat.PRIORITY_MIN);
+                    put(NotificationPriority.PRIORITY_LOW, NotificationCompat.PRIORITY_LOW);
+                    put(NotificationPriority.PRIORITY_DEFAULT, NotificationCompat.PRIORITY_DEFAULT);
+                    put(NotificationPriority.PRIORITY_HIGH, NotificationCompat.PRIORITY_HIGH);
+                    put(NotificationPriority.PRIORITY_MAX, NotificationCompat.PRIORITY_MAX);
                 }
             };
 
@@ -369,6 +369,18 @@ class AEPPushTemplate {
         return data;
     }
 
+    /**
+     * Convenience method to modify the notification data payload. This is used in the following
+     * scenarios: - Setting a carousel image URI as the data map's image URI to allow a basic push
+     * template notification to be shown in a fallback situation.
+     *
+     * @param key {@code String} value containing the key to modify
+     * @param value {@code String} value containing the new value to be used
+     */
+    void modifyData(final String key, final String value) {
+        data.put(key, value);
+    }
+
     int getPayloadVersion() {
         return payloadVersion;
     }
@@ -454,9 +466,9 @@ class AEPPushTemplate {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private int getNotificationImportanceFromString(final String priority) {
-        if (StringUtils.isNullOrEmpty(priority)) return Notification.PRIORITY_DEFAULT;
+        if (StringUtils.isNullOrEmpty(priority)) return NotificationCompat.PRIORITY_DEFAULT;
         final Integer resolvedImportance = notificationImportanceMap.get(priority);
-        if (resolvedImportance == null) return Notification.PRIORITY_DEFAULT;
+        if (resolvedImportance == null) return NotificationCompat.PRIORITY_DEFAULT;
         return resolvedImportance;
     }
 
@@ -469,9 +481,9 @@ class AEPPushTemplate {
      */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private int getNotificationVisibilityFromString(final String visibility) {
-        if (StringUtils.isNullOrEmpty(visibility)) return Notification.VISIBILITY_PRIVATE;
+        if (StringUtils.isNullOrEmpty(visibility)) return NotificationCompat.VISIBILITY_PRIVATE;
         final Integer resolvedVisibility = notificationVisibilityMap.get(visibility);
-        if (resolvedVisibility == null) return Notification.VISIBILITY_PRIVATE;
+        if (resolvedVisibility == null) return NotificationCompat.VISIBILITY_PRIVATE;
         return resolvedVisibility;
     }
 }

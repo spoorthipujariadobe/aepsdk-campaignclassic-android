@@ -10,7 +10,6 @@
 */
 package com.adobe.marketing.mobile;
 
-import android.app.Notification;
 import android.content.Context;
 import android.os.Build;
 import androidx.annotation.NonNull;
@@ -20,7 +19,8 @@ import com.adobe.marketing.mobile.services.Log;
 public class LegacyNotificationBuilder {
     private static final String SELF_TAG = "LegacyNotificationBuilder";
 
-    @NonNull static Notification build(final AEPPushTemplate pushTemplate, final Context context) {
+    @NonNull static NotificationCompat.Builder construct(
+            final AEPPushTemplate pushTemplate, final Context context) {
         Log.trace(
                 CampaignPushConstants.LOG_TAG,
                 SELF_TAG,
@@ -50,6 +50,6 @@ public class LegacyNotificationBuilder {
         AEPPushNotificationBuilder.setNotificationClickAction(builder, pushTemplate, context);
         AEPPushNotificationBuilder.setNotificationDeleteAction(builder, pushTemplate, context);
 
-        return builder.build();
+        return builder;
     }
 }

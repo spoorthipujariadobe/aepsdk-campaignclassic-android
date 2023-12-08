@@ -27,7 +27,8 @@ import java.util.ArrayList;
 public class CarouselTemplateNotificationBuilder {
     private static final String SELF_TAG = "CarouselTemplateNotificationBuilder";
 
-    @NonNull static Notification build(final CarouselPushTemplate pushTemplate, final Context context) {
+    @NonNull static NotificationCompat.Builder construct(
+            final CarouselPushTemplate pushTemplate, final Context context) {
         final String channelId =
                 AEPPushNotificationBuilder.createChannelAndGetChannelID(pushTemplate, context);
         final String packageName =
@@ -54,7 +55,7 @@ public class CarouselTemplateNotificationBuilder {
                     buildManualCarouselNotification(pushTemplate, context, channelId, packageName);
         }
 
-        return builder.build();
+        return builder;
     }
 
     private static NotificationCompat.Builder buildAutoCarouselNotification(
@@ -69,6 +70,8 @@ public class CarouselTemplateNotificationBuilder {
 
         // load images into the carousel
         final ArrayList<CarouselPushTemplate.CarouselItem> items = pushTemplate.getCarouselItems();
+        int downloadedImageCount = 0;
+        String downloadImageUri = null;
         for (final CarouselPushTemplate.CarouselItem item : items) {
             final String imageUri = item.getImageUri();
             if (!StringUtils.isNullOrEmpty(imageUri)) {
@@ -76,13 +79,40 @@ public class CarouselTemplateNotificationBuilder {
                     final RemoteViews carouselItem =
                             new RemoteViews(packageName, R.layout.push_template_carousel_item);
                     final Bitmap image = CampaignPushUtils.download(imageUri);
-                    // scale down the bitmap as we don't need the full size image
-                    final Bitmap scaledBitmap = Bitmap.createScaledBitmap(image, 300, 200, false);
-                    carouselItem.setImageViewBitmap(R.id.carousel_item_image_view, scaledBitmap);
-                    carouselItem.setTextViewText(R.id.carousel_item_caption, item.getCaptionText());
-                    expandedLayout.addView(R.id.auto_carousel_view_flipper, carouselItem);
+                    if (image != null) {
+                        // scale down the bitmap to 300dp x 200dp as we don't want to use a full
+                        // size image due to memory constraints
+                        final Bitmap scaledBitmap =
+                                Bitmap.createScaledBitmap(
+                                        image,
+                                        CampaignPushConstants.DefaultValues
+                                                .CAROUSEL_MAX_BITMAP_WIDTH,
+                                        CampaignPushConstants.DefaultValues
+                                                .CAROUSEL_MAX_BITMAP_HEIGHT,
+                                        false);
+                        carouselItem.setImageViewBitmap(
+                                R.id.carousel_item_image_view, scaledBitmap);
+                        carouselItem.setTextViewText(
+                                R.id.carousel_item_caption, item.getCaptionText());
+                        expandedLayout.addView(R.id.auto_carousel_view_flipper, carouselItem);
+                        downloadedImageCount++;
+                        downloadImageUri = imageUri;
+                    }
                 }
             }
+        }
+
+        // fallback to a basic push template notification builder if only 1 (or less) image was able
+        // to be downloaded
+        if (downloadedImageCount
+                <= CampaignPushConstants.DefaultValues.CAROUSEL_MINIMUM_IMAGE_COUNT) {
+            if (!StringUtils.isNullOrEmpty(downloadImageUri)) {
+                pushTemplate.modifyData(
+                        CampaignPushConstants.PushPayloadKeys.IMAGE_URL, downloadImageUri);
+            }
+            final BasicPushTemplate basicPushTemplate =
+                    new BasicPushTemplate(pushTemplate.getData());
+            return BasicTemplateNotificationBuilder.construct(basicPushTemplate, context);
         }
 
         smallLayout.setTextViewText(R.id.notification_title, pushTemplate.getTitle());
@@ -130,7 +160,7 @@ public class CarouselTemplateNotificationBuilder {
                 "setTextColor",
                 "notification body text");
         AEPPushNotificationBuilder.setElementColor(
-                smallLayout,
+                expandedLayout,
                 R.id.notification_body_expanded,
                 "#" + bodyColorHex,
                 "setTextColor",
