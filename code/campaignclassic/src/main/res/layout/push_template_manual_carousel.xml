@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/basic_expanded_layout"
+    android:id="@+id/carousel_container_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -22,10 +22,29 @@
         android:textAlignment="viewStart"
         android:layout_below="@id/notification_title"/>
 
-    <ImageView
-        android:id="@+id/expanded_template_image"
+    <ViewFlipper
+        android:id="@+id/manual_carousel_view_flipper"
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:layout_gravity="center"
-        android:layout_below="@id/notification_body_expanded"/>
+        android:layout_below="@id/notification_body_expanded"
+        android:inAnimation="@android:anim/slide_in_left"
+        android:outAnimation="@android:anim/slide_out_right">
+    </ViewFlipper>
+
+    <ImageButton
+        android:id="@+id/leftImageButton"
+        android:layout_width="30dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="100dp"
+        android:background="@drawable/SkipLeft" />
+
+    <ImageButton
+        android:id="@+id/rightImageButton"
+        android:layout_width="30dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="100dp"
+        android:layout_alignEnd="@id/manual_carousel_view_flipper"
+        android:layout_gravity="right"
+        android:background="@drawable/SkipRight" />
 </RelativeLayout>

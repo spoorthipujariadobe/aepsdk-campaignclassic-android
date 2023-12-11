@@ -43,10 +43,28 @@ final class CampaignPushConstants {
 
     final class DefaultValues {
         static final String LEGACY_PAYLOAD_VERSION_STRING = "0";
+        static final int CAROUSEL_MINIMUM_IMAGE_COUNT = 1;
+        static final int CAROUSEL_MAX_BITMAP_WIDTH = 300;
+        static final int CAROUSEL_MAX_BITMAP_HEIGHT = 200;
         static final String AUTO_CAROUSEL_MODE = "auto";
-        static final String MANUAL_CAROUSEL_MODE = "manual";
+        static final String FILMSTRIP_CAROUSEL_MODE = "filmstrip";
 
         private DefaultValues() {}
+    }
+
+    final class MethodNames {
+        static final String SET_BACKGROUND_COLOR = "setBackgroundColor";
+        static final String SET_TEXT_COLOR = "setTextColor";
+
+        private MethodNames() {}
+    }
+
+    final class FriendlyViewNames {
+        static final String NOTIFICATION_BACKGROUND = "notification background";
+        static final String NOTIFICATION_TITLE = "notification title";
+        static final String NOTIFICATION_BODY_TEXT = "notification body text";
+
+        private FriendlyViewNames() {}
     }
 
     final class PushPayloadKeys {
@@ -67,7 +85,7 @@ final class CampaignPushConstants {
         public static final String CAROUSEL_LAYOUT = "adb_car_layout";
         public static final String CAROUSEL_ITEMS = "adb_items";
         public static final String CAROUSEL_ITEM_IMAGE = "img";
-        public static final String CAROUSEL_ITEM_TEXT = "text";
+        public static final String CAROUSEL_ITEM_TEXT = "txt";
         public static final String CAROUSEL_ITEM_URI = "uri";
         public static final String EXPANDED_BODY_TEXT = "adb_body_ex";
         public static final String EXPANDED_BODY_TEXT_COLOR = "adb_clr_body";
