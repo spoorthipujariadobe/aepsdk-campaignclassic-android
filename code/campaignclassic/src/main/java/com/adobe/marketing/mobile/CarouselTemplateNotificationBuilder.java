@@ -69,9 +69,9 @@ public class CarouselTemplateNotificationBuilder {
                 new RemoteViews(context.getPackageName(), R.layout.push_template_auto_carousel);
 
         // load images into the carousel
+        final long imageProcessingStartTime = System.currentTimeMillis();
         final ArrayList<CarouselPushTemplate.CarouselItem> items = pushTemplate.getCarouselItems();
-        int downloadedImageCount = 0;
-        String downloadImageUri = null;
+        final ArrayList<String> downloadImageUris = new ArrayList<>();
         for (final CarouselPushTemplate.CarouselItem item : items) {
             final String imageUri = item.getImageUri();
             if (!StringUtils.isNullOrEmpty(imageUri)) {
@@ -95,20 +95,35 @@ public class CarouselTemplateNotificationBuilder {
                         carouselItem.setTextViewText(
                                 R.id.carousel_item_caption, item.getCaptionText());
                         expandedLayout.addView(R.id.auto_carousel_view_flipper, carouselItem);
-                        downloadedImageCount++;
-                        downloadImageUri = imageUri;
+                        downloadImageUris.add(imageUri);
                     }
                 }
             }
         }
 
+        // log time needed to process the carousel images
+        final long imageProcessingEndTime = System.currentTimeMillis();
+        final long imageProcessingElapsedTime = imageProcessingStartTime - imageProcessingEndTime;
+        Log.trace(
+                CampaignPushConstants.LOG_TAG,
+                SELF_TAG,
+                "Processed %d carousel image(s) in %d milliseconds.",
+                items.size(),
+                imageProcessingElapsedTime);
+
         // fallback to a basic push template notification builder if only 1 (or less) image was able
         // to be downloaded
-        if (downloadedImageCount
+        if (downloadImageUris.size()
                 <= CampaignPushConstants.DefaultValues.CAROUSEL_MINIMUM_IMAGE_COUNT) {
-            if (!StringUtils.isNullOrEmpty(downloadImageUri)) {
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "Only %d image(s) for the auto carousel notification were downloaded. Building"
+                            + " a basic push notification instead.",
+                    downloadImageUris.size());
+            if (!StringUtils.isNullOrEmpty(downloadImageUris.get(0))) {
                 pushTemplate.modifyData(
-                        CampaignPushConstants.PushPayloadKeys.IMAGE_URL, downloadImageUri);
+                        CampaignPushConstants.PushPayloadKeys.IMAGE_URL, downloadImageUris.get(0));
             }
             final BasicPushTemplate basicPushTemplate =
                     new BasicPushTemplate(pushTemplate.getData());
@@ -127,14 +142,14 @@ public class CarouselTemplateNotificationBuilder {
                 smallLayout,
                 R.id.basic_small_layout,
                 "#" + backgroundColorHex,
-                "setBackgroundColor",
-                "notification background");
+                CampaignPushConstants.MethodNames.SET_BACKGROUND_COLOR,
+                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BACKGROUND);
         AEPPushNotificationBuilder.setElementColor(
                 expandedLayout,
                 R.id.carousel_container_layout,
                 "#" + backgroundColorHex,
-                "setBackgroundColor",
-                "notification background");
+                CampaignPushConstants.MethodNames.SET_BACKGROUND_COLOR,
+                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BACKGROUND);
 
         // get custom color from hex string and set it the notification title
         final String titleColorHex = pushTemplate.getTitleTextColor();
@@ -142,14 +157,14 @@ public class CarouselTemplateNotificationBuilder {
                 smallLayout,
                 R.id.notification_title,
                 "#" + titleColorHex,
-                "setTextColor",
-                "notification title");
+                CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
+                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_TITLE);
         AEPPushNotificationBuilder.setElementColor(
                 expandedLayout,
                 R.id.notification_title,
                 "#" + titleColorHex,
-                "setTextColor",
-                "notification title");
+                CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
+                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_TITLE);
 
         // get custom color from hex string and set it the notification body text
         final String bodyColorHex = pushTemplate.getExpandedBodyTextColor();
@@ -157,20 +172,18 @@ public class CarouselTemplateNotificationBuilder {
                 smallLayout,
                 R.id.notification_body,
                 "#" + bodyColorHex,
-                "setTextColor",
-                "notification body text");
+                CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
+                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BODY_TEXT);
         AEPPushNotificationBuilder.setElementColor(
                 expandedLayout,
                 R.id.notification_body_expanded,
                 "#" + bodyColorHex,
-                "setTextColor",
-                "notification body text");
+                CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
+                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BODY_TEXT);
 
         // Create the notification
         final NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(context, channelId)
-                        .setContentTitle(pushTemplate.getTitle())
-                        .setContentText(pushTemplate.getBody())
                         .setNumber(pushTemplate.getBadgeCount())
                         .setAutoCancel(true)
                         .setStyle(new NotificationCompat.DecoratedCustomViewStyle())

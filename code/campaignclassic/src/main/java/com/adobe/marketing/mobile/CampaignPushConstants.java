@@ -52,6 +52,21 @@ final class CampaignPushConstants {
         private DefaultValues() {}
     }
 
+    final class MethodNames {
+        static final String SET_BACKGROUND_COLOR = "setBackgroundColor";
+        static final String SET_TEXT_COLOR = "setTextColor";
+
+        private MethodNames() {}
+    }
+
+    final class FriendlyViewNames {
+        static final String NOTIFICATION_BACKGROUND = "notification background";
+        static final String NOTIFICATION_TITLE = "notification title";
+        static final String NOTIFICATION_BODY_TEXT = "notification body text";
+
+        private FriendlyViewNames() {}
+    }
+
     final class PushPayloadKeys {
         public static final String TEMPLATE_TYPE = "adb_template_type";
         public static final String TITLE = "adb_title";

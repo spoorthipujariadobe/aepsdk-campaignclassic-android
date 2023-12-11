@@ -177,7 +177,7 @@ class AEPPushNotificationBuilder {
 
         try {
             // sets the icon color if provided
-            final String smallIconColor = pushTemplate.getSmallIconColor();
+            final String smallIconColor = "#" + pushTemplate.getSmallIconColor();
             if (!StringUtils.isNullOrEmpty(smallIconColor)) {
                 builder.setColorized(true).setColor(Color.parseColor(smallIconColor));
             }
