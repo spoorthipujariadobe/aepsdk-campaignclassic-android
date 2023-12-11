@@ -64,14 +64,14 @@ public class BasicTemplateNotificationBuilder {
                 smallLayout,
                 R.id.basic_small_layout,
                 "#" + backgroundColorHex,
-                "setBackgroundColor",
-                "notification background");
+                CampaignPushConstants.MethodNames.SET_BACKGROUND_COLOR,
+                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BACKGROUND);
         AEPPushNotificationBuilder.setElementColor(
                 expandedLayout,
                 R.id.basic_expanded_layout,
                 "#" + backgroundColorHex,
-                "setBackgroundColor",
-                "notification background");
+                CampaignPushConstants.MethodNames.SET_BACKGROUND_COLOR,
+                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BACKGROUND);
 
         // get custom color from hex string and set it the notification title
         final String titleColorHex = pushTemplate.getTitleTextColor();
@@ -79,14 +79,14 @@ public class BasicTemplateNotificationBuilder {
                 smallLayout,
                 R.id.notification_title,
                 "#" + titleColorHex,
-                "setTextColor",
-                "notification title");
+                CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
+                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_TITLE);
         AEPPushNotificationBuilder.setElementColor(
                 expandedLayout,
                 R.id.notification_title,
                 "#" + titleColorHex,
-                "setTextColor",
-                "notification title");
+                CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
+                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_TITLE);
 
         // get custom color from hex string and set it the notification body text
         final String bodyColorHex = pushTemplate.getExpandedBodyTextColor();
@@ -94,14 +94,14 @@ public class BasicTemplateNotificationBuilder {
                 smallLayout,
                 R.id.notification_body,
                 "#" + bodyColorHex,
-                "setTextColor",
-                "notification body text");
+                CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
+                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BODY_TEXT);
         AEPPushNotificationBuilder.setElementColor(
                 smallLayout,
                 R.id.notification_body_expanded,
                 "#" + bodyColorHex,
-                "setTextColor",
-                "notification body text");
+                CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
+                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BODY_TEXT);
 
         // Create the notification
         final NotificationCompat.Builder builder =

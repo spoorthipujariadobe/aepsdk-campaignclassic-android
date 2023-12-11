@@ -43,6 +43,9 @@ final class CampaignPushConstants {
 
     final class DefaultValues {
         static final String LEGACY_PAYLOAD_VERSION_STRING = "0";
+        static final int CAROUSEL_MINIMUM_IMAGE_COUNT = 1;
+        static final int CAROUSEL_MAX_BITMAP_WIDTH = 300;
+        static final int CAROUSEL_MAX_BITMAP_HEIGHT = 200;
         static final String AUTO_CAROUSEL_MODE = "auto";
         static final String FILMSTRIP_CAROUSEL_MODE = "filmstrip";
         static final int AUTO_CAROUSEL_MINIMUM_IMAGE_COUNT = 1;
@@ -76,6 +79,21 @@ final class CampaignPushConstants {
         static final String CHANNEL_ID = "channelId";
 
         private IntentKeys() {}
+    }
+
+    final class MethodNames {
+        static final String SET_BACKGROUND_COLOR = "setBackgroundColor";
+        static final String SET_TEXT_COLOR = "setTextColor";
+
+        private MethodNames() {}
+    }
+
+    final class FriendlyViewNames {
+        static final String NOTIFICATION_BACKGROUND = "notification background";
+        static final String NOTIFICATION_TITLE = "notification title";
+        static final String NOTIFICATION_BODY_TEXT = "notification body text";
+
+        private FriendlyViewNames() {}
     }
 
     final class PushPayloadKeys {
