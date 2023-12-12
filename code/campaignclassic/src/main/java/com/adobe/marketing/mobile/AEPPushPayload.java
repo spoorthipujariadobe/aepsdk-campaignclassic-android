@@ -21,6 +21,7 @@ import java.util.Map;
  */
 public class AEPPushPayload {
     private final Map<String, String> messageData;
+    private final String messageId;
 
     /**
      * Constructor
@@ -45,7 +46,7 @@ public class AEPPushPayload {
                             + " empty.");
         }
 
-        final String messageId = messageData.get(CampaignPushConstants.Tracking.Keys.MESSAGE_ID);
+        messageId = messageData.get(CampaignPushConstants.Tracking.Keys.MESSAGE_ID);
         if (StringUtils.isNullOrEmpty(messageId)) {
             throw new IllegalArgumentException(
                     "Failed to create AEPPushPayload, message id is null or empty.");
@@ -62,5 +63,9 @@ public class AEPPushPayload {
 
     Map<String, String> getMessageData() {
         return messageData;
+    }
+
+    String getMessageId() {
+        return messageId;
     }
 }

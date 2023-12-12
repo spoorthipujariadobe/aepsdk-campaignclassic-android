@@ -15,14 +15,13 @@ import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.services.ServiceProvider;
-import com.google.firebase.components.MissingDependencyException;
 
 public class CarouselTemplateNotificationBuilder {
     private static final String SELF_TAG = "CarouselTemplateNotificationBuilder";
 
     @NonNull static NotificationCompat.Builder construct(
             final CarouselPushTemplate pushTemplate, final Context context)
-            throws MissingDependencyException {
+            throws NotificationConstructionFailedException {
         final String channelId =
                 AEPPushNotificationBuilder.createChannelAndGetChannelID(pushTemplate, context);
         final String packageName =
@@ -59,7 +58,7 @@ public class CarouselTemplateNotificationBuilder {
             final Context context,
             final String channelId,
             final String packageName)
-            throws MissingDependencyException {
+            throws NotificationConstructionFailedException {
         final String carouselLayoutType = pushTemplate.getCarouselLayoutType();
         if (carouselLayoutType.equals(
                 CampaignPushConstants.DefaultValues.FILMSTRIP_CAROUSEL_MODE)) {

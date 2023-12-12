@@ -10,8 +10,10 @@
 */
 package com.adobe.marketing.mobile;
 
+import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -25,8 +27,10 @@ import com.adobe.marketing.mobile.services.NamedCollection;
 import com.adobe.marketing.mobile.services.ServiceProvider;
 import com.adobe.marketing.mobile.services.caching.CacheEntry;
 import com.adobe.marketing.mobile.services.caching.CacheExpiry;
+import com.adobe.marketing.mobile.services.caching.CacheResult;
 import com.adobe.marketing.mobile.services.caching.CacheService;
 import com.adobe.marketing.mobile.util.StringUtils;
+import com.adobe.marketing.mobile.util.UrlUtils;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -34,6 +38,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Utility class for building push notifications.
@@ -227,5 +233,154 @@ class CampaignPushUtils {
                 dataStoreService.getNamedCollection(CampaignPushConstants.DATASTORE_NAME);
         return campaignDatastore.getInt(
                 CampaignPushConstants.SMALL_ICON_RESOURCE_ID_DATASTORE_KEY, 0);
+    }
+
+    /**
+     * Downloads an image using the provided uri {@code String}. Prior to downloading, the image uri
+     * is used o retrieve a {@code CacheResult} containing a previously cached image. If no cache
+     * result is returned then a call to {@link CampaignPushUtils#download(String)} is made to
+     * download then cache the image.
+     *
+     * <p>If a valid cache result is returned then no image is downloaded. Instead, a {@code Bitmap}
+     * is created from the cache result and returned by this method.
+     *
+     * @param cacheService the AEPSDK {@link CacheService} to use for caching or retrieving
+     *     downloaded image assets
+     * @param uri {@code String} containing an image asset url
+     * @return {@link Bitmap} containing the image referenced by the {@code String} uri
+     */
+    static Bitmap downloadImage(final CacheService cacheService, final String uri) {
+        if (StringUtils.isNullOrEmpty(uri)) {
+            return null;
+        }
+        final String cacheLocation = CampaignPushUtils.getAssetCacheLocation();
+        final CacheResult cacheResult = cacheService.get(cacheLocation, uri);
+        Bitmap pushImage = null;
+        if (cacheResult == null) {
+            if (UrlUtils.isValidUrl(uri)) { // we need to download the images first
+                final Bitmap image = CampaignPushUtils.download(uri);
+                if (image != null) {
+                    Log.trace(
+                            CampaignPushConstants.LOG_TAG,
+                            SELF_TAG,
+                            "Successfully download image from %s",
+                            uri);
+                    // scale down the bitmap to 300dp x 200dp as we don't want to use a full
+                    // size image due to memory constraints
+                    pushImage =
+                            Bitmap.createScaledBitmap(
+                                    image,
+                                    CampaignPushConstants.DefaultValues.CAROUSEL_MAX_BITMAP_WIDTH,
+                                    CampaignPushConstants.DefaultValues.CAROUSEL_MAX_BITMAP_HEIGHT,
+                                    false);
+
+                    // write bitmap to cache
+                    try (final InputStream bitmapInputStream =
+                            CampaignPushUtils.bitmapToInputStream(pushImage)) {
+                        CampaignPushUtils.cacheBitmapInputStream(
+                                cacheService, bitmapInputStream, uri);
+                    } catch (final IOException exception) {
+                        Log.trace(
+                                CampaignPushConstants.LOG_TAG,
+                                SELF_TAG,
+                                "Exception occurred creating an input stream from a"
+                                        + " bitmap: %s.",
+                                exception.getLocalizedMessage());
+                    }
+                }
+            }
+        } else { // we have previously downloaded the image
+            Log.trace(CampaignPushConstants.LOG_TAG, SELF_TAG, "Found cached image for %s.", uri);
+            pushImage = BitmapFactory.decodeStream(cacheResult.getData());
+        }
+        return pushImage;
+    }
+
+    /**
+     * Creates a pending intent for the provided image interaction uri {@code String}.
+     *
+     * @param context the current app {@link Context}
+     * @param uri {@code String} containing an image interaction uri
+     * @return {@link PendingIntent} created from the provided uri
+     */
+    static PendingIntent createPendingIntentFromImageInteractionUri(
+            final Context context, final String uri) {
+        if (StringUtils.isNullOrEmpty(uri)) {
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "Click action uri not found, will not create PendingIntent.");
+            return null;
+        }
+        Log.trace(
+                CampaignPushConstants.LOG_TAG,
+                SELF_TAG,
+                "Creating pending intent for click action %s.",
+                uri);
+        final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+        return PendingIntent.getActivity(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    /**
+     * Calculates a new left, center, and right index given the current center index, total number
+     * of images, and the intent action.
+     *
+     * @param centerIndex {@code int} containing the current center image index
+     * @param listSize {@code int} containing the total number of images
+     * @param action {@code String} containing the action found in the broadcast {@link Intent}
+     * @return {@link List<Integer>} containing the new calculated indices
+     */
+    static List<Integer> calculateNewIndices(
+            final int centerIndex, final int listSize, final String action) {
+        final List<Integer> newIndices = new ArrayList<>();
+        int newCenterIndex = 0;
+        int newLeftIndex = 0;
+        int newRightIndex = 0;
+        Log.trace(
+                CampaignPushConstants.LOG_TAG,
+                SELF_TAG,
+                "Current center index is %d and list size is %d.",
+                centerIndex,
+                listSize);
+        if (action.equals(CampaignPushConstants.IntentActions.FILMSTRIP_LEFT_CLICKED)) {
+            newCenterIndex = centerIndex - 1;
+            newLeftIndex = newCenterIndex - 1 < 0 ? listSize - 1 : newCenterIndex - 1;
+            newRightIndex = centerIndex;
+
+            if (newCenterIndex < 0) {
+                newCenterIndex = listSize - 1;
+                newLeftIndex = newCenterIndex - 1;
+                newRightIndex = 0;
+            }
+        } else if (action.equals(CampaignPushConstants.IntentActions.FILMSTRIP_RIGHT_CLICKED)) {
+            newCenterIndex = centerIndex + 1;
+            newLeftIndex = centerIndex;
+            newRightIndex = newCenterIndex + 1 == listSize ? 0 : newCenterIndex + 1;
+
+            if (newCenterIndex == listSize) {
+                newCenterIndex = 0;
+                newLeftIndex = listSize - 1;
+                newRightIndex = 1;
+            }
+        }
+
+        newIndices.add(newLeftIndex);
+        newIndices.add(newCenterIndex);
+        newIndices.add(newRightIndex);
+
+        Log.trace(
+                CampaignPushConstants.LOG_TAG,
+                SELF_TAG,
+                "Calculated new indices. New center index is %d, new left index is %d, and new"
+                        + " right index is %d.",
+                newCenterIndex,
+                newLeftIndex,
+                newRightIndex);
+
+        return newIndices;
     }
 }

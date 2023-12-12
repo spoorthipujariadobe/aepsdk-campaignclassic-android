@@ -25,9 +25,9 @@ import android.widget.RemoteViews;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
+import com.adobe.marketing.mobile.campaignclassic.R;
 import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.util.StringUtils;
-import com.google.firebase.components.MissingDependencyException;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -56,7 +56,7 @@ class AEPPushNotificationBuilder {
      * @return the notification
      */
     @NonNull static Notification buildPushNotification(final AEPPushPayload payload, final Context context)
-            throws IllegalArgumentException, MissingDependencyException {
+            throws IllegalArgumentException, NotificationConstructionFailedException {
         NotificationCompat.Builder builder;
         final Map<String, String> messageData = payload.getMessageData();
         final PushTemplateType pushTemplateType =
@@ -472,6 +472,71 @@ class AEPPushNotificationBuilder {
     }
 
     /**
+     * Sets custom colors to UI elements present in the specified {@code RemoteViews} object.
+     *
+     * @param pushTemplate {@link AEPPushTemplate} object containing color customization values
+     * @param smallLayout {@link RemoteViews} object for a collapsed custom notification
+     * @param expandedLayout {@code RemoteViews} object for an expanded custom notification
+     * @param containerViewId {@code int} containing the resource id of the layout container
+     */
+    static void setCustomNotificationColors(
+            final AEPPushTemplate pushTemplate,
+            final RemoteViews smallLayout,
+            final RemoteViews expandedLayout,
+            final int containerViewId) {
+        // get custom color from hex string and set it the notification background
+        final String backgroundColorHex = pushTemplate.getNotificationBackgroundColor();
+        if (!StringUtils.isNullOrEmpty(backgroundColorHex)) {
+            setElementColor(
+                    smallLayout,
+                    R.id.basic_small_layout,
+                    "#" + backgroundColorHex,
+                    CampaignPushConstants.MethodNames.SET_BACKGROUND_COLOR,
+                    CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BACKGROUND);
+            setElementColor(
+                    expandedLayout,
+                    containerViewId,
+                    "#" + backgroundColorHex,
+                    CampaignPushConstants.MethodNames.SET_BACKGROUND_COLOR,
+                    CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BACKGROUND);
+        }
+
+        // get custom color from hex string and set it the notification title
+        final String titleColorHex = pushTemplate.getTitleTextColor();
+        if (!StringUtils.isNullOrEmpty(titleColorHex)) {
+            setElementColor(
+                    smallLayout,
+                    R.id.notification_title,
+                    "#" + titleColorHex,
+                    CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
+                    CampaignPushConstants.FriendlyViewNames.NOTIFICATION_TITLE);
+            setElementColor(
+                    expandedLayout,
+                    R.id.notification_title,
+                    "#" + titleColorHex,
+                    CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
+                    CampaignPushConstants.FriendlyViewNames.NOTIFICATION_TITLE);
+        }
+
+        // get custom color from hex string and set it the notification body text
+        final String bodyColorHex = pushTemplate.getExpandedBodyTextColor();
+        if (!StringUtils.isNullOrEmpty(bodyColorHex)) {
+            setElementColor(
+                    smallLayout,
+                    R.id.notification_body,
+                    "#" + bodyColorHex,
+                    CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
+                    CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BODY_TEXT);
+            setElementColor(
+                    expandedLayout,
+                    R.id.notification_body_expanded,
+                    "#" + bodyColorHex,
+                    CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
+                    CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BODY_TEXT);
+        }
+    }
+
+    /**
      * Sets a provided color hex string to a UI element contained in a specified {@code RemoteViews}
      * view.
      *
@@ -483,7 +548,7 @@ class AEPPushNotificationBuilder {
      * @param viewFriendlyName {@code String} containing the friendly name of the view to be used
      *     for logging purposes
      */
-    static void setElementColor(
+    private static void setElementColor(
             final RemoteViews remoteView,
             final int elementId,
             final String colorHex,

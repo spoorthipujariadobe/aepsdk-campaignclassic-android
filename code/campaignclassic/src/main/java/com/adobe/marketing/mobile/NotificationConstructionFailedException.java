@@ -10,18 +10,15 @@
 */
 package com.adobe.marketing.mobile;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
+/** Exception indicating that construction of a push notification failed. */
+final class NotificationConstructionFailedException extends Exception {
 
-public class AEPPushTemplateBroadcastReceiver extends BroadcastReceiver {
-
-    @Override
-    public void onReceive(final Context context, final Intent intent) {
-        if (intent.getAction().equals(CampaignPushConstants.IntentActions.FILMSTRIP_LEFT_CLICKED)
-                || intent.getAction()
-                        .equals(CampaignPushConstants.IntentActions.FILMSTRIP_RIGHT_CLICKED)) {
-            FilmstripCarouselTemplateNotificationBuilder.handleIntent(context, intent);
-        }
+    /**
+     * Constructor.
+     *
+     * @param message {@link String} containing the message for the new exception
+     */
+    public NotificationConstructionFailedException(final String message) {
+        super(message);
     }
 }

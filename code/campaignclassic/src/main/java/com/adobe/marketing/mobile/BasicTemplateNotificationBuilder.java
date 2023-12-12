@@ -12,7 +12,6 @@ package com.adobe.marketing.mobile;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.widget.RemoteViews;
 import androidx.annotation.NonNull;
@@ -20,19 +19,14 @@ import androidx.core.app.NotificationCompat;
 import com.adobe.marketing.mobile.campaignclassic.R;
 import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.services.ServiceProvider;
-import com.adobe.marketing.mobile.services.caching.CacheResult;
 import com.adobe.marketing.mobile.services.caching.CacheService;
-import com.adobe.marketing.mobile.util.StringUtils;
-import com.google.firebase.components.MissingDependencyException;
-import java.io.IOException;
-import java.io.InputStream;
 
 public class BasicTemplateNotificationBuilder {
     private static final String SELF_TAG = "BasicTemplateNotificationBuilder";
 
     @NonNull static NotificationCompat.Builder construct(
             final BasicPushTemplate pushTemplate, final Context context)
-            throws MissingDependencyException {
+            throws NotificationConstructionFailedException {
         Log.trace(
                 CampaignPushConstants.LOG_TAG,
                 SELF_TAG,
@@ -49,47 +43,16 @@ public class BasicTemplateNotificationBuilder {
         final RemoteViews expandedLayout =
                 new RemoteViews(packageName, R.layout.push_template_expanded);
         final CacheService cacheService = ServiceProvider.getInstance().getCacheService();
-        final String cacheLocation = CampaignPushUtils.getAssetCacheLocation();
 
         if (cacheService == null) {
-            throw new MissingDependencyException(
-                    "Cache service is null, notification will not be constructed.");
+            throw new NotificationConstructionFailedException(
+                    "Cache service is null, basic push notification will not be constructed.");
         }
 
         // get push payload data
         final String imageUri = pushTemplate.getImageUrl();
-        if (!StringUtils.isNullOrEmpty(imageUri)) {
-            Bitmap pushImage = null;
-            final CacheResult cacheResult = cacheService.get(cacheLocation, imageUri);
-            if (cacheResult == null) {
-                final Bitmap image = CampaignPushUtils.download(imageUri);
-                if (image != null) {
-                    // scale down the bitmap to 300dp x 200dp as we don't want to use a full
-                    // size image due to memory constraints
-                    pushImage = Bitmap.createScaledBitmap(image, 300, 200, false);
-
-                    // write bitmap to cache
-                    try (final InputStream bitmapInputStream =
-                            CampaignPushUtils.bitmapToInputStream(pushImage)) {
-                        CampaignPushUtils.cacheBitmapInputStream(
-                                cacheService, bitmapInputStream, imageUri);
-                    } catch (final IOException exception) {
-                        Log.trace(
-                                CampaignPushConstants.LOG_TAG,
-                                SELF_TAG,
-                                "Exception occurred creating an input stream from a bitmap: %s.",
-                                exception.getLocalizedMessage());
-                    }
-                }
-            } else { // we have previously downloaded the image
-                Log.trace(
-                        CampaignPushConstants.LOG_TAG,
-                        SELF_TAG,
-                        "Found cached image for %s.",
-                        imageUri);
-                pushImage = BitmapFactory.decodeStream(cacheResult.getData());
-            }
-
+        final Bitmap pushImage = CampaignPushUtils.downloadImage(cacheService, imageUri);
+        if (pushImage != null) {
             smallLayout.setImageViewBitmap(R.id.template_image, pushImage);
             expandedLayout.setImageViewBitmap(R.id.expanded_template_image, pushImage);
         }
@@ -100,50 +63,9 @@ public class BasicTemplateNotificationBuilder {
         expandedLayout.setTextViewText(
                 R.id.notification_body_expanded, pushTemplate.getExpandedBodyText());
 
-        // get custom color from hex string and set it the notification background
-        final String backgroundColorHex = pushTemplate.getNotificationBackgroundColor();
-        AEPPushNotificationBuilder.setElementColor(
-                smallLayout,
-                R.id.basic_small_layout,
-                "#" + backgroundColorHex,
-                CampaignPushConstants.MethodNames.SET_BACKGROUND_COLOR,
-                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BACKGROUND);
-        AEPPushNotificationBuilder.setElementColor(
-                expandedLayout,
-                R.id.basic_expanded_layout,
-                "#" + backgroundColorHex,
-                CampaignPushConstants.MethodNames.SET_BACKGROUND_COLOR,
-                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BACKGROUND);
-
-        // get custom color from hex string and set it the notification title
-        final String titleColorHex = pushTemplate.getTitleTextColor();
-        AEPPushNotificationBuilder.setElementColor(
-                smallLayout,
-                R.id.notification_title,
-                "#" + titleColorHex,
-                CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
-                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_TITLE);
-        AEPPushNotificationBuilder.setElementColor(
-                expandedLayout,
-                R.id.notification_title,
-                "#" + titleColorHex,
-                CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
-                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_TITLE);
-
-        // get custom color from hex string and set it the notification body text
-        final String bodyColorHex = pushTemplate.getExpandedBodyTextColor();
-        AEPPushNotificationBuilder.setElementColor(
-                smallLayout,
-                R.id.notification_body,
-                "#" + bodyColorHex,
-                CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
-                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BODY_TEXT);
-        AEPPushNotificationBuilder.setElementColor(
-                smallLayout,
-                R.id.notification_body_expanded,
-                "#" + bodyColorHex,
-                CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
-                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BODY_TEXT);
+        // set any custom colors if needed
+        AEPPushNotificationBuilder.setCustomNotificationColors(
+                pushTemplate, smallLayout, expandedLayout, R.id.basic_expanded_layout);
 
         // Create the notification
         final NotificationCompat.Builder builder =

@@ -10,22 +10,17 @@
 */
 package com.adobe.marketing.mobile;
 
+import android.app.PendingIntent;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.widget.RemoteViews;
 import androidx.core.app.NotificationCompat;
 import com.adobe.marketing.mobile.campaignclassic.R;
 import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.services.ServiceProvider;
-import com.adobe.marketing.mobile.services.caching.CacheResult;
 import com.adobe.marketing.mobile.services.caching.CacheService;
 import com.adobe.marketing.mobile.util.StringUtils;
-import com.adobe.marketing.mobile.util.UrlUtils;
-import com.google.firebase.components.MissingDependencyException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 
 public class AutoCarouselTemplateNotificationBuilder {
@@ -36,17 +31,17 @@ public class AutoCarouselTemplateNotificationBuilder {
             final Context context,
             final String channelId,
             final String packageName)
-            throws MissingDependencyException {
+            throws NotificationConstructionFailedException {
         final RemoteViews smallLayout =
                 new RemoteViews(context.getPackageName(), R.layout.push_template_collapsed);
         final RemoteViews expandedLayout =
                 new RemoteViews(context.getPackageName(), R.layout.push_template_auto_carousel);
         final CacheService cacheService = ServiceProvider.getInstance().getCacheService();
-        final String cacheLocation = CampaignPushUtils.getAssetCacheLocation();
 
         if (cacheService == null) {
-            throw new MissingDependencyException(
-                    "Cache service is null, notification will not be constructed.");
+            throw new NotificationConstructionFailedException(
+                    "Cache service is null, auto carousel push notification will not be"
+                            + " constructed.");
         }
 
         // load images into the carousel
@@ -55,58 +50,24 @@ public class AutoCarouselTemplateNotificationBuilder {
         final ArrayList<String> downloadedImageUris = new ArrayList<>();
 
         for (final CarouselPushTemplate.CarouselItem item : items) {
-            Bitmap pushImage = null;
             final RemoteViews carouselItem =
                     new RemoteViews(packageName, R.layout.push_template_carousel_item);
             final String imageUri = item.getImageUri();
-
-            if (!StringUtils.isNullOrEmpty(imageUri)) {
-                final CacheResult cacheResult = cacheService.get(cacheLocation, imageUri);
-                if (cacheResult == null) {
-                    if (UrlUtils.isValidUrl(imageUri)) { // we need to download the images first
-                        final Bitmap image = CampaignPushUtils.download(imageUri);
-                        if (image != null) {
-                            // scale down the bitmap to 300dp x 200dp as we don't want to use a full
-                            // size image due to memory constraints
-                            pushImage =
-                                    Bitmap.createScaledBitmap(
-                                            image,
-                                            CampaignPushConstants.DefaultValues
-                                                    .CAROUSEL_MAX_BITMAP_WIDTH,
-                                            CampaignPushConstants.DefaultValues
-                                                    .CAROUSEL_MAX_BITMAP_HEIGHT,
-                                            false);
-                            downloadedImageUris.add(imageUri);
-
-                            // write bitmap to cache
-                            try (final InputStream bitmapInputStream =
-                                    CampaignPushUtils.bitmapToInputStream(pushImage)) {
-                                CampaignPushUtils.cacheBitmapInputStream(
-                                        cacheService, bitmapInputStream, imageUri);
-                            } catch (final IOException exception) {
-                                Log.trace(
-                                        CampaignPushConstants.LOG_TAG,
-                                        SELF_TAG,
-                                        "Exception occurred creating an input stream from a"
-                                                + " bitmap: %s.",
-                                        exception.getLocalizedMessage());
-                                break;
-                            }
-                        }
-                    }
-                } else { // we have previously downloaded the image
-                    Log.trace(
-                            CampaignPushConstants.LOG_TAG,
-                            SELF_TAG,
-                            "Found cached image for %s.",
-                            imageUri);
-                    downloadedImageUris.add(imageUri);
-                    pushImage = BitmapFactory.decodeStream(cacheResult.getData());
-                }
-
+            final Bitmap pushImage = CampaignPushUtils.downloadImage(cacheService, imageUri);
+            if (pushImage != null) {
+                downloadedImageUris.add(imageUri);
                 carouselItem.setImageViewBitmap(R.id.carousel_item_image_view, pushImage);
                 carouselItem.setTextViewText(R.id.carousel_item_caption, item.getCaptionText());
                 expandedLayout.addView(R.id.auto_carousel_view_flipper, carouselItem);
+
+                // assign a click action pending intent for each carousel item
+                final PendingIntent carouselItemPendingIntent =
+                        CampaignPushUtils.createPendingIntentFromImageInteractionUri(
+                                context, item.getInteractionUri());
+                if (carouselItemPendingIntent != null) {
+                    carouselItem.setOnClickPendingIntent(
+                            R.id.carousel_item_image_view, carouselItemPendingIntent);
+                }
             }
         }
 
@@ -148,50 +109,9 @@ public class AutoCarouselTemplateNotificationBuilder {
         expandedLayout.setTextViewText(
                 R.id.notification_body_expanded, pushTemplate.getExpandedBodyText());
 
-        // get custom color from hex string and set it the notification background
-        final String backgroundColorHex = pushTemplate.getNotificationBackgroundColor();
-        AEPPushNotificationBuilder.setElementColor(
-                smallLayout,
-                R.id.basic_small_layout,
-                "#" + backgroundColorHex,
-                CampaignPushConstants.MethodNames.SET_BACKGROUND_COLOR,
-                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BACKGROUND);
-        AEPPushNotificationBuilder.setElementColor(
-                expandedLayout,
-                R.id.carousel_container_layout,
-                "#" + backgroundColorHex,
-                CampaignPushConstants.MethodNames.SET_BACKGROUND_COLOR,
-                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BACKGROUND);
-
-        // get custom color from hex string and set it the notification title
-        final String titleColorHex = pushTemplate.getTitleTextColor();
-        AEPPushNotificationBuilder.setElementColor(
-                smallLayout,
-                R.id.notification_title,
-                "#" + titleColorHex,
-                CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
-                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_TITLE);
-        AEPPushNotificationBuilder.setElementColor(
-                expandedLayout,
-                R.id.notification_title,
-                "#" + titleColorHex,
-                CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
-                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_TITLE);
-
-        // get custom color from hex string and set it the notification body text
-        final String bodyColorHex = pushTemplate.getExpandedBodyTextColor();
-        AEPPushNotificationBuilder.setElementColor(
-                smallLayout,
-                R.id.notification_body,
-                "#" + bodyColorHex,
-                CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
-                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BODY_TEXT);
-        AEPPushNotificationBuilder.setElementColor(
-                expandedLayout,
-                R.id.notification_body_expanded,
-                "#" + bodyColorHex,
-                CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
-                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BODY_TEXT);
+        // set any custom colors if needed
+        AEPPushNotificationBuilder.setCustomNotificationColors(
+                pushTemplate, smallLayout, expandedLayout, R.id.carousel_container_layout);
 
         // Create the notification
         final NotificationCompat.Builder builder =

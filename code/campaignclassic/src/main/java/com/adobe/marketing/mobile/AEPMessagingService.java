@@ -15,7 +15,6 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationManagerCompat;
 import com.adobe.marketing.mobile.services.Log;
-import com.google.firebase.components.MissingDependencyException;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -44,18 +43,28 @@ public class AEPMessagingService extends FirebaseMessagingService {
             @NonNull final Context context, @NonNull final RemoteMessage remoteMessage) {
         final NotificationManagerCompat notificationManager =
                 NotificationManagerCompat.from(context);
+        AEPPushPayload payload;
         try {
-            final AEPPushPayload payload = new AEPPushPayload(remoteMessage);
-            final Notification notification =
-                    AEPPushNotificationBuilder.buildPushNotification(payload, context);
-
-            // display notification
-            notificationManager.notify(payload.getMessageId().hashCode(), notification);
-        } catch (final IllegalArgumentException | MissingDependencyException exception) {
+            payload = new AEPPushPayload(remoteMessage);
+        } catch (final IllegalArgumentException exception) {
             Log.error(
                     CampaignPushConstants.LOG_TAG,
                     SELF_TAG,
                     "Failed to create push payload object, an exception occurred:" + " %s",
+                    exception.getLocalizedMessage());
+            return false;
+        }
+
+        try {
+            final Notification notification =
+                    AEPPushNotificationBuilder.buildPushNotification(payload, context);
+            // display notification
+            notificationManager.notify(payload.getMessageId().hashCode(), notification);
+        } catch (final NotificationConstructionFailedException exception) {
+            Log.error(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "Failed to create a push notification, an exception occurred:" + " %s",
                     exception.getLocalizedMessage());
             return false;
         }

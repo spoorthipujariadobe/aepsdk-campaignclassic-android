@@ -14,11 +14,12 @@ import androidx.annotation.NonNull;
 import com.adobe.marketing.mobile.util.DataReader;
 import com.adobe.marketing.mobile.util.DataReaderException;
 import com.adobe.marketing.mobile.util.StringUtils;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-class CarouselPushTemplate extends AEPPushTemplate {
+class CarouselPushTemplate extends AEPPushTemplate implements Serializable {
     // Optional, Determines how the carousel will be operated. Valid values are "auto" or "manual".
     // Default is "auto".
     private final String carouselOperationMode; // auto or manual
@@ -27,7 +28,7 @@ class CarouselPushTemplate extends AEPPushTemplate {
     // Required, "default" or "filmstrip"
     private String carouselLayoutType;
 
-    class CarouselItem {
+    class CarouselItem implements Serializable {
         // Required, URI to an image to be shown for the carousel item
         private final String imageUri;
         // Optional, caption to show when the carousel item is visible

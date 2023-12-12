@@ -52,6 +52,7 @@ final class CampaignPushConstants {
         static final String AUTO_CAROUSEL_MODE = "auto";
         static final String FILMSTRIP_CAROUSEL_MODE = "filmstrip";
         static final int AUTO_CAROUSEL_MINIMUM_IMAGE_COUNT = 1;
+        static final int CENTER_INDEX = 1;
         static final int FILMSTRIP_CAROUSEL_MINIMUM_IMAGE_COUNT = 3;
         static final long PUSH_NOTIFICATION_IMAGE_CACHE_EXPIRY = 259200000; // 3 days
 
@@ -66,21 +67,12 @@ final class CampaignPushConstants {
     }
 
     final class IntentKeys {
-        static final String BACKGROUND_COLOR = "bgColor";
-        static final String TITLE_COLOR = "titleColor";
-        static final String BODY_COLOR = "bodyColor";
-        static final String ICON_COLOR = "iconColor";
-        static final String LEFT_IMAGE = "leftImage";
-        static final String CENTER_IMAGE = "centerImage";
-        static final String RIGHT_IMAGE = "rightImage";
-        static final String LEFT_CAPTION = "leftCaption";
-        static final String CENTER_CAPTION = "centerCaption";
-        static final String RIGHT_CAPTION = "rightCaption";
-        static final String SMALL_TITLE_TEXT = "smallLayoutTitleText";
-        static final String SMALL_BODY_TEXT = "smallLayoutBodyText";
-        static final String EXPANDED_BODY_TEXT = "smallLayoutBodyText";
+        static final String CENTER_IMAGE_INDEX = "centerImageIndex";
+        static final String IMAGE_URLS = "imageUrls";
+        static final String IMAGE_CAPTIONS = "imageCaptions";
+        static final String IMAGE_CLICK_ACTIONS = "imageClickActions";
         static final String CHANNEL_ID = "channelId";
-        static final String MESSAGE_ID = "messageId";
+        static final String PUSH_TEMPLATE = "pushTemplate";
 
         private IntentKeys() {}
     }

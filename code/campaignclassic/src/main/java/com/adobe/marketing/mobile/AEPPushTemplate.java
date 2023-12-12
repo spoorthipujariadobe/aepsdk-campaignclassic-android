@@ -20,6 +20,7 @@ import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.util.DataReader;
 import com.adobe.marketing.mobile.util.DataReaderException;
 import com.adobe.marketing.mobile.util.StringUtils;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,10 +29,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-class AEPPushTemplate {
+class AEPPushTemplate implements Serializable {
 
     /** Enum to denote the type of action */
-    enum ActionType {
+    enum ActionType implements Serializable {
         DEEPLINK,
         WEBURL,
         DISMISS,
@@ -40,7 +41,7 @@ class AEPPushTemplate {
     }
 
     /** Class representing the action button with label, link and type */
-    class ActionButton {
+    class ActionButton implements Serializable {
         private final String label;
         private final String link;
         private final ActionType type;
@@ -64,20 +65,20 @@ class AEPPushTemplate {
         }
     }
 
-    static final class ActionButtonType {
+    static final class ActionButtonType implements Serializable {
         static final String DEEPLINK = "DEEPLINK";
         static final String WEBURL = "WEBURL";
         static final String DISMISS = "DISMISS";
         static final String OPENAPP = "OPENAPP";
     }
 
-    static final class ActionButtons {
+    static final class ActionButtons implements Serializable {
         static final String LABEL = "label";
         static final String URI = "uri";
         static final String TYPE = "type";
     }
 
-    static final class NotificationPriority {
+    static final class NotificationPriority implements Serializable {
         static int from(final String priority) {
             if (priority == null) return NotificationCompat.PRIORITY_DEFAULT;
             final Integer resolvedPriority = notificationPriorityMap.get(priority);
@@ -92,7 +93,7 @@ class AEPPushTemplate {
         static final String PRIORITY_MAX = "PRIORITY_MAX";
     }
 
-    static final class NotificationVisibility {
+    static final class NotificationVisibility implements Serializable {
         static final String PUBLIC = "PUBLIC";
         static final String PRIVATE = "PRIVATE";
         static final String SECRET = "SECRET";
