@@ -130,8 +130,10 @@ public class AEPPushTemplateBroadcastReceiver extends BroadcastReceiver {
         expandedLayout.setTextViewText(R.id.notification_title, titleText);
         expandedLayout.setTextViewText(R.id.notification_body_expanded, expandedBodyText);
 
-        String newCaption;
         final String action = intent.getAction();
+        String newLeftCaption;
+        String newCenterCaption;
+        String newRightCaption;
         Bitmap newLeftImage;
         Bitmap newCenterImage;
         Bitmap newRightImage;
@@ -146,7 +148,9 @@ public class AEPPushTemplateBroadcastReceiver extends BroadcastReceiver {
             newCenterImageUri = leftImageUri;
             newRightImageUri = centerImageUri;
             newLeftImageUri = rightImageUri;
-            newCaption = captionMap.get(leftImageUri);
+            newLeftCaption = captionMap.get(rightImageUri);
+            newCenterCaption = captionMap.get(leftImageUri);
+            newRightCaption = captionMap.get(centerImageUri);
         } else {
             newCenterImage = cachedImages.get(2);
             newRightImage = cachedImages.get(0);
@@ -154,13 +158,15 @@ public class AEPPushTemplateBroadcastReceiver extends BroadcastReceiver {
             newCenterImageUri = rightImageUri;
             newRightImageUri = leftImageUri;
             newLeftImageUri = centerImageUri;
-            newCaption = captionMap.get(rightImageUri);
+            newLeftCaption = captionMap.get(centerImageUri);
+            newCenterCaption = captionMap.get(rightImageUri);
+            newRightCaption = captionMap.get(leftImageUri);
         }
 
         expandedLayout.setImageViewBitmap(R.id.manual_carousel_filmstrip_center, newCenterImage);
         expandedLayout.setImageViewBitmap(R.id.manual_carousel_filmstrip_left, newLeftImage);
         expandedLayout.setImageViewBitmap(R.id.manual_carousel_filmstrip_right, newRightImage);
-        expandedLayout.setTextViewText(R.id.manual_carousel_filmstrip_caption, newCaption);
+        expandedLayout.setTextViewText(R.id.manual_carousel_filmstrip_caption, newCenterCaption);
 
         // get custom color from hex string and set it the notification background
         AEPPushNotificationBuilder.setElementColor(
@@ -221,10 +227,10 @@ public class AEPPushTemplateBroadcastReceiver extends BroadcastReceiver {
         leftButtonIntent.putExtra(CampaignPushConstants.IntentKeys.LEFT_IMAGE, newLeftImageUri);
         leftButtonIntent.putExtra(CampaignPushConstants.IntentKeys.CENTER_IMAGE, newCenterImageUri);
         leftButtonIntent.putExtra(CampaignPushConstants.IntentKeys.RIGHT_IMAGE, newRightImageUri);
-        leftButtonIntent.putExtra(CampaignPushConstants.IntentKeys.LEFT_CAPTION, leftCaptionText);
+        leftButtonIntent.putExtra(CampaignPushConstants.IntentKeys.LEFT_CAPTION, newLeftCaption);
         leftButtonIntent.putExtra(
-                CampaignPushConstants.IntentKeys.CENTER_CAPTION, centerCaptionText);
-        leftButtonIntent.putExtra(CampaignPushConstants.IntentKeys.RIGHT_CAPTION, rightCaptionText);
+                CampaignPushConstants.IntentKeys.CENTER_CAPTION, newCenterCaption);
+        leftButtonIntent.putExtra(CampaignPushConstants.IntentKeys.RIGHT_CAPTION, newRightCaption);
         leftButtonIntent.putExtra(CampaignPushConstants.IntentKeys.SMALL_TITLE_TEXT, titleText);
         leftButtonIntent.putExtra(CampaignPushConstants.IntentKeys.SMALL_BODY_TEXT, smallBodyText);
         leftButtonIntent.putExtra(
@@ -249,11 +255,10 @@ public class AEPPushTemplateBroadcastReceiver extends BroadcastReceiver {
         rightButtonIntent.putExtra(
                 CampaignPushConstants.IntentKeys.CENTER_IMAGE, newCenterImageUri);
         rightButtonIntent.putExtra(CampaignPushConstants.IntentKeys.RIGHT_IMAGE, newRightImageUri);
-        rightButtonIntent.putExtra(CampaignPushConstants.IntentKeys.LEFT_CAPTION, leftCaptionText);
+        rightButtonIntent.putExtra(CampaignPushConstants.IntentKeys.LEFT_CAPTION, newLeftCaption);
         rightButtonIntent.putExtra(
-                CampaignPushConstants.IntentKeys.CENTER_CAPTION, centerCaptionText);
-        rightButtonIntent.putExtra(
-                CampaignPushConstants.IntentKeys.RIGHT_CAPTION, rightCaptionText);
+                CampaignPushConstants.IntentKeys.CENTER_CAPTION, newCenterCaption);
+        rightButtonIntent.putExtra(CampaignPushConstants.IntentKeys.RIGHT_CAPTION, newRightCaption);
         rightButtonIntent.putExtra(CampaignPushConstants.IntentKeys.SMALL_TITLE_TEXT, titleText);
         rightButtonIntent.putExtra(CampaignPushConstants.IntentKeys.SMALL_BODY_TEXT, smallBodyText);
         rightButtonIntent.putExtra(
