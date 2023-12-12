@@ -14,62 +14,119 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.widget.RemoteViews;
-
 import androidx.core.app.NotificationCompat;
-
+import com.adobe.marketing.mobile.campaignclassic.R;
+import com.adobe.marketing.mobile.services.Log;
+import com.adobe.marketing.mobile.services.ServiceProvider;
+import com.adobe.marketing.mobile.services.caching.CacheResult;
+import com.adobe.marketing.mobile.services.caching.CacheService;
 import com.adobe.marketing.mobile.util.StringUtils;
 import com.adobe.marketing.mobile.util.UrlUtils;
-
+import com.google.android.gms.common.util.CollectionUtils;
+import com.google.firebase.components.MissingDependencyException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 public class FilmstripCarouselTemplateNotificationBuilder {
+    private static final String SELF_TAG = "FilmstripCarouselTemplateNotificationBuilder";
 
     static NotificationCompat.Builder construct(
             final CarouselPushTemplate pushTemplate,
             final Context context,
             final String channelId,
-            final String packageName) {
+            final String packageName)
+            throws MissingDependencyException {
+        final RemoteViews smallLayout =
+                new RemoteViews(packageName, R.layout.push_template_collapsed);
+        final RemoteViews expandedLayout =
+                new RemoteViews(packageName, R.layout.push_template_filmstrip_carousel);
+        final CacheService cacheService = ServiceProvider.getInstance().getCacheService();
+        final String cacheLocation = CampaignPushUtils.getAssetCacheLocation();
 
-        final RemoteViews smallLayout = new RemoteViews(packageName, com.adobe.marketing.mobile.campaignclassic.R.layout.push_template_collapsed);
-        final RemoteViews expandedLayout = new RemoteViews(packageName, com.adobe.marketing.mobile.campaignclassic.R.layout.push_template_filmstrip_carousel);
+        if (cacheService == null) {
+            throw new MissingDependencyException(
+                    "Cache service is null, notification will not be constructed.");
+        }
 
         // download the carousel images
+        final long imageProcessingStartTime = System.currentTimeMillis();
         final List<CarouselPushTemplate.CarouselItem> items = pushTemplate.getCarouselItems();
-        final List<Bitmap> downloadedImages = new ArrayList<>();
-        String downloadImageUri = null;
+        final ArrayList<Bitmap> downloadedImages = new ArrayList<>();
+        final ArrayList<String> downloadedImageUris = new ArrayList<>();
+
         for (final CarouselPushTemplate.CarouselItem item : items) {
             final String imageUri = item.getImageUri();
             if (!StringUtils.isNullOrEmpty(imageUri)) {
-                if (UrlUtils.isValidUrl(imageUri)) { // we need to download the images first
-                    final Bitmap image = CampaignPushUtils.download(imageUri);
-                    if (image != null) {
-                        // scale down the bitmap to 300dp x 200dp as we don't want to use a full
-                        // size image due to memory constraints
-                        final Bitmap scaledBitmap =
-                                Bitmap.createScaledBitmap(
-                                        image,
-                                        CampaignPushConstants.DefaultValues
-                                                .CAROUSEL_MAX_BITMAP_WIDTH,
-                                        CampaignPushConstants.DefaultValues
-                                                .CAROUSEL_MAX_BITMAP_HEIGHT,
-                                        false);
-                        downloadedImages.add(scaledBitmap);
-                        downloadImageUri = imageUri;
+                final CacheResult cacheResult = cacheService.get(cacheLocation, imageUri);
+                if (cacheResult == null) {
+                    if (UrlUtils.isValidUrl(imageUri)) { // we need to download the images first
+                        final Bitmap image = CampaignPushUtils.download(imageUri);
+                        if (image != null) {
+                            // scale down the bitmap to 300dp x 200dp as we don't want to use a full
+                            // size image due to memory constraints
+                            final Bitmap scaledBitmap =
+                                    Bitmap.createScaledBitmap(image, 300, 200, false);
+                            downloadedImageUris.add(imageUri);
+                            downloadedImages.add(scaledBitmap);
+
+                            // write bitmap to cache
+                            try (final InputStream bitmapInputStream =
+                                    CampaignPushUtils.bitmapToInputStream(scaledBitmap)) {
+                                CampaignPushUtils.cacheBitmapInputStream(
+                                        cacheService, bitmapInputStream, imageUri);
+                            } catch (final IOException exception) {
+                                Log.trace(
+                                        CampaignPushConstants.LOG_TAG,
+                                        SELF_TAG,
+                                        "Exception occurred creating an input stream from a"
+                                                + " bitmap: %s.",
+                                        exception.getLocalizedMessage());
+                                break;
+                            }
+                        }
                     }
+                } else { // we have previously downloaded the image
+                    Log.trace(
+                            CampaignPushConstants.LOG_TAG,
+                            SELF_TAG,
+                            "Found cached image for %s.",
+                            imageUri);
+                    downloadedImageUris.add(imageUri);
+                    downloadedImages.add(BitmapFactory.decodeStream(cacheResult.getData()));
                 }
             }
         }
 
+        // log time needed to process the carousel images
+        final long imageProcessingElapsedTime =
+                System.currentTimeMillis() - imageProcessingStartTime;
+        Log.trace(
+                CampaignPushConstants.LOG_TAG,
+                SELF_TAG,
+                "Processed %d manual filmstrip carousel image(s) in %d milliseconds.",
+                downloadedImageUris.size(),
+                imageProcessingElapsedTime);
+
         // fallback to a basic push template notification builder if less than 3 images were able
         // to be downloaded
-        if (downloadedImages.size()
-                <= CampaignPushConstants.DefaultValues.FILMSTRIP_CAROUSEL_MINIMUM_IMAGE_COUNT) {
-            if (!StringUtils.isNullOrEmpty(downloadImageUri)) {
+        if (downloadedImageUris.size()
+                < CampaignPushConstants.DefaultValues.FILMSTRIP_CAROUSEL_MINIMUM_IMAGE_COUNT) {
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "Only %d image(s) for the manual filmstrip carousel notification were"
+                            + " downloaded. Building a basic push notification instead.",
+                    downloadedImageUris.size());
+            if (!CollectionUtils.isEmpty(downloadedImageUris)) {
+                // use the first downloaded image (if available) for the basic template notification
                 pushTemplate.modifyData(
-                        CampaignPushConstants.PushPayloadKeys.IMAGE_URL, downloadImageUri);
+                        CampaignPushConstants.PushPayloadKeys.IMAGE_URL,
+                        downloadedImageUris.get(0));
             }
             final BasicPushTemplate basicPushTemplate =
                     new BasicPushTemplate(pushTemplate.getData());
@@ -79,107 +136,150 @@ public class FilmstripCarouselTemplateNotificationBuilder {
         final String titleText = pushTemplate.getTitle();
         final String smallBodyText = pushTemplate.getBody();
         final String expandedBodyText = pushTemplate.getExpandedBodyText();
-        smallLayout.setTextViewText(com.adobe.marketing.mobile.campaignclassic.R.id.notification_title, titleText);
-        smallLayout.setTextViewText(com.adobe.marketing.mobile.campaignclassic.R.id.notification_body, smallBodyText);
-        expandedLayout.setTextViewText(com.adobe.marketing.mobile.campaignclassic.R.id.notification_title, titleText);
-        expandedLayout.setTextViewText(com.adobe.marketing.mobile.campaignclassic.R.id.notification_body_expanded, expandedBodyText);
+        smallLayout.setTextViewText(R.id.notification_title, titleText);
+        smallLayout.setTextViewText(R.id.notification_body, smallBodyText);
+        expandedLayout.setTextViewText(R.id.notification_title, titleText);
+        expandedLayout.setTextViewText(R.id.notification_body_expanded, expandedBodyText);
 
         // get all captions present then set center caption text
         final String leftCaptionText = items.get(0).getCaptionText();
         final String centerCaptionText = items.get(1).getCaptionText();
         final String rightCaptionText = items.get(2).getCaptionText();
-        expandedLayout.setTextViewText(com.adobe.marketing.mobile.campaignclassic.R.id.manual_carousel_filmstrip_caption, centerCaptionText);
+        expandedLayout.setTextViewText(R.id.manual_carousel_filmstrip_caption, centerCaptionText);
 
         // set the downloaded bitmaps in the filmstrip image views
-        expandedLayout.setImageViewBitmap(com.adobe.marketing.mobile.campaignclassic.R.id.manual_carousel_filmstrip_left, downloadedImages.get(0));
-        expandedLayout.setImageViewBitmap(com.adobe.marketing.mobile.campaignclassic.R.id.manual_carousel_filmstrip_center, downloadedImages.get(1));
-        expandedLayout.setImageViewBitmap(com.adobe.marketing.mobile.campaignclassic.R.id.manual_carousel_filmstrip_right, downloadedImages.get(2));
+        expandedLayout.setImageViewBitmap(
+                R.id.manual_carousel_filmstrip_left, downloadedImages.get(0));
+        expandedLayout.setImageViewBitmap(
+                R.id.manual_carousel_filmstrip_center, downloadedImages.get(1));
+        expandedLayout.setImageViewBitmap(
+                R.id.manual_carousel_filmstrip_right, downloadedImages.get(2));
 
         // get custom color from hex string and set it the notification background
         final String backgroundColorHex = pushTemplate.getNotificationBackgroundColor();
         AEPPushNotificationBuilder.setElementColor(
                 smallLayout,
-                com.adobe.marketing.mobile.campaignclassic.R.id.basic_small_layout,
+                R.id.basic_small_layout,
                 "#" + backgroundColorHex,
-                "setBackgroundColor",
-                "notification background");
+                CampaignPushConstants.MethodNames.SET_BACKGROUND_COLOR,
+                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BACKGROUND);
         AEPPushNotificationBuilder.setElementColor(
                 expandedLayout,
-                com.adobe.marketing.mobile.campaignclassic.R.id.carousel_container_layout,
+                R.id.carousel_container_layout,
                 "#" + backgroundColorHex,
-                "setBackgroundColor",
-                "notification background");
+                CampaignPushConstants.MethodNames.SET_BACKGROUND_COLOR,
+                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BACKGROUND);
 
         // get custom color from hex string and set it the notification title
         final String titleColorHex = pushTemplate.getTitleTextColor();
         AEPPushNotificationBuilder.setElementColor(
                 smallLayout,
-                com.adobe.marketing.mobile.campaignclassic.R.id.notification_title,
+                R.id.notification_title,
                 "#" + titleColorHex,
-                "setTextColor",
-                "notification title");
+                CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
+                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_TITLE);
         AEPPushNotificationBuilder.setElementColor(
                 expandedLayout,
-                com.adobe.marketing.mobile.campaignclassic.R.id.notification_title,
+                R.id.notification_title,
                 "#" + titleColorHex,
-                "setTextColor",
-                "notification title");
+                CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
+                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_TITLE);
 
         // get custom color from hex string and set it the notification body text
         final String bodyColorHex = pushTemplate.getExpandedBodyTextColor();
         AEPPushNotificationBuilder.setElementColor(
                 smallLayout,
-                com.adobe.marketing.mobile.campaignclassic.R.id.notification_body,
+                R.id.notification_body,
                 "#" + bodyColorHex,
-                "setTextColor",
-                "notification body text");
+                CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
+                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BODY_TEXT);
         AEPPushNotificationBuilder.setElementColor(
                 expandedLayout,
-                com.adobe.marketing.mobile.campaignclassic.R.id.notification_body_expanded,
+                R.id.notification_body_expanded,
                 "#" + bodyColorHex,
-                "setTextColor",
-                "notification body text");
+                CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
+                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BODY_TEXT);
 
         // handle left and right navigation buttons
-        final Intent leftButtonIntent = new Intent(CampaignPushConstants.IntentActions.FILMSTRIP_LEFT_CLICKED, null, context, AEPPushTemplateBroadcastReceiver.class);
+        final String messageId = pushTemplate.getMessageId();
+        final String iconColorHex = pushTemplate.getSmallIconColor();
+
+        final Intent leftButtonIntent =
+                new Intent(
+                        CampaignPushConstants.IntentActions.FILMSTRIP_LEFT_CLICKED,
+                        null,
+                        context,
+                        AEPPushTemplateBroadcastReceiver.class);
         leftButtonIntent.setClass(context, AEPPushTemplateBroadcastReceiver.class);
         leftButtonIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        leftButtonIntent.putExtra(CampaignPushConstants.IntentKeys.BACKGROUND_COLOR, backgroundColorHex);
+        leftButtonIntent.putExtra(
+                CampaignPushConstants.IntentKeys.BACKGROUND_COLOR, backgroundColorHex);
         leftButtonIntent.putExtra(CampaignPushConstants.IntentKeys.TITLE_COLOR, titleColorHex);
         leftButtonIntent.putExtra(CampaignPushConstants.IntentKeys.BODY_COLOR, bodyColorHex);
-        leftButtonIntent.putExtra(CampaignPushConstants.IntentKeys.LEFT_IMAGE, downloadedImages.get(0));
-        leftButtonIntent.putExtra(CampaignPushConstants.IntentKeys.CENTER_IMAGE, downloadedImages.get(1));
-        leftButtonIntent.putExtra(CampaignPushConstants.IntentKeys.RIGHT_IMAGE, downloadedImages.get(2));
+        leftButtonIntent.putExtra(CampaignPushConstants.IntentKeys.ICON_COLOR, iconColorHex);
+        leftButtonIntent.putExtra(
+                CampaignPushConstants.IntentKeys.LEFT_IMAGE, downloadedImageUris.get(0));
+        leftButtonIntent.putExtra(
+                CampaignPushConstants.IntentKeys.CENTER_IMAGE, downloadedImageUris.get(1));
+        leftButtonIntent.putExtra(
+                CampaignPushConstants.IntentKeys.RIGHT_IMAGE, downloadedImageUris.get(2));
         leftButtonIntent.putExtra(CampaignPushConstants.IntentKeys.LEFT_CAPTION, leftCaptionText);
-        leftButtonIntent.putExtra(CampaignPushConstants.IntentKeys.CENTER_CAPTION, centerCaptionText);
+        leftButtonIntent.putExtra(
+                CampaignPushConstants.IntentKeys.CENTER_CAPTION, centerCaptionText);
         leftButtonIntent.putExtra(CampaignPushConstants.IntentKeys.RIGHT_CAPTION, rightCaptionText);
         leftButtonIntent.putExtra(CampaignPushConstants.IntentKeys.SMALL_TITLE_TEXT, titleText);
         leftButtonIntent.putExtra(CampaignPushConstants.IntentKeys.SMALL_BODY_TEXT, smallBodyText);
-        leftButtonIntent.putExtra(CampaignPushConstants.IntentKeys.EXPANDED_BODY_TEXT, expandedBodyText);
+        leftButtonIntent.putExtra(
+                CampaignPushConstants.IntentKeys.EXPANDED_BODY_TEXT, expandedBodyText);
         leftButtonIntent.putExtra(CampaignPushConstants.IntentKeys.CHANNEL_ID, channelId);
+        leftButtonIntent.putExtra(CampaignPushConstants.IntentKeys.MESSAGE_ID, messageId);
 
-        final Intent rightButtonIntent = new Intent(CampaignPushConstants.IntentActions.FILMSTRIP_RIGHT_CLICKED, null, context, AEPPushTemplateBroadcastReceiver.class);
+        final Intent rightButtonIntent =
+                new Intent(
+                        CampaignPushConstants.IntentActions.FILMSTRIP_RIGHT_CLICKED,
+                        null,
+                        context,
+                        AEPPushTemplateBroadcastReceiver.class);
         rightButtonIntent.setClass(context, AEPPushTemplateBroadcastReceiver.class);
         rightButtonIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        rightButtonIntent.putExtra(CampaignPushConstants.IntentKeys.BACKGROUND_COLOR, backgroundColorHex);
+        rightButtonIntent.putExtra(
+                CampaignPushConstants.IntentKeys.BACKGROUND_COLOR, backgroundColorHex);
         rightButtonIntent.putExtra(CampaignPushConstants.IntentKeys.TITLE_COLOR, titleColorHex);
         rightButtonIntent.putExtra(CampaignPushConstants.IntentKeys.BODY_COLOR, bodyColorHex);
-        rightButtonIntent.putExtra(CampaignPushConstants.IntentKeys.LEFT_IMAGE, downloadedImages.get(0));
-        rightButtonIntent.putExtra(CampaignPushConstants.IntentKeys.CENTER_IMAGE, downloadedImages.get(1));
-        rightButtonIntent.putExtra(CampaignPushConstants.IntentKeys.RIGHT_IMAGE, downloadedImages.get(2));
+        rightButtonIntent.putExtra(CampaignPushConstants.IntentKeys.ICON_COLOR, iconColorHex);
+        rightButtonIntent.putExtra(
+                CampaignPushConstants.IntentKeys.LEFT_IMAGE, downloadedImageUris.get(0));
+        rightButtonIntent.putExtra(
+                CampaignPushConstants.IntentKeys.CENTER_IMAGE, downloadedImageUris.get(1));
+        rightButtonIntent.putExtra(
+                CampaignPushConstants.IntentKeys.RIGHT_IMAGE, downloadedImageUris.get(2));
         rightButtonIntent.putExtra(CampaignPushConstants.IntentKeys.LEFT_CAPTION, leftCaptionText);
-        rightButtonIntent.putExtra(CampaignPushConstants.IntentKeys.CENTER_CAPTION, centerCaptionText);
-        rightButtonIntent.putExtra(CampaignPushConstants.IntentKeys.RIGHT_CAPTION, rightCaptionText);
+        rightButtonIntent.putExtra(
+                CampaignPushConstants.IntentKeys.CENTER_CAPTION, centerCaptionText);
+        rightButtonIntent.putExtra(
+                CampaignPushConstants.IntentKeys.RIGHT_CAPTION, rightCaptionText);
         rightButtonIntent.putExtra(CampaignPushConstants.IntentKeys.SMALL_TITLE_TEXT, titleText);
         rightButtonIntent.putExtra(CampaignPushConstants.IntentKeys.SMALL_BODY_TEXT, smallBodyText);
-        rightButtonIntent.putExtra(CampaignPushConstants.IntentKeys.EXPANDED_BODY_TEXT, expandedBodyText);
+        rightButtonIntent.putExtra(
+                CampaignPushConstants.IntentKeys.EXPANDED_BODY_TEXT, expandedBodyText);
         rightButtonIntent.putExtra(CampaignPushConstants.IntentKeys.CHANNEL_ID, channelId);
+        rightButtonIntent.putExtra(CampaignPushConstants.IntentKeys.MESSAGE_ID, messageId);
 
-        final PendingIntent pendingIntentLeftButton = PendingIntent.getBroadcast(context, 0, leftButtonIntent, PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-        final PendingIntent pendingIntentRightButton = PendingIntent.getBroadcast(context, 0, rightButtonIntent, PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+        final PendingIntent pendingIntentLeftButton =
+                PendingIntent.getBroadcast(
+                        context,
+                        0,
+                        leftButtonIntent,
+                        PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+        final PendingIntent pendingIntentRightButton =
+                PendingIntent.getBroadcast(
+                        context,
+                        0,
+                        rightButtonIntent,
+                        PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
 
-        expandedLayout.setOnClickPendingIntent(com.adobe.marketing.mobile.campaignclassic.R.id.leftImageButton, pendingIntentLeftButton);
-        expandedLayout.setOnClickPendingIntent(com.adobe.marketing.mobile.campaignclassic.R.id.rightImageButton, pendingIntentRightButton);
+        expandedLayout.setOnClickPendingIntent(R.id.leftImageButton, pendingIntentLeftButton);
+        expandedLayout.setOnClickPendingIntent(R.id.rightImageButton, pendingIntentRightButton);
 
         final NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(context, channelId)

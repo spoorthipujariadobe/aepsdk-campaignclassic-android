@@ -15,6 +15,7 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationManagerCompat;
 import com.adobe.marketing.mobile.services.Log;
+import com.google.firebase.components.MissingDependencyException;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -49,13 +50,12 @@ public class AEPMessagingService extends FirebaseMessagingService {
                     AEPPushNotificationBuilder.buildPushNotification(payload, context);
 
             // display notification
-            notificationManager.notify(remoteMessage.getMessageId().hashCode(), notification);
-        } catch (final IllegalArgumentException exception) {
+            notificationManager.notify(payload.getMessageId().hashCode(), notification);
+        } catch (final IllegalArgumentException | MissingDependencyException exception) {
             Log.error(
                     CampaignPushConstants.LOG_TAG,
                     SELF_TAG,
-                    "Failed to create push payload object, an illegal argument exception occurred:"
-                            + " %s",
+                    "Failed to create push payload object, an exception occurred:" + " %s",
                     exception.getLocalizedMessage());
             return false;
         }

@@ -8,131 +8,190 @@
   OF ANY KIND, either express or implied. See the License for the specific language
   governing permissions and limitations under the License.
 */
-
 package com.adobe.marketing.mobile;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.widget.RemoteViews;
-
 import androidx.core.app.NotificationCompat;
-
 import com.adobe.marketing.mobile.campaignclassic.R;
+import com.adobe.marketing.mobile.services.Log;
+import com.adobe.marketing.mobile.services.ServiceProvider;
+import com.adobe.marketing.mobile.services.caching.CacheResult;
+import com.adobe.marketing.mobile.services.caching.CacheService;
 import com.adobe.marketing.mobile.util.StringUtils;
 import com.adobe.marketing.mobile.util.UrlUtils;
-
-import java.util.List;
+import com.google.firebase.components.MissingDependencyException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 
 public class AutoCarouselTemplateNotificationBuilder {
+    private static final String SELF_TAG = "AutoCarouselTemplateNotificationBuilder";
 
     static NotificationCompat.Builder construct(
             final CarouselPushTemplate pushTemplate,
             final Context context,
             final String channelId,
-            final String packageName) {
+            final String packageName)
+            throws MissingDependencyException {
         final RemoteViews smallLayout =
-                new RemoteViews(context.getPackageName(), com.adobe.marketing.mobile.campaignclassic.R.layout.push_template_collapsed);
+                new RemoteViews(context.getPackageName(), R.layout.push_template_collapsed);
         final RemoteViews expandedLayout =
-                new RemoteViews(context.getPackageName(), com.adobe.marketing.mobile.campaignclassic.R.layout.push_template_auto_carousel);
+                new RemoteViews(context.getPackageName(), R.layout.push_template_auto_carousel);
+        final CacheService cacheService = ServiceProvider.getInstance().getCacheService();
+        final String cacheLocation = CampaignPushUtils.getAssetCacheLocation();
+
+        if (cacheService == null) {
+            throw new MissingDependencyException(
+                    "Cache service is null, notification will not be constructed.");
+        }
 
         // load images into the carousel
-        final List<CarouselPushTemplate.CarouselItem> items = pushTemplate.getCarouselItems();
-        int downloadedImageCount = 0;
-        String downloadImageUri = null;
+        final long imageProcessingStartTime = System.currentTimeMillis();
+        final ArrayList<CarouselPushTemplate.CarouselItem> items = pushTemplate.getCarouselItems();
+        final ArrayList<String> downloadedImageUris = new ArrayList<>();
+
         for (final CarouselPushTemplate.CarouselItem item : items) {
+            Bitmap pushImage = null;
+            final RemoteViews carouselItem =
+                    new RemoteViews(packageName, R.layout.push_template_carousel_item);
             final String imageUri = item.getImageUri();
+
             if (!StringUtils.isNullOrEmpty(imageUri)) {
-                if (UrlUtils.isValidUrl(imageUri)) { // we need to download the images first
-                    final RemoteViews carouselItem =
-                            new RemoteViews(packageName, com.adobe.marketing.mobile.campaignclassic.R.layout.push_template_carousel_item);
-                    final Bitmap image = CampaignPushUtils.download(imageUri);
-                    if (image != null) {
-                        // scale down the bitmap to 300dp x 200dp as we don't want to use a full
-                        // size image due to memory constraints
-                        final Bitmap scaledBitmap =
-                                Bitmap.createScaledBitmap(
-                                        image,
-                                        CampaignPushConstants.DefaultValues
-                                                .CAROUSEL_MAX_BITMAP_WIDTH,
-                                        CampaignPushConstants.DefaultValues
-                                                .CAROUSEL_MAX_BITMAP_HEIGHT,
-                                        false);
-                        carouselItem.setImageViewBitmap(
-                                com.adobe.marketing.mobile.campaignclassic.R.id.carousel_item_image_view, scaledBitmap);
-                        carouselItem.setTextViewText(
-                                com.adobe.marketing.mobile.campaignclassic.R.id.carousel_item_caption, item.getCaptionText());
-                        expandedLayout.addView(com.adobe.marketing.mobile.campaignclassic.R.id.auto_carousel_view_flipper, carouselItem);
-                        downloadedImageCount++;
-                        downloadImageUri = imageUri;
+                final CacheResult cacheResult = cacheService.get(cacheLocation, imageUri);
+                if (cacheResult == null) {
+                    if (UrlUtils.isValidUrl(imageUri)) { // we need to download the images first
+                        final Bitmap image = CampaignPushUtils.download(imageUri);
+                        if (image != null) {
+                            // scale down the bitmap to 300dp x 200dp as we don't want to use a full
+                            // size image due to memory constraints
+                            pushImage =
+                                    Bitmap.createScaledBitmap(
+                                            image,
+                                            CampaignPushConstants.DefaultValues
+                                                    .CAROUSEL_MAX_BITMAP_WIDTH,
+                                            CampaignPushConstants.DefaultValues
+                                                    .CAROUSEL_MAX_BITMAP_HEIGHT,
+                                            false);
+                            downloadedImageUris.add(imageUri);
+
+                            // write bitmap to cache
+                            try (final InputStream bitmapInputStream =
+                                    CampaignPushUtils.bitmapToInputStream(pushImage)) {
+                                CampaignPushUtils.cacheBitmapInputStream(
+                                        cacheService, bitmapInputStream, imageUri);
+                            } catch (final IOException exception) {
+                                Log.trace(
+                                        CampaignPushConstants.LOG_TAG,
+                                        SELF_TAG,
+                                        "Exception occurred creating an input stream from a"
+                                                + " bitmap: %s.",
+                                        exception.getLocalizedMessage());
+                                break;
+                            }
+                        }
                     }
+                } else { // we have previously downloaded the image
+                    Log.trace(
+                            CampaignPushConstants.LOG_TAG,
+                            SELF_TAG,
+                            "Found cached image for %s.",
+                            imageUri);
+                    downloadedImageUris.add(imageUri);
+                    pushImage = BitmapFactory.decodeStream(cacheResult.getData());
                 }
+
+                carouselItem.setImageViewBitmap(R.id.carousel_item_image_view, pushImage);
+                carouselItem.setTextViewText(R.id.carousel_item_caption, item.getCaptionText());
+                expandedLayout.addView(R.id.auto_carousel_view_flipper, carouselItem);
             }
         }
 
+        // log time needed to process the carousel images
+        final long imageProcessingElapsedTime =
+                System.currentTimeMillis() - imageProcessingStartTime;
+        Log.trace(
+                CampaignPushConstants.LOG_TAG,
+                SELF_TAG,
+                "Processed %d auto carousel image(s) in %d milliseconds.",
+                downloadedImageUris.size(),
+                imageProcessingElapsedTime);
+
         // fallback to a basic push template notification builder if only 1 (or less) image was able
         // to be downloaded
-        if (downloadedImageCount
+        if (downloadedImageUris.size()
                 <= CampaignPushConstants.DefaultValues.AUTO_CAROUSEL_MINIMUM_IMAGE_COUNT) {
-            if (!StringUtils.isNullOrEmpty(downloadImageUri)) {
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "Only %d image(s) for the auto carousel notification were downloaded. Building"
+                            + " a basic push notification instead.",
+                    downloadedImageUris.size());
+
+            // use the downloaded image if available
+            if (!StringUtils.isNullOrEmpty(downloadedImageUris.get(0))) {
                 pushTemplate.modifyData(
-                        CampaignPushConstants.PushPayloadKeys.IMAGE_URL, downloadImageUri);
+                        CampaignPushConstants.PushPayloadKeys.IMAGE_URL,
+                        downloadedImageUris.get(0));
             }
             final BasicPushTemplate basicPushTemplate =
                     new BasicPushTemplate(pushTemplate.getData());
             return BasicTemplateNotificationBuilder.construct(basicPushTemplate, context);
         }
 
-        smallLayout.setTextViewText(com.adobe.marketing.mobile.campaignclassic.R.id.notification_title, pushTemplate.getTitle());
-        smallLayout.setTextViewText(com.adobe.marketing.mobile.campaignclassic.R.id.notification_body, pushTemplate.getBody());
-        expandedLayout.setTextViewText(com.adobe.marketing.mobile.campaignclassic.R.id.notification_title, pushTemplate.getTitle());
+        smallLayout.setTextViewText(R.id.notification_title, pushTemplate.getTitle());
+        smallLayout.setTextViewText(R.id.notification_body, pushTemplate.getBody());
+        expandedLayout.setTextViewText(R.id.notification_title, pushTemplate.getTitle());
         expandedLayout.setTextViewText(
-                com.adobe.marketing.mobile.campaignclassic.R.id.notification_body_expanded, pushTemplate.getExpandedBodyText());
+                R.id.notification_body_expanded, pushTemplate.getExpandedBodyText());
 
         // get custom color from hex string and set it the notification background
         final String backgroundColorHex = pushTemplate.getNotificationBackgroundColor();
         AEPPushNotificationBuilder.setElementColor(
                 smallLayout,
-                com.adobe.marketing.mobile.campaignclassic.R.id.basic_small_layout,
+                R.id.basic_small_layout,
                 "#" + backgroundColorHex,
-                "setBackgroundColor",
-                "notification background");
+                CampaignPushConstants.MethodNames.SET_BACKGROUND_COLOR,
+                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BACKGROUND);
         AEPPushNotificationBuilder.setElementColor(
                 expandedLayout,
-                com.adobe.marketing.mobile.campaignclassic.R.id.carousel_container_layout,
+                R.id.carousel_container_layout,
                 "#" + backgroundColorHex,
-                "setBackgroundColor",
-                "notification background");
+                CampaignPushConstants.MethodNames.SET_BACKGROUND_COLOR,
+                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BACKGROUND);
 
         // get custom color from hex string and set it the notification title
         final String titleColorHex = pushTemplate.getTitleTextColor();
         AEPPushNotificationBuilder.setElementColor(
                 smallLayout,
-                com.adobe.marketing.mobile.campaignclassic.R.id.notification_title,
+                R.id.notification_title,
                 "#" + titleColorHex,
-                "setTextColor",
-                "notification title");
+                CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
+                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_TITLE);
         AEPPushNotificationBuilder.setElementColor(
                 expandedLayout,
-                com.adobe.marketing.mobile.campaignclassic.R.id.notification_title,
+                R.id.notification_title,
                 "#" + titleColorHex,
-                "setTextColor",
-                "notification title");
+                CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
+                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_TITLE);
 
         // get custom color from hex string and set it the notification body text
         final String bodyColorHex = pushTemplate.getExpandedBodyTextColor();
         AEPPushNotificationBuilder.setElementColor(
                 smallLayout,
-                com.adobe.marketing.mobile.campaignclassic.R.id.notification_body,
+                R.id.notification_body,
                 "#" + bodyColorHex,
-                "setTextColor",
-                "notification body text");
+                CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
+                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BODY_TEXT);
         AEPPushNotificationBuilder.setElementColor(
                 expandedLayout,
                 R.id.notification_body_expanded,
                 "#" + bodyColorHex,
-                "setTextColor",
-                "notification body text");
+                CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
+                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BODY_TEXT);
 
         // Create the notification
         final NotificationCompat.Builder builder =
@@ -148,7 +207,6 @@ public class AutoCarouselTemplateNotificationBuilder {
                 pushTemplate,
                 context); // Small Icon must be present, otherwise the notification will not be
         // displayed.
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             AEPPushNotificationBuilder.setVisibility(builder, pushTemplate);
         }

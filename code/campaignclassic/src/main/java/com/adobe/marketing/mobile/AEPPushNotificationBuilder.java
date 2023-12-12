@@ -27,6 +27,7 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.util.StringUtils;
+import com.google.firebase.components.MissingDependencyException;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -55,7 +56,7 @@ class AEPPushNotificationBuilder {
      * @return the notification
      */
     @NonNull static Notification buildPushNotification(final AEPPushPayload payload, final Context context)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, MissingDependencyException {
         NotificationCompat.Builder builder;
         final Map<String, String> messageData = payload.getMessageData();
         final PushTemplateType pushTemplateType =
@@ -174,10 +175,39 @@ class AEPPushNotificationBuilder {
         final int iconFromPayload =
                 CampaignPushUtils.getSmallIconWithResourceName(pushTemplate.getIcon(), context);
         final int iconFromMobileCore = MobileCore.getSmallIconResourceID();
+        int iconResourceId = 0;
+
+        if (isValidIcon(iconFromPayload)) {
+            iconResourceId = iconFromPayload;
+        } else if (isValidIcon(iconFromMobileCore)) {
+            iconResourceId = iconFromMobileCore;
+        } else {
+            final int iconFromApp = CampaignPushUtils.getDefaultAppIcon(context);
+            if (isValidIcon(iconFromApp)) {
+                iconResourceId = iconFromApp;
+            } else {
+                Log.warning(
+                        CampaignPushConstants.LOG_TAG,
+                        SELF_TAG,
+                        "No valid small icon found. Notification will not be displayed.");
+            }
+        }
+
+        // add icon resource id to datastore
+        CampaignPushUtils.setSmallIconIdInDatastore(iconResourceId);
+
+        final String iconColorHex = pushTemplate.getSmallIconColor();
+        setSmallIcon(builder, iconColorHex, iconResourceId);
+    }
+
+    static void setSmallIcon(
+            final NotificationCompat.Builder builder,
+            final String iconColorHex,
+            final int smallIconResourceId) {
 
         try {
             // sets the icon color if provided
-            final String smallIconColor = "#" + pushTemplate.getSmallIconColor();
+            final String smallIconColor = "#" + iconColorHex;
             if (!StringUtils.isNullOrEmpty(smallIconColor)) {
                 builder.setColorized(true).setColor(Color.parseColor(smallIconColor));
             }
@@ -189,21 +219,7 @@ class AEPPushNotificationBuilder {
                             + " be applied to the notification icon.");
         }
 
-        if (isValidIcon(iconFromPayload)) {
-            builder.setSmallIcon(iconFromPayload);
-        } else if (isValidIcon(iconFromMobileCore)) {
-            builder.setSmallIcon(iconFromMobileCore);
-        } else {
-            final int iconFromApp = CampaignPushUtils.getDefaultAppIcon(context);
-            if (isValidIcon(iconFromApp)) {
-                builder.setSmallIcon(iconFromApp);
-            } else {
-                Log.warning(
-                        CampaignPushConstants.LOG_TAG,
-                        SELF_TAG,
-                        "No valid small icon found. Notification will not be displayed.");
-            }
-        }
+        builder.setSmallIcon(smallIconResourceId);
     }
 
     /**
