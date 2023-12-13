@@ -54,7 +54,8 @@ final class CampaignPushConstants {
         static final int AUTO_CAROUSEL_MINIMUM_IMAGE_COUNT = 1;
         static final int CENTER_INDEX = 1;
         static final int FILMSTRIP_CAROUSEL_MINIMUM_IMAGE_COUNT = 3;
-        static final long PUSH_NOTIFICATION_IMAGE_CACHE_EXPIRY = 259200000; // 3 days
+        static final long PUSH_NOTIFICATION_IMAGE_CACHE_EXPIRY_IN_MILLISECONDS =
+                259200000; // 3 days
 
         private DefaultValues() {}
     }
@@ -72,7 +73,6 @@ final class CampaignPushConstants {
         static final String IMAGE_CAPTIONS = "imageCaptions";
         static final String IMAGE_CLICK_ACTIONS = "imageClickActions";
         static final String CHANNEL_ID = "channelId";
-        static final String PUSH_TEMPLATE = "pushTemplate";
 
         private IntentKeys() {}
     }

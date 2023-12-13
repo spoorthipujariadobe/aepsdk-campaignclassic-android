@@ -14,6 +14,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+/** Broadcast receiver for handling custom push template notification interactions. */
 public class AEPPushTemplateBroadcastReceiver extends BroadcastReceiver {
 
     @Override

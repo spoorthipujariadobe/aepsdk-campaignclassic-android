@@ -193,22 +193,26 @@ class AEPPushNotificationBuilder {
             }
         }
 
-        // add icon resource id to datastore
-        CampaignPushUtils.setSmallIconIdInDatastore(iconResourceId);
-
         final String iconColorHex = pushTemplate.getSmallIconColor();
-        setSmallIcon(builder, iconColorHex, iconResourceId);
-    }
+        setSmallIconColor(builder, iconColorHex);
 
-    static void setSmallIcon(
-            final NotificationCompat.Builder builder,
-            final String iconColorHex,
-            final int smallIconResourceId) {
+        builder.setSmallIcon(iconResourceId);
+    }
+    /**
+     * Sets a custom color to the notification's small icon.
+     *
+     * @param builder {@link AEPPushTemplate} containing the message data from the received push
+     *     notification
+     * @param iconColorHex {@code String} containing a color code to be used in customizing the
+     *     small icon color
+     */
+    private static void setSmallIconColor(
+            final NotificationCompat.Builder builder, final String iconColorHex) {
 
         try {
             // sets the icon color if provided
-            final String smallIconColor = "#" + iconColorHex;
-            if (!StringUtils.isNullOrEmpty(smallIconColor)) {
+            if (!StringUtils.isNullOrEmpty(iconColorHex)) {
+                final String smallIconColor = "#" + iconColorHex;
                 builder.setColorized(true).setColor(Color.parseColor(smallIconColor));
             }
         } catch (final IllegalArgumentException exception) {
@@ -218,8 +222,6 @@ class AEPPushNotificationBuilder {
                     "Unrecognized hex string passed to Color.parseColor(), custom color will not"
                             + " be applied to the notification icon.");
         }
-
-        builder.setSmallIcon(smallIconResourceId);
     }
 
     /**

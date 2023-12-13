@@ -27,6 +27,13 @@ public class BasicTemplateNotificationBuilder {
     @NonNull static NotificationCompat.Builder construct(
             final BasicPushTemplate pushTemplate, final Context context)
             throws NotificationConstructionFailedException {
+
+        if (pushTemplate == null) {
+            throw new NotificationConstructionFailedException(
+                    "Invalid push template received, filmstrip carousel notification will not be"
+                            + " constructed.");
+        }
+
         Log.trace(
                 CampaignPushConstants.LOG_TAG,
                 SELF_TAG,

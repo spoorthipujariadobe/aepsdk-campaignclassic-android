@@ -37,7 +37,7 @@
         android:layout_width="30dp"
         android:layout_height="60dp"
         android:layout_marginTop="100dp"
-        android:background="@drawable/SkipLeft" />
+        android:background="@drawable/skipleft" />
 
     <ImageButton
         android:id="@+id/rightImageButton"
@@ -46,5 +46,5 @@
         android:layout_marginTop="100dp"
         android:layout_alignEnd="@id/manual_carousel_view_flipper"
         android:layout_gravity="right"
-        android:background="@drawable/SkipRight" />
+        android:background="@drawable/skipright" />
 </RelativeLayout>

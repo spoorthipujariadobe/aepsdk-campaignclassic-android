@@ -33,6 +33,7 @@ import java.util.List;
 
 public class FilmstripCarouselTemplateNotificationBuilder {
     private static final String SELF_TAG = "FilmstripCarouselTemplateNotificationBuilder";
+    private static CarouselPushTemplate pushTemplate;
 
     static NotificationCompat.Builder construct(
             final CarouselPushTemplate pushTemplate,
@@ -51,6 +52,14 @@ public class FilmstripCarouselTemplateNotificationBuilder {
                     "Cache service is null, filmstrip carousel notification will not be"
                             + " constructed.");
         }
+
+        if (pushTemplate == null) {
+            throw new NotificationConstructionFailedException(
+                    "Invalid push template received, filmstrip carousel notification will not be"
+                            + " constructed.");
+        }
+
+        FilmstripCarouselTemplateNotificationBuilder.pushTemplate = pushTemplate;
 
         // download the carousel images and populate the image uri, image caption, and image click
         // action arrays
@@ -88,21 +97,11 @@ public class FilmstripCarouselTemplateNotificationBuilder {
         // to be downloaded
         if (downloadedImageUris.size()
                 < CampaignPushConstants.DefaultValues.FILMSTRIP_CAROUSEL_MINIMUM_IMAGE_COUNT) {
-            Log.trace(
-                    CampaignPushConstants.LOG_TAG,
-                    SELF_TAG,
-                    "Only %d image(s) for the manual filmstrip carousel notification were"
-                            + " downloaded. Building a basic push notification instead.",
-                    downloadedImageUris.size());
-            if (!CollectionUtils.isEmpty(downloadedImageUris)) {
-                // use the first downloaded image (if available) for the basic template notification
-                pushTemplate.modifyData(
-                        CampaignPushConstants.PushPayloadKeys.IMAGE_URL,
-                        downloadedImageUris.get(0));
-            }
-            final BasicPushTemplate basicPushTemplate =
-                    new BasicPushTemplate(pushTemplate.getData());
-            return BasicTemplateNotificationBuilder.construct(basicPushTemplate, context);
+            return CarouselTemplateNotificationBuilder.fallbackToBasicNotification(
+                    context,
+                    pushTemplate,
+                    downloadedImageUris,
+                    CampaignPushConstants.DefaultValues.FILMSTRIP_CAROUSEL_MINIMUM_IMAGE_COUNT);
         }
 
         final String titleText = pushTemplate.getTitle();
@@ -133,8 +132,7 @@ public class FilmstripCarouselTemplateNotificationBuilder {
                 imageCaptions,
                 imageClickActions,
                 expandedLayout,
-                smallLayout,
-                pushTemplate);
+                smallLayout);
     }
 
     static void handleIntent(final Context context, final Intent intent) {
@@ -157,10 +155,6 @@ public class FilmstripCarouselTemplateNotificationBuilder {
                     intent.getAction());
             return;
         }
-
-        final CarouselPushTemplate pushTemplate =
-                (CarouselPushTemplate)
-                        intentExtras.get(CampaignPushConstants.IntentKeys.PUSH_TEMPLATE);
 
         final CacheService cacheService = ServiceProvider.getInstance().getCacheService();
         final String assetCacheLocation = CampaignPushUtils.getAssetCacheLocation();
@@ -196,13 +190,6 @@ public class FilmstripCarouselTemplateNotificationBuilder {
                 R.id.notification_body_expanded, pushTemplate.getExpandedBodyText());
 
         final String action = intent.getAction();
-        String newCenterCaption;
-        Bitmap newLeftImage;
-        Bitmap newCenterImage;
-        Bitmap newRightImage;
-        int newCenterIndex;
-        int newLeftIndex;
-        int newRightIndex;
         int centerImageIndex =
                 intentExtras.getInt(CampaignPushConstants.IntentKeys.CENTER_IMAGE_INDEX);
 
@@ -220,13 +207,34 @@ public class FilmstripCarouselTemplateNotificationBuilder {
                             imageUrls.size(),
                             CampaignPushConstants.IntentActions.FILMSTRIP_RIGHT_CLICKED);
         }
-        newLeftIndex = newIndices.get(0);
-        newCenterIndex = newIndices.get(1);
-        newRightIndex = newIndices.get(2);
-        newCenterImage = cachedImages.get(newCenterIndex);
-        newLeftImage = cachedImages.get(newLeftIndex);
-        newRightImage = cachedImages.get(newRightIndex);
-        newCenterCaption = imageCaptions.get(newCenterIndex);
+
+        String newCenterCaption;
+        Bitmap newLeftImage;
+        Bitmap newCenterImage;
+        Bitmap newRightImage;
+        int newCenterIndex;
+        int newLeftIndex;
+        int newRightIndex;
+        if (newIndices == null) {
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "Unable to calculate new left, center, and right indices. Using default center"
+                            + " image index of 1.");
+            newCenterIndex = CampaignPushConstants.DefaultValues.CENTER_INDEX;
+            newLeftImage = cachedImages.get(CampaignPushConstants.DefaultValues.CENTER_INDEX - 1);
+            newCenterImage = cachedImages.get(CampaignPushConstants.DefaultValues.CENTER_INDEX);
+            newRightImage = cachedImages.get(CampaignPushConstants.DefaultValues.CENTER_INDEX + 1);
+            newCenterCaption = imageCaptions.get(CampaignPushConstants.DefaultValues.CENTER_INDEX);
+        } else {
+            newLeftIndex = newIndices.get(0);
+            newCenterIndex = newIndices.get(1);
+            newRightIndex = newIndices.get(2);
+            newCenterImage = cachedImages.get(newCenterIndex);
+            newLeftImage = cachedImages.get(newLeftIndex);
+            newRightImage = cachedImages.get(newRightIndex);
+            newCenterCaption = imageCaptions.get(newCenterIndex);
+        }
 
         expandedLayout.setImageViewBitmap(R.id.manual_carousel_filmstrip_center, newCenterImage);
         expandedLayout.setImageViewBitmap(R.id.manual_carousel_filmstrip_left, newLeftImage);
@@ -244,8 +252,7 @@ public class FilmstripCarouselTemplateNotificationBuilder {
                                 imageCaptions,
                                 imageClickActions,
                                 expandedLayout,
-                                smallLayout,
-                                pushTemplate)
+                                smallLayout)
                         .build();
 
         notificationManager.notify(pushTemplate.getMessageId().hashCode(), notification);
@@ -259,8 +266,7 @@ public class FilmstripCarouselTemplateNotificationBuilder {
             final ArrayList<String> imageCaptions,
             final ArrayList<String> imageClickActions,
             final RemoteViews expandedLayout,
-            final RemoteViews smallLayout,
-            final CarouselPushTemplate pushTemplate) {
+            final RemoteViews smallLayout) {
         // assign a click action pending intent to the center image view
         final PendingIntent centerImagePendingIntent =
                 CampaignPushUtils.createPendingIntentFromImageInteractionUri(
@@ -356,7 +362,6 @@ public class FilmstripCarouselTemplateNotificationBuilder {
         clickIntent.putExtra(CampaignPushConstants.IntentKeys.IMAGE_CAPTIONS, imageCaptions);
         clickIntent.putExtra(
                 CampaignPushConstants.IntentKeys.IMAGE_CLICK_ACTIONS, imageClickActions);
-        clickIntent.putExtra(CampaignPushConstants.IntentKeys.PUSH_TEMPLATE, pushTemplate);
 
         return clickIntent;
     }

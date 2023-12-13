@@ -15,6 +15,8 @@ import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.services.ServiceProvider;
+import com.google.android.gms.common.util.CollectionUtils;
+import java.util.List;
 
 public class CarouselTemplateNotificationBuilder {
     private static final String SELF_TAG = "CarouselTemplateNotificationBuilder";
@@ -76,5 +78,27 @@ public class CarouselTemplateNotificationBuilder {
             final String packageName) {
         // TODO
         return new NotificationCompat.Builder(context, channelId);
+    }
+
+    static NotificationCompat.Builder fallbackToBasicNotification(
+            final Context context,
+            final CarouselPushTemplate pushTemplate,
+            final List<String> downloadedImageUris,
+            final int minimumImageCount)
+            throws NotificationConstructionFailedException {
+        Log.trace(
+                CampaignPushConstants.LOG_TAG,
+                SELF_TAG,
+                "Only %d image(s) for the carousel notification were downloaded while at least %d"
+                        + " were expected. Building a basic push notification instead.",
+                downloadedImageUris.size(),
+                minimumImageCount);
+        if (!CollectionUtils.isEmpty(downloadedImageUris)) {
+            // use the first downloaded image (if available) for the basic template notification
+            pushTemplate.modifyData(
+                    CampaignPushConstants.PushPayloadKeys.IMAGE_URL, downloadedImageUris.get(0));
+        }
+        final BasicPushTemplate basicPushTemplate = new BasicPushTemplate(pushTemplate.getData());
+        return BasicTemplateNotificationBuilder.construct(basicPushTemplate, context);
     }
 }

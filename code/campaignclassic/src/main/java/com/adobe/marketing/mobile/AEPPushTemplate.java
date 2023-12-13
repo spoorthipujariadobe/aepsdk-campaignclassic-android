@@ -20,7 +20,6 @@ import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.util.DataReader;
 import com.adobe.marketing.mobile.util.DataReaderException;
 import com.adobe.marketing.mobile.util.StringUtils;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,10 +28,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-class AEPPushTemplate implements Serializable {
+class AEPPushTemplate {
 
     /** Enum to denote the type of action */
-    enum ActionType implements Serializable {
+    enum ActionType {
         DEEPLINK,
         WEBURL,
         DISMISS,
@@ -41,7 +40,7 @@ class AEPPushTemplate implements Serializable {
     }
 
     /** Class representing the action button with label, link and type */
-    class ActionButton implements Serializable {
+    class ActionButton {
         private final String label;
         private final String link;
         private final ActionType type;
@@ -65,20 +64,20 @@ class AEPPushTemplate implements Serializable {
         }
     }
 
-    static final class ActionButtonType implements Serializable {
+    static final class ActionButtonType {
         static final String DEEPLINK = "DEEPLINK";
         static final String WEBURL = "WEBURL";
         static final String DISMISS = "DISMISS";
         static final String OPENAPP = "OPENAPP";
     }
 
-    static final class ActionButtons implements Serializable {
+    static final class ActionButtons {
         static final String LABEL = "label";
         static final String URI = "uri";
         static final String TYPE = "type";
     }
 
-    static final class NotificationPriority implements Serializable {
+    static final class NotificationPriority {
         static int from(final String priority) {
             if (priority == null) return NotificationCompat.PRIORITY_DEFAULT;
             final Integer resolvedPriority = notificationPriorityMap.get(priority);
@@ -93,7 +92,7 @@ class AEPPushTemplate implements Serializable {
         static final String PRIORITY_MAX = "PRIORITY_MAX";
     }
 
-    static final class NotificationVisibility implements Serializable {
+    static final class NotificationVisibility {
         static final String PUBLIC = "PUBLIC";
         static final String PRIVATE = "PRIVATE";
         static final String SECRET = "SECRET";

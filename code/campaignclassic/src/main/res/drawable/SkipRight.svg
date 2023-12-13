@@ -1,8 +1,0 @@
-<svg data-name="spectrum1" xmlns="http://www.w3.org/2000/svg" width="10" height="12" viewBox="0 0 10 12">
-    <style>
-        .fill {
-            fill:#6e6e6e;
-        }
-    </style>
-    <path class="fill"  id="Shape" d="M9,.01a1,1,0,0,0-1,1v9.98a1,1,0,1,0,2,0V1.01A1,1,0,0,0,9,.01Z"/>  <path class="fill"  id="Shape-2" data-name="Shape" d="M7,6a.99679.99679,0,0,0-.29327-.70734L1.71734.30327A.9999.9999,0,1,0,.30327,1.71734L4.58594,6,.30327,10.28266a.9999.9999,0,1,0,1.41407,1.41407L6.70673,6.70734A.99669.99669,0,0,0,7,6Z"/>
-</svg>

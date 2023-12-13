@@ -20,10 +20,8 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.adobe.marketing.mobile.services.DataStoring;
 import com.adobe.marketing.mobile.services.DeviceInforming;
 import com.adobe.marketing.mobile.services.Log;
-import com.adobe.marketing.mobile.services.NamedCollection;
 import com.adobe.marketing.mobile.services.ServiceProvider;
 import com.adobe.marketing.mobile.services.caching.CacheEntry;
 import com.adobe.marketing.mobile.services.caching.CacheExpiry;
@@ -40,6 +38,11 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Utility class for building push notifications.
@@ -51,41 +54,72 @@ import java.util.List;
 class CampaignPushUtils {
     private static final String SELF_TAG = "CampaignPushUtils";
 
-    static Bitmap download(@NonNull final String url) {
-        Bitmap bitmap = null;
-        HttpURLConnection connection = null;
-        InputStream inputStream = null;
+    private static class DownloadImageCallable implements Callable<Bitmap> {
+        final String url;
 
-        try {
-            final URL imageUrl = new URL(url);
-            connection = (HttpURLConnection) imageUrl.openConnection();
-            inputStream = connection.getInputStream();
-            bitmap = BitmapFactory.decodeStream(inputStream);
-        } catch (IOException e) {
-            Log.warning(
-                    CampaignPushConstants.LOG_TAG,
-                    SELF_TAG,
-                    "Failed to download push notification image from url (%s). Exception: %s",
-                    url,
-                    e.getMessage());
-        } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    Log.warning(
-                            CampaignPushConstants.LOG_TAG,
-                            SELF_TAG,
-                            "IOException during closing Input stream while push notification image"
-                                    + " from url (%s). Exception: %s ",
-                            url,
-                            e.getMessage());
+        DownloadImageCallable(final String url) {
+            this.url = url;
+        }
+
+        @Override
+        public Bitmap call() {
+            Bitmap bitmap = null;
+            HttpURLConnection connection = null;
+            InputStream inputStream = null;
+
+            try {
+                final URL imageUrl = new URL(url);
+                connection = (HttpURLConnection) imageUrl.openConnection();
+                inputStream = connection.getInputStream();
+                bitmap = BitmapFactory.decodeStream(inputStream);
+            } catch (final IOException e) {
+                Log.warning(
+                        CampaignPushConstants.LOG_TAG,
+                        SELF_TAG,
+                        "Failed to download push notification image from url (%s). Exception: %s",
+                        url,
+                        e.getMessage());
+            } finally {
+                if (inputStream != null) {
+                    try {
+                        inputStream.close();
+                    } catch (final IOException e) {
+                        Log.warning(
+                                CampaignPushConstants.LOG_TAG,
+                                SELF_TAG,
+                                "IOException during closing Input stream while push notification"
+                                        + " image from url (%s). Exception: %s ",
+                                url,
+                                e.getMessage());
+                    }
+                }
+
+                if (connection != null) {
+                    connection.disconnect();
                 }
             }
 
-            if (connection != null) {
-                connection.disconnect();
-            }
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "Downloaded push notification image from url (%s)",
+                    url);
+            return bitmap;
+        }
+    }
+    ;
+
+    static Bitmap download(final String url) {
+        Bitmap bitmap = null;
+        final ExecutorService executorService = Executors.newSingleThreadExecutor();
+        final Future<Bitmap> downloadTask = executorService.submit(new DownloadImageCallable(url));
+
+        try {
+            bitmap = downloadTask.get(1, TimeUnit.SECONDS);
+            executorService.shutdown();
+            executorService.awaitTermination(1, TimeUnit.SECONDS);
+        } catch (final Exception e) {
+            downloadTask.cancel(true);
         }
 
         return bitmap;
@@ -175,7 +209,7 @@ class CampaignPushUtils {
                         bitmapInputStream,
                         CacheExpiry.after(
                                 CampaignPushConstants.DefaultValues
-                                        .PUSH_NOTIFICATION_IMAGE_CACHE_EXPIRY),
+                                        .PUSH_NOTIFICATION_IMAGE_CACHE_EXPIRY_IN_MILLISECONDS),
                         null);
         cacheService.set(CampaignPushUtils.getAssetCacheLocation(), imageUri, cacheEntry);
     }
@@ -204,38 +238,6 @@ class CampaignPushUtils {
     }
 
     /**
-     * Writes a small icon resourceId in the Campaign Classic extension's datastore.
-     *
-     * @param resourceId {@code int} containing a small icon resource id
-     */
-    static void setSmallIconIdInDatastore(final int resourceId) {
-        final DataStoring dataStoreService = ServiceProvider.getInstance().getDataStoreService();
-        if (dataStoreService == null) {
-            return;
-        }
-        final NamedCollection campaignDatastore =
-                dataStoreService.getNamedCollection(CampaignPushConstants.DATASTORE_NAME);
-        campaignDatastore.setInt(
-                CampaignPushConstants.SMALL_ICON_RESOURCE_ID_DATASTORE_KEY, resourceId);
-    }
-
-    /**
-     * Retrieves a small icon resourceId from the Campaign Classic extension's datastore.
-     *
-     * @return {@code int} containing a retrieved small icon resource id
-     */
-    static int getSmallIconIdFromDatastore() {
-        final DataStoring dataStoreService = ServiceProvider.getInstance().getDataStoreService();
-        if (dataStoreService == null) {
-            return 0;
-        }
-        final NamedCollection campaignDatastore =
-                dataStoreService.getNamedCollection(CampaignPushConstants.DATASTORE_NAME);
-        return campaignDatastore.getInt(
-                CampaignPushConstants.SMALL_ICON_RESOURCE_ID_DATASTORE_KEY, 0);
-    }
-
-    /**
      * Downloads an image using the provided uri {@code String}. Prior to downloading, the image uri
      * is used o retrieve a {@code CacheResult} containing a previously cached image. If no cache
      * result is returned then a call to {@link CampaignPushUtils#download(String)} is made to
@@ -255,43 +257,44 @@ class CampaignPushUtils {
         }
         final String cacheLocation = CampaignPushUtils.getAssetCacheLocation();
         final CacheResult cacheResult = cacheService.get(cacheLocation, uri);
-        Bitmap pushImage = null;
-        if (cacheResult == null) {
-            if (UrlUtils.isValidUrl(uri)) { // we need to download the images first
-                final Bitmap image = CampaignPushUtils.download(uri);
-                if (image != null) {
-                    Log.trace(
-                            CampaignPushConstants.LOG_TAG,
-                            SELF_TAG,
-                            "Successfully download image from %s",
-                            uri);
-                    // scale down the bitmap to 300dp x 200dp as we don't want to use a full
-                    // size image due to memory constraints
-                    pushImage =
-                            Bitmap.createScaledBitmap(
-                                    image,
-                                    CampaignPushConstants.DefaultValues.CAROUSEL_MAX_BITMAP_WIDTH,
-                                    CampaignPushConstants.DefaultValues.CAROUSEL_MAX_BITMAP_HEIGHT,
-                                    false);
 
-                    // write bitmap to cache
-                    try (final InputStream bitmapInputStream =
-                            CampaignPushUtils.bitmapToInputStream(pushImage)) {
-                        CampaignPushUtils.cacheBitmapInputStream(
-                                cacheService, bitmapInputStream, uri);
-                    } catch (final IOException exception) {
-                        Log.trace(
-                                CampaignPushConstants.LOG_TAG,
-                                SELF_TAG,
-                                "Exception occurred creating an input stream from a"
-                                        + " bitmap: %s.",
-                                exception.getLocalizedMessage());
-                    }
-                }
-            }
-        } else { // we have previously downloaded the image
+        if (cacheResult != null) {
             Log.trace(CampaignPushConstants.LOG_TAG, SELF_TAG, "Found cached image for %s.", uri);
-            pushImage = BitmapFactory.decodeStream(cacheResult.getData());
+            return BitmapFactory.decodeStream(cacheResult.getData());
+        }
+
+        if (!UrlUtils.isValidUrl(uri)) {
+            return null;
+        }
+
+        final Bitmap image = CampaignPushUtils.download(uri);
+
+        if (image == null) return null;
+
+        Log.trace(
+                CampaignPushConstants.LOG_TAG,
+                SELF_TAG,
+                "Successfully download image from %s",
+                uri);
+        // scale down the bitmap to 300dp x 200dp as we don't want to use a full
+        // size image due to memory constraints
+        Bitmap pushImage =
+                pushImage =
+                        Bitmap.createScaledBitmap(
+                                image,
+                                CampaignPushConstants.DefaultValues.CAROUSEL_MAX_BITMAP_WIDTH,
+                                CampaignPushConstants.DefaultValues.CAROUSEL_MAX_BITMAP_HEIGHT,
+                                false);
+        // write bitmap to cache
+        try (final InputStream bitmapInputStream =
+                CampaignPushUtils.bitmapToInputStream(pushImage)) {
+            CampaignPushUtils.cacheBitmapInputStream(cacheService, bitmapInputStream, uri);
+        } catch (final IOException exception) {
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "Exception occurred creating an input stream from a" + " bitmap: %s.",
+                    exception.getLocalizedMessage());
         }
         return pushImage;
     }
@@ -336,6 +339,10 @@ class CampaignPushUtils {
      */
     static List<Integer> calculateNewIndices(
             final int centerIndex, final int listSize, final String action) {
+        if (listSize < 3) {
+            return null;
+        }
+
         final List<Integer> newIndices = new ArrayList<>();
         int newCenterIndex = 0;
         int newLeftIndex = 0;

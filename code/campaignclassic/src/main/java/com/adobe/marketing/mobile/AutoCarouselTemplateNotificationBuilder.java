@@ -20,8 +20,8 @@ import com.adobe.marketing.mobile.campaignclassic.R;
 import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.services.ServiceProvider;
 import com.adobe.marketing.mobile.services.caching.CacheService;
-import com.adobe.marketing.mobile.util.StringUtils;
 import java.util.ArrayList;
+import java.util.List;
 
 public class AutoCarouselTemplateNotificationBuilder {
     private static final String SELF_TAG = "AutoCarouselTemplateNotificationBuilder";
@@ -44,63 +44,26 @@ public class AutoCarouselTemplateNotificationBuilder {
                             + " constructed.");
         }
 
-        // load images into the carousel
-        final long imageProcessingStartTime = System.currentTimeMillis();
-        final ArrayList<CarouselPushTemplate.CarouselItem> items = pushTemplate.getCarouselItems();
-        final ArrayList<String> downloadedImageUris = new ArrayList<>();
-
-        for (final CarouselPushTemplate.CarouselItem item : items) {
-            final RemoteViews carouselItem =
-                    new RemoteViews(packageName, R.layout.push_template_carousel_item);
-            final String imageUri = item.getImageUri();
-            final Bitmap pushImage = CampaignPushUtils.downloadImage(cacheService, imageUri);
-            if (pushImage != null) {
-                downloadedImageUris.add(imageUri);
-                carouselItem.setImageViewBitmap(R.id.carousel_item_image_view, pushImage);
-                carouselItem.setTextViewText(R.id.carousel_item_caption, item.getCaptionText());
-                expandedLayout.addView(R.id.auto_carousel_view_flipper, carouselItem);
-
-                // assign a click action pending intent for each carousel item
-                final PendingIntent carouselItemPendingIntent =
-                        CampaignPushUtils.createPendingIntentFromImageInteractionUri(
-                                context, item.getInteractionUri());
-                if (carouselItemPendingIntent != null) {
-                    carouselItem.setOnClickPendingIntent(
-                            R.id.carousel_item_image_view, carouselItemPendingIntent);
-                }
-            }
+        if (pushTemplate == null) {
+            throw new NotificationConstructionFailedException(
+                    "Invalid push template received, auto carousel notification will not be"
+                            + " constructed.");
         }
 
-        // log time needed to process the carousel images
-        final long imageProcessingElapsedTime =
-                System.currentTimeMillis() - imageProcessingStartTime;
-        Log.trace(
-                CampaignPushConstants.LOG_TAG,
-                SELF_TAG,
-                "Processed %d auto carousel image(s) in %d milliseconds.",
-                downloadedImageUris.size(),
-                imageProcessingElapsedTime);
+        // load images into the carousel
+        final ArrayList<CarouselPushTemplate.CarouselItem> items = pushTemplate.getCarouselItems();
+        final List<String> downloadedImageUris =
+                populateImages(context, cacheService, expandedLayout, items, packageName);
 
         // fallback to a basic push template notification builder if only 1 (or less) image was able
         // to be downloaded
         if (downloadedImageUris.size()
                 <= CampaignPushConstants.DefaultValues.AUTO_CAROUSEL_MINIMUM_IMAGE_COUNT) {
-            Log.trace(
-                    CampaignPushConstants.LOG_TAG,
-                    SELF_TAG,
-                    "Only %d image(s) for the auto carousel notification were downloaded. Building"
-                            + " a basic push notification instead.",
-                    downloadedImageUris.size());
-
-            // use the downloaded image if available
-            if (!StringUtils.isNullOrEmpty(downloadedImageUris.get(0))) {
-                pushTemplate.modifyData(
-                        CampaignPushConstants.PushPayloadKeys.IMAGE_URL,
-                        downloadedImageUris.get(0));
-            }
-            final BasicPushTemplate basicPushTemplate =
-                    new BasicPushTemplate(pushTemplate.getData());
-            return BasicTemplateNotificationBuilder.construct(basicPushTemplate, context);
+            return CarouselTemplateNotificationBuilder.fallbackToBasicNotification(
+                    context,
+                    pushTemplate,
+                    downloadedImageUris,
+                    CampaignPushConstants.DefaultValues.AUTO_CAROUSEL_MINIMUM_IMAGE_COUNT);
         }
 
         smallLayout.setTextViewText(R.id.notification_title, pushTemplate.getTitle());
@@ -142,5 +105,49 @@ public class AutoCarouselTemplateNotificationBuilder {
         }
 
         return builder;
+    }
+
+    private static List<String> populateImages(
+            final Context context,
+            final CacheService cacheService,
+            final RemoteViews expandedLayout,
+            final ArrayList<CarouselPushTemplate.CarouselItem> items,
+            final String packageName) {
+        final long imageProcessingStartTime = System.currentTimeMillis();
+        final ArrayList<String> downloadedImageUris = new ArrayList<>();
+
+        for (final CarouselPushTemplate.CarouselItem item : items) {
+            final RemoteViews carouselItem =
+                    new RemoteViews(packageName, R.layout.push_template_carousel_item);
+            final String imageUri = item.getImageUri();
+            final Bitmap pushImage = CampaignPushUtils.downloadImage(cacheService, imageUri);
+            if (pushImage != null) {
+                downloadedImageUris.add(imageUri);
+                carouselItem.setImageViewBitmap(R.id.carousel_item_image_view, pushImage);
+                carouselItem.setTextViewText(R.id.carousel_item_caption, item.getCaptionText());
+                expandedLayout.addView(R.id.auto_carousel_view_flipper, carouselItem);
+
+                // assign a click action pending intent for each carousel item
+                final PendingIntent carouselItemPendingIntent =
+                        CampaignPushUtils.createPendingIntentFromImageInteractionUri(
+                                context, item.getInteractionUri());
+                if (carouselItemPendingIntent != null) {
+                    carouselItem.setOnClickPendingIntent(
+                            R.id.carousel_item_image_view, carouselItemPendingIntent);
+                }
+            }
+        }
+
+        // log time needed to process the carousel images
+        final long imageProcessingElapsedTime =
+                System.currentTimeMillis() - imageProcessingStartTime;
+        Log.trace(
+                CampaignPushConstants.LOG_TAG,
+                SELF_TAG,
+                "Processed %d auto carousel image(s) in %d milliseconds.",
+                downloadedImageUris.size(),
+                imageProcessingElapsedTime);
+
+        return downloadedImageUris;
     }
 }

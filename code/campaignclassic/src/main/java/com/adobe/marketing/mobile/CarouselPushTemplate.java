@@ -13,13 +13,15 @@ package com.adobe.marketing.mobile;
 import androidx.annotation.NonNull;
 import com.adobe.marketing.mobile.util.DataReader;
 import com.adobe.marketing.mobile.util.DataReaderException;
+import com.adobe.marketing.mobile.util.JSONUtils;
 import com.adobe.marketing.mobile.util.StringUtils;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONException;
 
-class CarouselPushTemplate extends AEPPushTemplate implements Serializable {
+class CarouselPushTemplate extends AEPPushTemplate {
     // Optional, Determines how the carousel will be operated. Valid values are "auto" or "manual".
     // Default is "auto".
     private final String carouselOperationMode; // auto or manual
@@ -28,7 +30,7 @@ class CarouselPushTemplate extends AEPPushTemplate implements Serializable {
     // Required, "default" or "filmstrip"
     private String carouselLayoutType;
 
-    class CarouselItem implements Serializable {
+    class CarouselItem {
         // Required, URI to an image to be shown for the carousel item
         private final String imageUri;
         // Optional, caption to show when the carousel item is visible
@@ -80,15 +82,23 @@ class CarouselPushTemplate extends AEPPushTemplate implements Serializable {
             throw new IllegalArgumentException("Required field \"adb_car_layout\" not found.");
         }
 
-        List<Map<String, String>> carouselItemMaps;
+        String carouselItemsString;
         try {
-            carouselItemMaps =
-                    DataReader.getTypedListOfMap(
-                            String.class,
-                            messageData,
-                            CampaignPushConstants.PushPayloadKeys.CAROUSEL_ITEMS);
+            carouselItemsString =
+                    DataReader.getString(
+                            messageData, CampaignPushConstants.PushPayloadKeys.CAROUSEL_ITEMS);
         } catch (final DataReaderException dataReaderException) {
             throw new IllegalArgumentException("Required field \"adb_items\" not found.");
+        }
+
+        JSONArray carouselItemJSONArray;
+        List<Object> carouselItemObjects;
+        try {
+            carouselItemJSONArray = new JSONArray(carouselItemsString);
+            carouselItemObjects = JSONUtils.toList(carouselItemJSONArray);
+        } catch (final JSONException exception) {
+            throw new IllegalArgumentException(
+                    "Unable to create a JSONObject from the carousel items string.");
         }
 
         this.carouselOperationMode =
@@ -96,7 +106,8 @@ class CarouselPushTemplate extends AEPPushTemplate implements Serializable {
                         messageData,
                         CampaignPushConstants.PushPayloadKeys.CAROUSEL_OPERATION_MODE,
                         CampaignPushConstants.DefaultValues.AUTO_CAROUSEL_MODE);
-        for (final Map<String, String> carouselItemMap : carouselItemMaps) {
+        for (final Object carouselObject : carouselItemObjects) {
+            final Map<String, String> carouselItemMap = (Map<String, String>) carouselObject;
             // the image uri is required, do not create a CarouselItem if it is missing
             final String carouselImage =
                     carouselItemMap.get(CampaignPushConstants.PushPayloadKeys.CAROUSEL_ITEM_IMAGE);
