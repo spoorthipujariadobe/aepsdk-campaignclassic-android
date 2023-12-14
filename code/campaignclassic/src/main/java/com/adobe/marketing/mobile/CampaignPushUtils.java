@@ -279,12 +279,11 @@ class CampaignPushUtils {
         // scale down the bitmap to 300dp x 200dp as we don't want to use a full
         // size image due to memory constraints
         Bitmap pushImage =
-                pushImage =
-                        Bitmap.createScaledBitmap(
-                                image,
-                                CampaignPushConstants.DefaultValues.CAROUSEL_MAX_BITMAP_WIDTH,
-                                CampaignPushConstants.DefaultValues.CAROUSEL_MAX_BITMAP_HEIGHT,
-                                false);
+                Bitmap.createScaledBitmap(
+                        image,
+                        CampaignPushConstants.DefaultValues.CAROUSEL_MAX_BITMAP_WIDTH,
+                        CampaignPushConstants.DefaultValues.CAROUSEL_MAX_BITMAP_HEIGHT,
+                        false);
         // write bitmap to cache
         try (final InputStream bitmapInputStream =
                 CampaignPushUtils.bitmapToInputStream(pushImage)) {
@@ -339,9 +338,7 @@ class CampaignPushUtils {
      */
     static List<Integer> calculateNewIndices(
             final int centerIndex, final int listSize, final String action) {
-        if (listSize < 3) {
-            return null;
-        }
+        if (listSize < 3) return null;
 
         final List<Integer> newIndices = new ArrayList<>();
         int newCenterIndex = 0;
