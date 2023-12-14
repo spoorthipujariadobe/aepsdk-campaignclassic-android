@@ -31,28 +31,24 @@ public class CarouselTemplateNotificationBuilder {
                         .getAppContextService()
                         .getApplication()
                         .getPackageName();
-
         final String carouselOperationMode = pushTemplate.getCarouselOperationMode();
 
-        NotificationCompat.Builder builder;
-        if (carouselOperationMode.equals(CampaignPushConstants.DefaultValues.AUTO_CAROUSEL_MODE)) {
-            Log.trace(
-                    CampaignPushConstants.LOG_TAG,
-                    SELF_TAG,
-                    "Building an auto carousel push notification.");
-            builder =
-                    AutoCarouselTemplateNotificationBuilder.construct(
-                            pushTemplate, context, channelId, packageName);
-        } else {
+        if (carouselOperationMode.equals(
+                CampaignPushConstants.DefaultValues.MANUAL_CAROUSEL_MODE)) {
             Log.trace(
                     CampaignPushConstants.LOG_TAG,
                     SELF_TAG,
                     "Building a manual carousel push notification.");
-            builder =
-                    buildManualCarouselNotification(pushTemplate, context, channelId, packageName);
+            return buildManualCarouselNotification(pushTemplate, context, channelId, packageName);
         }
 
-        return builder;
+        // default operation mode is auto
+        Log.trace(
+                CampaignPushConstants.LOG_TAG,
+                SELF_TAG,
+                "Building an auto carousel push notification.");
+        return AutoCarouselTemplateNotificationBuilder.construct(
+                pushTemplate, context, channelId, packageName);
     }
 
     static NotificationCompat.Builder buildManualCarouselNotification(

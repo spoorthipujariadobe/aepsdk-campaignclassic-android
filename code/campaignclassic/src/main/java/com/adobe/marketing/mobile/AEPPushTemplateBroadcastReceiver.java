@@ -13,12 +13,18 @@ package com.adobe.marketing.mobile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import com.adobe.marketing.mobile.util.StringUtils;
 
 /** Broadcast receiver for handling custom push template notification interactions. */
 public class AEPPushTemplateBroadcastReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, final Intent intent) {
+        final String action = intent.getAction();
+        if (StringUtils.isNullOrEmpty(action)) {
+            return;
+        }
+
         if (intent.getAction().equals(CampaignPushConstants.IntentActions.FILMSTRIP_LEFT_CLICKED)
                 || intent.getAction()
                         .equals(CampaignPushConstants.IntentActions.FILMSTRIP_RIGHT_CLICKED)) {

@@ -50,6 +50,7 @@ final class CampaignPushConstants {
         static final int CAROUSEL_MAX_BITMAP_WIDTH = 300;
         static final int CAROUSEL_MAX_BITMAP_HEIGHT = 200;
         static final String AUTO_CAROUSEL_MODE = "auto";
+        static final String MANUAL_CAROUSEL_MODE = "manual";
         static final String FILMSTRIP_CAROUSEL_MODE = "filmstrip";
         static final int AUTO_CAROUSEL_MINIMUM_IMAGE_COUNT = 1;
         static final int CENTER_INDEX = 1;

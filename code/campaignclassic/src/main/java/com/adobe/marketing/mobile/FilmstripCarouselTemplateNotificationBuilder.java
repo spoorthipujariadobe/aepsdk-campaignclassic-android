@@ -288,8 +288,7 @@ public class FilmstripCarouselTemplateNotificationBuilder {
                         centerImageIndex,
                         downloadedImageUris,
                         imageCaptions,
-                        imageClickActions,
-                        pushTemplate);
+                        imageClickActions);
 
         final PendingIntent pendingIntentLeftButton =
                 PendingIntent.getBroadcast(
@@ -346,8 +345,7 @@ public class FilmstripCarouselTemplateNotificationBuilder {
             final int centerIndex,
             final ArrayList<String> imageUrls,
             final ArrayList<String> imageCaptions,
-            final ArrayList<String> imageClickActions,
-            final CarouselPushTemplate pushTemplate) {
+            final ArrayList<String> imageClickActions) {
         final Intent clickIntent =
                 new Intent(
                         CampaignPushConstants.IntentActions.FILMSTRIP_LEFT_CLICKED,

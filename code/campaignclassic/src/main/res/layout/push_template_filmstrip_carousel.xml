@@ -69,15 +69,15 @@
     <ImageButton
         android:id="@+id/leftImageButton"
         android:layout_width="30dp"
-        android:layout_height="60dp"
-        android:layout_marginTop="110dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="130dp"
         android:background="@drawable/skipleft" />
 
     <ImageButton
         android:id="@+id/rightImageButton"
         android:layout_width="30dp"
-        android:layout_height="60dp"
-        android:layout_marginTop="110dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="130dp"
         android:layout_alignEnd="@id/manual_carousel_filmstrip_right"
         android:layout_gravity="right"
         android:background="@drawable/skipright" />
