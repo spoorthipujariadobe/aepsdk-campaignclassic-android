@@ -23,6 +23,10 @@ public class AEPPushTemplateBroadcastReceiver extends BroadcastReceiver {
                 || intent.getAction()
                         .equals(CampaignPushConstants.IntentActions.FILMSTRIP_RIGHT_CLICKED)) {
             FilmstripCarouselTemplateNotificationBuilder.handleIntent(context, intent);
+        } else if (intent.getAction().equals(CampaignPushConstants.IntentActions.MANUAL_CAROUSEL_LEFT_CLICKED)
+                || intent.getAction()
+                .equals(CampaignPushConstants.IntentActions.MANUAL_CAROUSEL_RIGHT_CLICKED)) {
+            ManualCarouselTemplateNotificationBuilder.handleIntent(context, intent);
         }
     }
 }

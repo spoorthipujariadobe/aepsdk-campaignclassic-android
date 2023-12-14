@@ -353,7 +353,7 @@ class CampaignPushUtils {
                 "Current center index is %d and list size is %d.",
                 centerIndex,
                 listSize);
-        if (action.equals(CampaignPushConstants.IntentActions.FILMSTRIP_LEFT_CLICKED)) {
+        if (action.equals(CampaignPushConstants.IntentActions.FILMSTRIP_LEFT_CLICKED) || action.equals(CampaignPushConstants.IntentActions.MANUAL_CAROUSEL_LEFT_CLICKED)) {
             newCenterIndex = centerIndex - 1;
             newLeftIndex = newCenterIndex - 1 < 0 ? listSize - 1 : newCenterIndex - 1;
             newRightIndex = centerIndex;
@@ -363,7 +363,7 @@ class CampaignPushUtils {
                 newLeftIndex = newCenterIndex - 1;
                 newRightIndex = 0;
             }
-        } else if (action.equals(CampaignPushConstants.IntentActions.FILMSTRIP_RIGHT_CLICKED)) {
+        } else if (action.equals(CampaignPushConstants.IntentActions.FILMSTRIP_RIGHT_CLICKED) || action.equals(CampaignPushConstants.IntentActions.MANUAL_CAROUSEL_RIGHT_CLICKED)) {
             newCenterIndex = centerIndex + 1;
             newLeftIndex = centerIndex;
             newRightIndex = newCenterIndex + 1 == listSize ? 0 : newCenterIndex + 1;

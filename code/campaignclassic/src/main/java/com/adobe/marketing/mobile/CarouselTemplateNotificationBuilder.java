@@ -67,17 +67,8 @@ public class CarouselTemplateNotificationBuilder {
             return FilmstripCarouselTemplateNotificationBuilder.construct(
                     pushTemplate, context, channelId, packageName);
         }
-        return buildDefaultManualCarouselNotification(
+        return ManualCarouselTemplateNotificationBuilder.construct(
                 pushTemplate, context, channelId, packageName);
-    }
-
-    private static NotificationCompat.Builder buildDefaultManualCarouselNotification(
-            final CarouselPushTemplate pushTemplate,
-            final Context context,
-            final String channelId,
-            final String packageName) {
-        // TODO
-        return new NotificationCompat.Builder(context, channelId);
     }
 
     static NotificationCompat.Builder fallbackToBasicNotification(

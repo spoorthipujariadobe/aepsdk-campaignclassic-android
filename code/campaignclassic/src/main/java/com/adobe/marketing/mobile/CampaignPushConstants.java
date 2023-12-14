@@ -52,6 +52,7 @@ final class CampaignPushConstants {
         static final String AUTO_CAROUSEL_MODE = "auto";
         static final String FILMSTRIP_CAROUSEL_MODE = "filmstrip";
         static final int AUTO_CAROUSEL_MINIMUM_IMAGE_COUNT = 1;
+        static final int MANUAL_CAROUSEL_MINIMUM_IMAGE_COUNT = 1;
         static final int CENTER_INDEX = 1;
         static final int FILMSTRIP_CAROUSEL_MINIMUM_IMAGE_COUNT = 3;
         static final long PUSH_NOTIFICATION_IMAGE_CACHE_EXPIRY_IN_MILLISECONDS =
@@ -63,6 +64,8 @@ final class CampaignPushConstants {
     final class IntentActions {
         static final String FILMSTRIP_LEFT_CLICKED = "filmstrip_left";
         static final String FILMSTRIP_RIGHT_CLICKED = "filmstrip_right";
+        static final String MANUAL_CAROUSEL_LEFT_CLICKED = "carousel_left";
+        static final String MANUAL_CAROUSEL_RIGHT_CLICKED = "carousel_right";
 
         private IntentActions() {}
     }
