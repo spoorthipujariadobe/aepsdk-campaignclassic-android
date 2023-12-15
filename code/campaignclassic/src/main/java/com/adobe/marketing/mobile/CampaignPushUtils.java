@@ -10,7 +10,6 @@
 */
 package com.adobe.marketing.mobile;
 
-import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -278,7 +277,7 @@ class CampaignPushUtils {
                 uri);
         // scale down the bitmap to 300dp x 200dp as we don't want to use a full
         // size image due to memory constraints
-        Bitmap pushImage =
+        final Bitmap pushImage =
                 Bitmap.createScaledBitmap(
                         image,
                         CampaignPushConstants.DefaultValues.CAROUSEL_MAX_BITMAP_WIDTH,
@@ -296,35 +295,6 @@ class CampaignPushUtils {
                     exception.getLocalizedMessage());
         }
         return pushImage;
-    }
-
-    /**
-     * Creates a pending intent for the provided image interaction uri {@code String}.
-     *
-     * @param context the current app {@link Context}
-     * @param uri {@code String} containing an image interaction uri
-     * @return {@link PendingIntent} created from the provided uri
-     */
-    static PendingIntent createPendingIntentFromImageInteractionUri(
-            final Context context, final String uri) {
-        if (StringUtils.isNullOrEmpty(uri)) {
-            Log.trace(
-                    CampaignPushConstants.LOG_TAG,
-                    SELF_TAG,
-                    "Click action uri not found, will not create PendingIntent.");
-            return null;
-        }
-        Log.trace(
-                CampaignPushConstants.LOG_TAG,
-                SELF_TAG,
-                "Creating pending intent for click action %s.",
-                uri);
-        final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
-        return PendingIntent.getActivity(
-                context,
-                0,
-                intent,
-                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     /**
@@ -350,7 +320,9 @@ class CampaignPushUtils {
                 "Current center index is %d and list size is %d.",
                 centerIndex,
                 listSize);
-        if (action.equals(CampaignPushConstants.IntentActions.FILMSTRIP_LEFT_CLICKED) || action.equals(CampaignPushConstants.IntentActions.MANUAL_CAROUSEL_LEFT_CLICKED)) {
+        if (action.equals(CampaignPushConstants.IntentActions.FILMSTRIP_LEFT_CLICKED)
+                || action.equals(
+                        CampaignPushConstants.IntentActions.MANUAL_CAROUSEL_LEFT_CLICKED)) {
             newCenterIndex = centerIndex - 1;
             newLeftIndex = newCenterIndex - 1 < 0 ? listSize - 1 : newCenterIndex - 1;
             newRightIndex = centerIndex;
@@ -360,7 +332,9 @@ class CampaignPushUtils {
                 newLeftIndex = newCenterIndex - 1;
                 newRightIndex = 0;
             }
-        } else if (action.equals(CampaignPushConstants.IntentActions.FILMSTRIP_RIGHT_CLICKED) || action.equals(CampaignPushConstants.IntentActions.MANUAL_CAROUSEL_RIGHT_CLICKED)) {
+        } else if (action.equals(CampaignPushConstants.IntentActions.FILMSTRIP_RIGHT_CLICKED)
+                || action.equals(
+                        CampaignPushConstants.IntentActions.MANUAL_CAROUSEL_RIGHT_CLICKED)) {
             newCenterIndex = centerIndex + 1;
             newLeftIndex = centerIndex;
             newRightIndex = newCenterIndex + 1 == listSize ? 0 : newCenterIndex + 1;

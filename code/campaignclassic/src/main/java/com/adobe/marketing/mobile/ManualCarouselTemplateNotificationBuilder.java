@@ -71,7 +71,6 @@ public class ManualCarouselTemplateNotificationBuilder {
         final Map<String, ArrayList<String>> extractedItemData =
                 populateImages(context, cacheService, expandedLayout, items, packageName);
 
-
         final ArrayList<String> downloadedImageUris = extractedItemData.get(IMAGE_URIS_KEY);
         final ArrayList<String> imageCaptions = extractedItemData.get(IMAGE_CAPTIONS_KEY);
         final ArrayList<String> imageClickActions = extractedItemData.get(IMAGE_ACTIONS_KEY);
@@ -105,7 +104,8 @@ public class ManualCarouselTemplateNotificationBuilder {
                 imageCaptions,
                 imageClickActions,
                 expandedLayout,
-                smallLayout);
+                smallLayout,
+                false);
     }
 
     static void handleIntent(final Context context, final Intent intent) {
@@ -194,7 +194,11 @@ public class ManualCarouselTemplateNotificationBuilder {
         }
 
         final ArrayList<CarouselPushTemplate.CarouselItem> items = new ArrayList<>();
-        final CarouselPushTemplate.CarouselItem centerCarouselItem = new CarouselPushTemplate.CarouselItem(imageUrls.get(newCenterIndex), imageCaptions.get(newCenterIndex), imageClickActions.get(newCenterIndex));
+        final CarouselPushTemplate.CarouselItem centerCarouselItem =
+                new CarouselPushTemplate.CarouselItem(
+                        imageUrls.get(newCenterIndex),
+                        imageCaptions.get(newCenterIndex),
+                        imageClickActions.get(newCenterIndex));
         items.add(centerCarouselItem);
 
         populateImages(context, cacheService, expandedLayout, items, packageName);
@@ -203,14 +207,15 @@ public class ManualCarouselTemplateNotificationBuilder {
                 intentExtras.getString(CampaignPushConstants.IntentKeys.CHANNEL_ID);
         final Notification notification =
                 createNotificationBuilder(
-                        context,
-                        channelId,
-                        newCenterIndex,
-                        imageUrls,
-                        imageCaptions,
-                        imageClickActions,
-                        expandedLayout,
-                        smallLayout)
+                                context,
+                                channelId,
+                                newCenterIndex,
+                                imageUrls,
+                                imageCaptions,
+                                imageClickActions,
+                                expandedLayout,
+                                smallLayout,
+                                true)
                         .build();
 
         notificationManager.notify(pushTemplate.getMessageId().hashCode(), notification);
@@ -224,11 +229,11 @@ public class ManualCarouselTemplateNotificationBuilder {
             final ArrayList<String> imageCaptions,
             final ArrayList<String> imageClickActions,
             final RemoteViews expandedLayout,
-            final RemoteViews smallLayout) {
+            final RemoteViews smallLayout,
+            final boolean handlingIntent) {
         // assign a click action pending intent to the center image view
-        final PendingIntent centerImagePendingIntent =
-                CampaignPushUtils.createPendingIntentFromImageInteractionUri(
-                        context, imageClickActions.get(centerImageIndex));
+        AEPPushNotificationBuilder.setRemoteViewClickAction(
+                expandedLayout, R.id.manual_carousel_filmstrip_center, pushTemplate, context);
 
         // set any custom colors if needed
         AEPPushNotificationBuilder.setCustomNotificationColors(
@@ -262,13 +267,27 @@ public class ManualCarouselTemplateNotificationBuilder {
         expandedLayout.setOnClickPendingIntent(R.id.leftImageButton, pendingIntentLeftButton);
         expandedLayout.setOnClickPendingIntent(R.id.rightImageButton, pendingIntentRightButton);
 
-        final NotificationCompat.Builder builder =
-                new NotificationCompat.Builder(context, channelId)
-                        .setNumber(pushTemplate.getBadgeCount())
-                        .setAutoCancel(true)
-                        .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
-                        .setCustomContentView(smallLayout)
-                        .setCustomBigContentView(expandedLayout);
+        NotificationCompat.Builder builder;
+        if (handlingIntent) {
+            builder =
+                    new NotificationCompat.Builder(
+                                    context,
+                                    CampaignPushConstants.DefaultValues
+                                            .SILENT_NOTIFICATION_CHANNEL_ID)
+                            .setNumber(pushTemplate.getBadgeCount())
+                            .setAutoCancel(true)
+                            .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
+                            .setCustomContentView(smallLayout)
+                            .setCustomBigContentView(expandedLayout);
+        } else {
+            builder =
+                    new NotificationCompat.Builder(context, channelId)
+                            .setNumber(pushTemplate.getBadgeCount())
+                            .setAutoCancel(true)
+                            .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
+                            .setCustomContentView(smallLayout)
+                            .setCustomBigContentView(expandedLayout);
+        }
 
         AEPPushNotificationBuilder.setSmallIcon(
                 builder,
@@ -332,28 +351,31 @@ public class ManualCarouselTemplateNotificationBuilder {
 
         expandedLayout.removeAllViews(R.id.manual_carousel_view_flipper);
         for (final CarouselPushTemplate.CarouselItem item : items) {
-            final RemoteViews carouselItem =
-                    new RemoteViews(packageName, R.layout.push_template_carousel_item);
             final String imageUri = item.getImageUri();
             final Bitmap pushImage = CampaignPushUtils.downloadImage(cacheService, imageUri);
-            if (pushImage != null) {
-                downloadedImageUris.add(imageUri);
-                imageCaptions.add(item.getCaptionText());
-                imageClickActions.add(item.getInteractionUri());
-                carouselItem.setImageViewBitmap(R.id.carousel_item_image_view, pushImage);
-                carouselItem.setTextViewText(R.id.carousel_item_caption, item.getCaptionText());
-
-                // assign a click action pending intent for each carousel item
-                final PendingIntent carouselItemPendingIntent =
-                        CampaignPushUtils.createPendingIntentFromImageInteractionUri(
-                                context, item.getInteractionUri());
-                if (carouselItemPendingIntent != null) {
-                    carouselItem.setOnClickPendingIntent(
-                            R.id.carousel_item_image_view, carouselItemPendingIntent);
-                }
-
-                expandedLayout.addView(R.id.manual_carousel_view_flipper, carouselItem);
+            if (pushImage == null) {
+                Log.trace(
+                        CampaignPushConstants.LOG_TAG,
+                        SELF_TAG,
+                        "Failed to retrieve an image from %s, will not create a new carousel item.",
+                        imageUri);
+                break;
             }
+
+            final RemoteViews carouselItem =
+                    new RemoteViews(packageName, R.layout.push_template_carousel_item);
+            downloadedImageUris.add(imageUri);
+            imageCaptions.add(item.getCaptionText());
+            imageClickActions.add(item.getInteractionUri());
+            carouselItem.setImageViewBitmap(R.id.carousel_item_image_view, pushImage);
+            carouselItem.setTextViewText(R.id.carousel_item_caption, item.getCaptionText());
+
+            // assign a click action pending intent for each carousel item
+            AEPPushNotificationBuilder.setRemoteViewClickAction(
+                    carouselItem, R.id.carousel_item_image_view, pushTemplate, context);
+
+            // add the carousel item to the view flipper
+            expandedLayout.addView(R.id.manual_carousel_view_flipper, carouselItem);
         }
 
         // log time needed to process the carousel images

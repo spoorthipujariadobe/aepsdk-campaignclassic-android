@@ -75,12 +75,18 @@ public class FilmstripCarouselTemplateNotificationBuilder {
         for (final CarouselPushTemplate.CarouselItem item : items) {
             final String imageUri = item.getImageUri();
             final Bitmap pushImage = CampaignPushUtils.downloadImage(cacheService, imageUri);
-            if (pushImage != null) {
-                downloadedImages.add(pushImage);
-                downloadedImageUris.add(imageUri);
-                imageCaptions.add(item.getCaptionText());
-                imageClickActions.add(item.getInteractionUri());
+            if (pushImage == null) {
+                Log.trace(
+                        CampaignPushConstants.LOG_TAG,
+                        SELF_TAG,
+                        "Failed to retrieve an image from %s, will not create a new carousel item.",
+                        imageUri);
+                break;
             }
+            downloadedImages.add(pushImage);
+            downloadedImageUris.add(imageUri);
+            imageCaptions.add(item.getCaptionText());
+            imageClickActions.add(item.getInteractionUri());
         }
 
         // log time needed to process the carousel images
@@ -132,7 +138,8 @@ public class FilmstripCarouselTemplateNotificationBuilder {
                 imageCaptions,
                 imageClickActions,
                 expandedLayout,
-                smallLayout);
+                smallLayout,
+                false);
     }
 
     static void handleIntent(final Context context, final Intent intent) {
@@ -252,7 +259,8 @@ public class FilmstripCarouselTemplateNotificationBuilder {
                                 imageCaptions,
                                 imageClickActions,
                                 expandedLayout,
-                                smallLayout)
+                                smallLayout,
+                                true)
                         .build();
 
         notificationManager.notify(pushTemplate.getMessageId().hashCode(), notification);
@@ -266,15 +274,12 @@ public class FilmstripCarouselTemplateNotificationBuilder {
             final ArrayList<String> imageCaptions,
             final ArrayList<String> imageClickActions,
             final RemoteViews expandedLayout,
-            final RemoteViews smallLayout) {
+            final RemoteViews smallLayout,
+            final boolean handlingIntent) {
+
         // assign a click action pending intent to the center image view
-        final PendingIntent centerImagePendingIntent =
-                CampaignPushUtils.createPendingIntentFromImageInteractionUri(
-                        context, imageClickActions.get(centerImageIndex));
-        if (centerImagePendingIntent != null) {
-            expandedLayout.setOnClickPendingIntent(
-                    R.id.manual_carousel_filmstrip_center, centerImagePendingIntent);
-        }
+        AEPPushNotificationBuilder.setRemoteViewClickAction(
+                expandedLayout, R.id.manual_carousel_filmstrip_center, pushTemplate, context);
 
         // set any custom colors if needed
         AEPPushNotificationBuilder.setCustomNotificationColors(
@@ -308,13 +313,28 @@ public class FilmstripCarouselTemplateNotificationBuilder {
         expandedLayout.setOnClickPendingIntent(R.id.leftImageButton, pendingIntentLeftButton);
         expandedLayout.setOnClickPendingIntent(R.id.rightImageButton, pendingIntentRightButton);
 
-        final NotificationCompat.Builder builder =
-                new NotificationCompat.Builder(context, channelId)
-                        .setNumber(pushTemplate.getBadgeCount())
-                        .setAutoCancel(true)
-                        .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
-                        .setCustomContentView(smallLayout)
-                        .setCustomBigContentView(expandedLayout);
+        NotificationCompat.Builder builder;
+
+        if (handlingIntent) {
+            builder =
+                    new NotificationCompat.Builder(
+                                    context,
+                                    CampaignPushConstants.DefaultValues
+                                            .SILENT_NOTIFICATION_CHANNEL_ID)
+                            .setNumber(pushTemplate.getBadgeCount())
+                            .setAutoCancel(true)
+                            .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
+                            .setCustomContentView(smallLayout)
+                            .setCustomBigContentView(expandedLayout);
+        } else {
+            builder =
+                    new NotificationCompat.Builder(context, channelId)
+                            .setNumber(pushTemplate.getBadgeCount())
+                            .setAutoCancel(true)
+                            .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
+                            .setCustomContentView(smallLayout)
+                            .setCustomBigContentView(expandedLayout);
+        }
 
         AEPPushNotificationBuilder.setSmallIcon(
                 builder,

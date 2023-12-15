@@ -17,6 +17,8 @@ import androidx.core.app.NotificationManagerCompat;
 import com.adobe.marketing.mobile.services.Log;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class is the entry point for all push notifications received from Firebase.
@@ -69,6 +71,52 @@ public class AEPMessagingService extends FirebaseMessagingService {
             return false;
         }
 
+        // call track notification receive as we know that the push payload data is valid
+        trackNotificationReceive(payload);
+
         return true;
+    }
+
+    public static boolean handleRemoteMessageData(
+            final @NonNull Context context, final @NonNull Map<String, String> messageData) {
+        final NotificationManagerCompat notificationManager =
+                NotificationManagerCompat.from(context);
+        final AEPPushPayload payload = new AEPPushPayload(messageData);
+        try {
+            final Notification notification =
+                    AEPPushNotificationBuilder.buildPushNotification(payload, context);
+
+            // display notification
+            notificationManager.notify(payload.getMessageId().hashCode(), notification);
+        } catch (final NotificationConstructionFailedException exception) {
+            Log.error(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "Failed to create a push notification, an exception occurred:" + " %s",
+                    exception.getLocalizedMessage());
+            return false;
+        }
+
+        // call track notification receive as we know that the push payload data is valid
+        trackNotificationReceive(payload);
+
+        return true;
+    }
+
+    private static void trackNotificationReceive(final AEPPushPayload payload) {
+        Log.trace(
+                CampaignPushConstants.LOG_TAG,
+                SELF_TAG,
+                "Received push payload is valid, sending notification receive track request.");
+        final Map<String, String> trackInfo =
+                new HashMap<String, String>() {
+                    {
+                        put(CampaignPushConstants.Tracking.Keys.MESSAGE_ID, payload.getMessageId());
+                        put(
+                                CampaignPushConstants.Tracking.Keys.DELIVERY_ID,
+                                payload.getDeliveryId());
+                    }
+                };
+        CampaignClassic.trackNotificationReceive(trackInfo);
     }
 }

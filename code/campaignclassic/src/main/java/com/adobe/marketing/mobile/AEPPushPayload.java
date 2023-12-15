@@ -22,6 +22,7 @@ import java.util.Map;
 public class AEPPushPayload {
     private final Map<String, String> messageData;
     private final String messageId;
+    private final String deliveryId;
 
     /**
      * Constructor
@@ -52,7 +53,29 @@ public class AEPPushPayload {
                     "Failed to create AEPPushPayload, message id is null or empty.");
         }
 
-        final String deliveryId = messageData.get(CampaignPushConstants.Tracking.Keys.DELIVERY_ID);
+        deliveryId = messageData.get(CampaignPushConstants.Tracking.Keys.DELIVERY_ID);
+        if (StringUtils.isNullOrEmpty(deliveryId)) {
+            throw new IllegalArgumentException(
+                    "Failed to create AEPPushPayload, delivery id is null or empty.");
+        }
+
+        this.messageData = messageData;
+    }
+
+    public AEPPushPayload(final Map<String, String> messageData) {
+        if (MapUtils.isNullOrEmpty(messageData)) {
+            throw new IllegalArgumentException(
+                    "Failed to create AEPPushPayload, remote message data payload is null or"
+                            + " empty.");
+        }
+
+        messageId = messageData.get(CampaignPushConstants.Tracking.Keys.MESSAGE_ID);
+        if (StringUtils.isNullOrEmpty(messageId)) {
+            throw new IllegalArgumentException(
+                    "Failed to create AEPPushPayload, message id is null or empty.");
+        }
+
+        deliveryId = messageData.get(CampaignPushConstants.Tracking.Keys.DELIVERY_ID);
         if (StringUtils.isNullOrEmpty(deliveryId)) {
             throw new IllegalArgumentException(
                     "Failed to create AEPPushPayload, delivery id is null or empty.");
@@ -67,5 +90,9 @@ public class AEPPushPayload {
 
     String getMessageId() {
         return messageId;
+    }
+
+    String getDeliveryId() {
+        return deliveryId;
     }
 }

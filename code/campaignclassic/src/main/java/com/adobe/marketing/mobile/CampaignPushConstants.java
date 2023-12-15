@@ -46,6 +46,7 @@ final class CampaignPushConstants {
     }
 
     final class DefaultValues {
+        static final String SILENT_NOTIFICATION_CHANNEL_ID = "silent";
         static final String LEGACY_PAYLOAD_VERSION_STRING = "0";
         static final int CAROUSEL_MAX_BITMAP_WIDTH = 300;
         static final int CAROUSEL_MAX_BITMAP_HEIGHT = 200;
