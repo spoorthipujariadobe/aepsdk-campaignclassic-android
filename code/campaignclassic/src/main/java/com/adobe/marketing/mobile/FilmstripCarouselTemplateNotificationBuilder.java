@@ -278,8 +278,8 @@ public class FilmstripCarouselTemplateNotificationBuilder {
             final boolean handlingIntent) {
 
         // assign a click action pending intent to the center image view
-        AEPPushNotificationBuilder.setRemoteViewClickAction(
-                expandedLayout, R.id.manual_carousel_filmstrip_center, pushTemplate, context);
+        AEPPushNotificationBuilder.setRemoteViewClickAction(context,
+                expandedLayout, R.id.manual_carousel_filmstrip_center, pushTemplate, imageClickActions.get(centerImageIndex));
 
         // set any custom colors if needed
         AEPPushNotificationBuilder.setCustomNotificationColors(

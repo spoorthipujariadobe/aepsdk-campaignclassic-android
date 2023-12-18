@@ -361,21 +361,24 @@ class AEPPushNotificationBuilder {
     /**
      * Sets the click action for the specified view in the custom push template {@code RemoteView}.
      *
+     * @param context the application {@link Context}
      * @param pushTemplateRemoteView {@link RemoteViews} the parent view representing a push
      *     template
      * @param targetViewResourceId {@code int} containing the resource id of the view to attach the
      *     click action
      * @param pushTemplate {@link AEPPushTemplate} containing the message data from the received
      *     push notification
-     * @param context the application {@link Context}
+
+     * @param actionUri {@code String} containing the action uri defined for the push template image
      */
     static void setRemoteViewClickAction(
+            final Context context,
             final RemoteViews pushTemplateRemoteView,
             final int targetViewResourceId,
             final AEPPushTemplate pushTemplate,
-            final Context context) {
+            final String actionUri) {
         final PendingIntent pendingIntent =
-                createPendingIntent(pushTemplate, context, pushTemplate.getActionUri(), null);
+                createPendingIntent(pushTemplate, context, actionUri, null);
         pushTemplateRemoteView.setOnClickPendingIntent(targetViewResourceId, pendingIntent);
     }
 

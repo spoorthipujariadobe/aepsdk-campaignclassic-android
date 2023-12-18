@@ -232,8 +232,7 @@ public class ManualCarouselTemplateNotificationBuilder {
             final RemoteViews smallLayout,
             final boolean handlingIntent) {
         // assign a click action pending intent to the center image view
-        AEPPushNotificationBuilder.setRemoteViewClickAction(
-                expandedLayout, R.id.manual_carousel_filmstrip_center, pushTemplate, context);
+        AEPPushNotificationBuilder.setRemoteViewClickAction(context, expandedLayout, R.id.manual_carousel_filmstrip_center, pushTemplate, imageClickActions.get(centerImageIndex));
 
         // set any custom colors if needed
         AEPPushNotificationBuilder.setCustomNotificationColors(
@@ -371,8 +370,7 @@ public class ManualCarouselTemplateNotificationBuilder {
             carouselItem.setTextViewText(R.id.carousel_item_caption, item.getCaptionText());
 
             // assign a click action pending intent for each carousel item
-            AEPPushNotificationBuilder.setRemoteViewClickAction(
-                    carouselItem, R.id.carousel_item_image_view, pushTemplate, context);
+            AEPPushNotificationBuilder.setRemoteViewClickAction(context, carouselItem, R.id.carousel_item_image_view, pushTemplate, item.getInteractionUri());
 
             // add the carousel item to the view flipper
             expandedLayout.addView(R.id.manual_carousel_view_flipper, carouselItem);

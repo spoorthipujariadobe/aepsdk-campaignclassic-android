@@ -21,8 +21,6 @@ final class CampaignPushConstants {
     static final String LOG_TAG = "CampaignClassicExtension";
     static final String CACHE_BASE_DIR = "campaignclassic";
     static final String PUSH_IMAGE_CACHE = "pushimagecache";
-    static final String DATASTORE_NAME = "ADOBEMOBILE_CAMPAIGNCLASSIC";
-    static final String SMALL_ICON_RESOURCE_ID_DATASTORE_KEY = "smalliconid";
 
     final class NotificationAction {
         static final String DISMISSED = "Notification Dismissed";
@@ -66,8 +64,8 @@ final class CampaignPushConstants {
     final class IntentActions {
         static final String FILMSTRIP_LEFT_CLICKED = "filmstrip_left";
         static final String FILMSTRIP_RIGHT_CLICKED = "filmstrip_right";
-        static final String MANUAL_CAROUSEL_LEFT_CLICKED = "carousel_left";
-        static final String MANUAL_CAROUSEL_RIGHT_CLICKED = "carousel_right";
+        static final String MANUAL_CAROUSEL_LEFT_CLICKED = "manual_left";
+        static final String MANUAL_CAROUSEL_RIGHT_CLICKED = "manual_right";
 
         private IntentActions() {}
     }
