@@ -303,35 +303,6 @@ class CampaignPushUtils {
     }
 
     /**
-     * Creates a pending intent for the provided image interaction uri {@code String}.
-     *
-     * @param context the current app {@link Context}
-     * @param uri {@code String} containing an image interaction uri
-     * @return {@link PendingIntent} created from the provided uri
-     */
-    static PendingIntent createPendingIntentFromImageInteractionUri(
-            final Context context, final String uri) {
-        if (StringUtils.isNullOrEmpty(uri)) {
-            Log.trace(
-                    CampaignPushConstants.LOG_TAG,
-                    SELF_TAG,
-                    "Click action uri not found, will not create PendingIntent.");
-            return null;
-        }
-        Log.trace(
-                CampaignPushConstants.LOG_TAG,
-                SELF_TAG,
-                "Creating pending intent for click action %s.",
-                uri);
-        final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
-        return PendingIntent.getActivity(
-                context,
-                0,
-                intent,
-                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-    }
-
-    /**
      * Calculates a new left, center, and right index given the current center index, total number
      * of images, and the intent action.
      *

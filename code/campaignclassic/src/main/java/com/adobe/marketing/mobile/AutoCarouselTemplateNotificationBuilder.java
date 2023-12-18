@@ -10,7 +10,6 @@
 */
 package com.adobe.marketing.mobile;
 
-import android.app.PendingIntent;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -25,7 +24,6 @@ import java.util.List;
 
 public class AutoCarouselTemplateNotificationBuilder {
     private static final String SELF_TAG = "AutoCarouselTemplateNotificationBuilder";
-    private static CarouselPushTemplate pushTemplate;
 
     static NotificationCompat.Builder construct(
             final CarouselPushTemplate pushTemplate,
@@ -50,12 +48,12 @@ public class AutoCarouselTemplateNotificationBuilder {
                     "Invalid push template received, auto carousel notification will not be"
                             + " constructed.");
         }
-        AutoCarouselTemplateNotificationBuilder.pushTemplate = pushTemplate;
 
         // load images into the carousel
         final ArrayList<CarouselPushTemplate.CarouselItem> items = pushTemplate.getCarouselItems();
         final List<String> downloadedImageUris =
-                populateImages(context, cacheService, expandedLayout, items, packageName);
+                populateImages(
+                        context, cacheService, expandedLayout, pushTemplate, items, packageName);
 
         // fallback to a basic push template notification builder if only 1 (or less) image was able
         // to be downloaded
@@ -113,34 +111,33 @@ public class AutoCarouselTemplateNotificationBuilder {
             final Context context,
             final CacheService cacheService,
             final RemoteViews expandedLayout,
+            final CarouselPushTemplate pushTemplate,
             final ArrayList<CarouselPushTemplate.CarouselItem> items,
             final String packageName) {
         final long imageProcessingStartTime = System.currentTimeMillis();
         final ArrayList<String> downloadedImageUris = new ArrayList<>();
 
         for (final CarouselPushTemplate.CarouselItem item : items) {
-            final RemoteViews carouselItem =
-                    new RemoteViews(packageName, R.layout.push_template_carousel_item);
+
             final String imageUri = item.getImageUri();
             final Bitmap pushImage = CampaignPushUtils.downloadImage(cacheService, imageUri);
-            if (pushImage != null) {
-                downloadedImageUris.add(imageUri);
-                carouselItem.setImageViewBitmap(R.id.carousel_item_image_view, pushImage);
-                carouselItem.setTextViewText(R.id.carousel_item_caption, item.getCaptionText());
-                expandedLayout.addView(R.id.auto_carousel_view_flipper, carouselItem);
-
-                // assign a click action pending intent for each carousel item
-                final PendingIntent carouselItemPendingIntent =
-                        CampaignPushUtils.createPendingIntentFromImageInteractionUri(
-                                context, item.getInteractionUri());
-                if (carouselItemPendingIntent != null) {
-                    carouselItem.setOnClickPendingIntent(
-                            R.id.carousel_item_image_view, carouselItemPendingIntent);
-                }
+            if (pushImage == null) {
+                Log.trace(
+                        CampaignPushConstants.LOG_TAG,
+                        SELF_TAG,
+                        "Failed to retrieve an image from %s, will not create a new carousel item.",
+                        imageUri);
+                break;
             }
+            final RemoteViews carouselItem =
+                    new RemoteViews(packageName, R.layout.push_template_carousel_item);
+            downloadedImageUris.add(imageUri);
+            carouselItem.setImageViewBitmap(R.id.carousel_item_image_view, pushImage);
+            carouselItem.setTextViewText(R.id.carousel_item_caption, item.getCaptionText());
 
             // assign a click action pending intent for each carousel item
-            AEPPushNotificationBuilder.setRemoteViewClickAction(context, carouselItem, R.id.carousel_item_image_view, pushTemplate, item.getInteractionUri());
+            AEPPushNotificationBuilder.setRemoteViewClickAction(context,
+                    carouselItem, R.id.carousel_item_image_view, pushTemplate, item.getInteractionUri());
 
             // add the carousel item to the view flipper
             expandedLayout.addView(R.id.auto_carousel_view_flipper, carouselItem);
