@@ -30,7 +30,7 @@ class CarouselPushTemplate extends AEPPushTemplate {
     // Required, "default" or "filmstrip"
     private String carouselLayoutType;
 
-    class CarouselItem {
+    static class CarouselItem {
         // Required, URI to an image to be shown for the carousel item
         private final String imageUri;
         // Optional, caption to show when the carousel item is visible

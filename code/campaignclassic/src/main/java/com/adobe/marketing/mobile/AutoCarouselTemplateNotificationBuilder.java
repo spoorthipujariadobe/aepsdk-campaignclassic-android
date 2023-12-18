@@ -25,6 +25,7 @@ import java.util.List;
 
 public class AutoCarouselTemplateNotificationBuilder {
     private static final String SELF_TAG = "AutoCarouselTemplateNotificationBuilder";
+    private static CarouselPushTemplate pushTemplate;
 
     static NotificationCompat.Builder construct(
             final CarouselPushTemplate pushTemplate,
@@ -49,6 +50,7 @@ public class AutoCarouselTemplateNotificationBuilder {
                     "Invalid push template received, auto carousel notification will not be"
                             + " constructed.");
         }
+        AutoCarouselTemplateNotificationBuilder.pushTemplate = pushTemplate;
 
         // load images into the carousel
         final ArrayList<CarouselPushTemplate.CarouselItem> items = pushTemplate.getCarouselItems();
@@ -136,6 +138,12 @@ public class AutoCarouselTemplateNotificationBuilder {
                             R.id.carousel_item_image_view, carouselItemPendingIntent);
                 }
             }
+
+            // assign a click action pending intent for each carousel item
+            AEPPushNotificationBuilder.setRemoteViewClickAction(context, carouselItem, R.id.carousel_item_image_view, pushTemplate, item.getInteractionUri());
+
+            // add the carousel item to the view flipper
+            expandedLayout.addView(R.id.auto_carousel_view_flipper, carouselItem);
         }
 
         // log time needed to process the carousel images

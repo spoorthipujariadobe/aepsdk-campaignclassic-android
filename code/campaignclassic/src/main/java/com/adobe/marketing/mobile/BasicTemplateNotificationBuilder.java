@@ -60,7 +60,6 @@ public class BasicTemplateNotificationBuilder {
         final String imageUri = pushTemplate.getImageUrl();
         final Bitmap pushImage = CampaignPushUtils.downloadImage(cacheService, imageUri);
         if (pushImage != null) {
-            smallLayout.setImageViewBitmap(R.id.template_image, pushImage);
             expandedLayout.setImageViewBitmap(R.id.expanded_template_image, pushImage);
         }
 

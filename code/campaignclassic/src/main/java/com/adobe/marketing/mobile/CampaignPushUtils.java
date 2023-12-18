@@ -17,6 +17,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.RectF;
 import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -278,12 +280,7 @@ class CampaignPushUtils {
                 uri);
         // scale down the bitmap to 300dp x 200dp as we don't want to use a full
         // size image due to memory constraints
-        Bitmap pushImage =
-                Bitmap.createScaledBitmap(
-                        image,
-                        CampaignPushConstants.DefaultValues.CAROUSEL_MAX_BITMAP_WIDTH,
-                        CampaignPushConstants.DefaultValues.CAROUSEL_MAX_BITMAP_HEIGHT,
-                        false);
+        Bitmap pushImage = scaleBitmap(image);
         // write bitmap to cache
         try (final InputStream bitmapInputStream =
                 CampaignPushUtils.bitmapToInputStream(pushImage)) {
@@ -296,6 +293,13 @@ class CampaignPushUtils {
                     exception.getLocalizedMessage());
         }
         return pushImage;
+    }
+
+    private static Bitmap scaleBitmap(final Bitmap downloadedBitmap)
+    {
+        final Matrix matrix = new Matrix();
+        matrix.setRectToRect(new RectF(0, 0, downloadedBitmap.getWidth(), downloadedBitmap.getHeight()), new RectF(0, 0, CampaignPushConstants.DefaultValues.CAROUSEL_MAX_BITMAP_WIDTH, CampaignPushConstants.DefaultValues.CAROUSEL_MAX_BITMAP_HEIGHT), Matrix.ScaleToFit.CENTER);
+        return Bitmap.createBitmap(downloadedBitmap, 0, 0, downloadedBitmap.getWidth(), downloadedBitmap.getHeight(), matrix, true);
     }
 
     /**

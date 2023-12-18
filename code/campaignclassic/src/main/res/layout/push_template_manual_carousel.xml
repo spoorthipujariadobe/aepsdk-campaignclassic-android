@@ -25,8 +25,9 @@
     <ViewFlipper
         android:id="@+id/manual_carousel_view_flipper"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_gravity="center"
+        android:layout_height="300dp"
+        android:layout_centerInParent="true"
+        android:adjustViewBounds="true"
         android:layout_below="@id/notification_body_expanded"
         android:inAnimation="@android:anim/slide_in_left"
         android:outAnimation="@android:anim/slide_out_right">
@@ -45,6 +46,6 @@
         android:layout_height="40dp"
         android:layout_marginTop="120dp"
         android:layout_alignEnd="@id/manual_carousel_view_flipper"
-        android:layout_gravity="right"
+        android:layout_alignParentEnd="true"
         android:background="@drawable/skipright" />
 </RelativeLayout>
