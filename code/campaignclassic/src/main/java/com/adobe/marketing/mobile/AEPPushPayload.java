@@ -46,10 +46,9 @@ public class AEPPushPayload {
      *
      * <p>Provides the AEPPushPayload object
      *
-     * @param messageData {@link Map<String, String>} containing the message data present in a notification received from {@link
-     *     com.google.firebase.messaging.FirebaseMessagingService}
-     * @throws IllegalArgumentException if the message data, message id, or delivery id is
-     *     null
+     * @param messageData {@link Map<String, String>} containing the message data present in a
+     *     notification received from {@link com.google.firebase.messaging.FirebaseMessagingService}
+     * @throws IllegalArgumentException if the message data, message id, or delivery id is null
      */
     public AEPPushPayload(final Map<String, String> messageData) throws IllegalArgumentException {
         validateMessageData(messageData);

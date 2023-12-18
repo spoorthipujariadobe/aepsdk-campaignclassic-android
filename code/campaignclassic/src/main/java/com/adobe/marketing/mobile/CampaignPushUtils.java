@@ -10,7 +10,6 @@
 */
 package com.adobe.marketing.mobile;
 
-import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -295,11 +294,24 @@ class CampaignPushUtils {
         return pushImage;
     }
 
-    private static Bitmap scaleBitmap(final Bitmap downloadedBitmap)
-    {
+    private static Bitmap scaleBitmap(final Bitmap downloadedBitmap) {
         final Matrix matrix = new Matrix();
-        matrix.setRectToRect(new RectF(0, 0, downloadedBitmap.getWidth(), downloadedBitmap.getHeight()), new RectF(0, 0, CampaignPushConstants.DefaultValues.CAROUSEL_MAX_BITMAP_WIDTH, CampaignPushConstants.DefaultValues.CAROUSEL_MAX_BITMAP_HEIGHT), Matrix.ScaleToFit.CENTER);
-        return Bitmap.createBitmap(downloadedBitmap, 0, 0, downloadedBitmap.getWidth(), downloadedBitmap.getHeight(), matrix, true);
+        matrix.setRectToRect(
+                new RectF(0, 0, downloadedBitmap.getWidth(), downloadedBitmap.getHeight()),
+                new RectF(
+                        0,
+                        0,
+                        CampaignPushConstants.DefaultValues.CAROUSEL_MAX_BITMAP_WIDTH,
+                        CampaignPushConstants.DefaultValues.CAROUSEL_MAX_BITMAP_HEIGHT),
+                Matrix.ScaleToFit.CENTER);
+        return Bitmap.createBitmap(
+                downloadedBitmap,
+                0,
+                0,
+                downloadedBitmap.getWidth(),
+                downloadedBitmap.getHeight(),
+                matrix,
+                true);
     }
 
     /**

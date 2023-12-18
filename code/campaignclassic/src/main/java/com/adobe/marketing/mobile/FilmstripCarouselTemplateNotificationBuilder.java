@@ -252,15 +252,15 @@ public class FilmstripCarouselTemplateNotificationBuilder {
                 intentExtras.getString(CampaignPushConstants.IntentKeys.CHANNEL_ID);
         final Notification notification =
                 createNotificationBuilder(
-                        context,
-                        channelId,
-                        newCenterIndex,
-                        imageUrls,
-                        imageCaptions,
-                        imageClickActions,
-                        expandedLayout,
-                        smallLayout,
-                        true)
+                                context,
+                                channelId,
+                                newCenterIndex,
+                                imageUrls,
+                                imageCaptions,
+                                imageClickActions,
+                                expandedLayout,
+                                smallLayout,
+                                true)
                         .build();
 
         notificationManager.notify(pushTemplate.getMessageId().hashCode(), notification);
@@ -278,8 +278,12 @@ public class FilmstripCarouselTemplateNotificationBuilder {
             final boolean handlingIntent) {
 
         // assign a click action pending intent to the center image view
-        AEPPushNotificationBuilder.setRemoteViewClickAction(context,
-                expandedLayout, R.id.manual_carousel_filmstrip_center, pushTemplate, imageClickActions.get(centerImageIndex));
+        AEPPushNotificationBuilder.setRemoteViewClickAction(
+                context,
+                expandedLayout,
+                R.id.manual_carousel_filmstrip_center,
+                pushTemplate,
+                imageClickActions.get(centerImageIndex));
 
         // set any custom colors if needed
         AEPPushNotificationBuilder.setCustomNotificationColors(
@@ -318,9 +322,9 @@ public class FilmstripCarouselTemplateNotificationBuilder {
         if (handlingIntent) {
             builder =
                     new NotificationCompat.Builder(
-                            context,
-                            CampaignPushConstants.DefaultValues
-                                    .SILENT_NOTIFICATION_CHANNEL_ID)
+                                    context,
+                                    CampaignPushConstants.DefaultValues
+                                            .SILENT_NOTIFICATION_CHANNEL_ID)
                             .setNumber(pushTemplate.getBadgeCount())
                             .setAutoCancel(true)
                             .setStyle(new NotificationCompat.DecoratedCustomViewStyle())

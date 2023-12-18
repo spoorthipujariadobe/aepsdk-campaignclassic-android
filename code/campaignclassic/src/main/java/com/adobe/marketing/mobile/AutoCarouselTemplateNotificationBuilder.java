@@ -136,8 +136,12 @@ public class AutoCarouselTemplateNotificationBuilder {
             carouselItem.setTextViewText(R.id.carousel_item_caption, item.getCaptionText());
 
             // assign a click action pending intent for each carousel item
-            AEPPushNotificationBuilder.setRemoteViewClickAction(context,
-                    carouselItem, R.id.carousel_item_image_view, pushTemplate, item.getInteractionUri());
+            AEPPushNotificationBuilder.setRemoteViewClickAction(
+                    context,
+                    carouselItem,
+                    R.id.carousel_item_image_view,
+                    pushTemplate,
+                    item.getInteractionUri());
 
             // add the carousel item to the view flipper
             expandedLayout.addView(R.id.auto_carousel_view_flipper, carouselItem);

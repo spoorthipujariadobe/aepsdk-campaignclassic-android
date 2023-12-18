@@ -123,6 +123,31 @@ class AEPPushNotificationBuilder {
                                 + channelIdFromPayload
                                 + ". Using the same for push notification.");
                 return channelIdFromPayload;
+            } else if (channelIdFromPayload != null) {
+                Log.debug(
+                        CampaignPushConstants.LOG_TAG,
+                        SELF_TAG,
+                        "Channel does not exist for channel ID obtained from payload ( "
+                                + channelIdFromPayload
+                                + "). Creating a channel named %s.",
+                        channelIdFromPayload);
+
+                final NotificationChannel channel =
+                        new NotificationChannel(
+                                channelIdFromPayload,
+                                DEFAULT_CHANNEL_NAME,
+                                pushTemplate.getNotificationImportance());
+
+                // set a custom sound on the channel
+                setSound(channel, pushTemplate, context, false);
+
+                // add the channel to the notification manager
+                notificationManager.createNotificationChannel(channel);
+
+                // setup a silent channel for notification carousel item change
+                setupSilentNotificationChannel(context, notificationManager, pushTemplate);
+
+                return channelIdFromPayload;
             } else {
                 Log.debug(
                         CampaignPushConstants.LOG_TAG,
@@ -154,6 +179,27 @@ class AEPPushNotificationBuilder {
                 notificationManager.createNotificationChannel(channel);
             }
             return channelId;
+        }
+    }
+
+    private static void setupSilentNotificationChannel(
+            final Context context,
+            final NotificationManager notificationManager,
+            final AEPPushTemplate pushTemplate) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // create a channel containing no sound to be used when displaying an updated carousel
+            // notification
+            final NotificationChannel silentChannel =
+                    new NotificationChannel(
+                            CampaignPushConstants.DefaultValues.SILENT_NOTIFICATION_CHANNEL_ID,
+                            DEFAULT_CHANNEL_NAME,
+                            pushTemplate.getNotificationImportance());
+
+            // set no sound on the silent channel
+            setSound(silentChannel, pushTemplate, context, true);
+
+            // add the silent channel to the notification manager
+            notificationManager.createNotificationChannel(silentChannel);
         }
     }
 
@@ -247,6 +293,26 @@ class AEPPushNotificationBuilder {
                 RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
     }
 
+    static void setSound(
+            final NotificationChannel notificationChannel,
+            final AEPPushTemplate pushTemplate,
+            final Context context,
+            final boolean isSilent) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (isSilent) {
+                notificationChannel.setSound(null, null);
+                return;
+            }
+
+            if (!StringUtils.isNullOrEmpty(pushTemplate.getSound())) {
+                notificationChannel.setSound(
+                        CampaignPushUtils.getSoundUriForResourceName(
+                                pushTemplate.getSound(), context),
+                        null);
+            }
+        }
+    }
+
     /**
      * Sets the large icon for the notification. If a large icon url is received from the payload,
      * the image is downloaded and the notification style is set to BigPictureStyle. If large icon
@@ -276,10 +342,7 @@ class AEPPushNotificationBuilder {
     }
 
     /**
-     * Sets the click action for the notification. If an action type is received from the payload,
-     * the same is used. If an action type is not received from the payload, the default action type
-     * is used. If an action type is received from the payload, but the action type is not
-     * supported, the default action type is used.
+     * Sets the click action for the notification buttons.
      *
      * @param notificationBuilder the notification builder
      * @param pushTemplate {@link AEPPushTemplate} containing the message data from the received
@@ -290,25 +353,8 @@ class AEPPushNotificationBuilder {
             final NotificationCompat.Builder notificationBuilder,
             final AEPPushTemplate pushTemplate,
             final Context context) {
-        final PendingIntent pendingIntent;
-        if (pushTemplate.getActionType() == AEPPushTemplate.ActionType.DEEPLINK
-                || pushTemplate.getActionType() == AEPPushTemplate.ActionType.WEBURL) {
-            pendingIntent =
-                    createPendingIntent(
-                            pushTemplate,
-                            context,
-                            CampaignPushConstants.NotificationAction.OPENED,
-                            pushTemplate.getActionUri(),
-                            null);
-        } else {
-            pendingIntent =
-                    createPendingIntent(
-                            pushTemplate,
-                            context,
-                            CampaignPushConstants.NotificationAction.OPENED,
-                            null,
-                            null);
-        }
+        final PendingIntent pendingIntent =
+                createPendingIntent(pushTemplate, context, pushTemplate.getActionUri(), null);
         notificationBuilder.setContentIntent(pendingIntent);
     }
 
@@ -322,17 +368,16 @@ class AEPPushNotificationBuilder {
      *     click action
      * @param pushTemplate {@link AEPPushTemplate} containing the message data from the received
      *     push notification
-     * @param actionUri {@code String} containing the action uri to be performed
+     * @param actionUri {@code String} containing the action uri defined for the push template image
      */
     static void setRemoteViewClickAction(
             final Context context,
             final RemoteViews pushTemplateRemoteView,
             final int targetViewResourceId,
             final AEPPushTemplate pushTemplate,
-            final String actionUri
-    ) {
+            final String actionUri) {
         final PendingIntent pendingIntent =
-                createPendingIntent(pushTemplate, context, actionUri, CampaignPushConstants.NotificationAction.BUTTON_CLICKED, null);
+                createPendingIntent(pushTemplate, context, actionUri, null);
         pushTemplateRemoteView.setOnClickPendingIntent(targetViewResourceId, pendingIntent);
     }
 
@@ -386,19 +431,10 @@ class AEPPushNotificationBuilder {
                     || eachButton.getType() == AEPPushTemplate.ActionType.WEBURL) {
                 pendingIntent =
                         createPendingIntent(
-                                pushTemplate,
-                                context,
-                                CampaignPushConstants.NotificationAction.BUTTON_CLICKED,
-                                eachButton.getLink(),
-                                eachButton.getLabel());
+                                pushTemplate, context, eachButton.getLink(), eachButton.getLabel());
             } else {
                 pendingIntent =
-                        createPendingIntent(
-                                pushTemplate,
-                                context,
-                                CampaignPushConstants.NotificationAction.BUTTON_CLICKED,
-                                null,
-                                eachButton.getLabel());
+                        createPendingIntent(pushTemplate, context, null, eachButton.getLabel());
             }
             builder.addAction(0, eachButton.getLabel(), pendingIntent);
         }
@@ -410,7 +446,6 @@ class AEPPushNotificationBuilder {
      * @param pushTemplate {@link AEPPushTemplate} containing the message data from the received
      *     push notification
      * @param context the application {@link Context}
-     * @param notificationAction the notification action
      * @param actionUri the action uri
      * @param actionID the action ID
      * @return the pending intent
@@ -418,10 +453,9 @@ class AEPPushNotificationBuilder {
     private static PendingIntent createPendingIntent(
             final AEPPushTemplate pushTemplate,
             final Context context,
-            final String notificationAction,
             final String actionUri,
             final String actionID) {
-        final Intent intent = new Intent(notificationAction);
+        final Intent intent = new Intent(CampaignPushConstants.NotificationAction.BUTTON_CLICKED);
         intent.setClass(context.getApplicationContext(), CampaignPushTrackerActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         intent.putExtra(
@@ -431,13 +465,11 @@ class AEPPushNotificationBuilder {
         addActionDetailsToIntent(intent, actionUri, actionID);
 
         // adding tracking details
-        PendingIntent resultIntent =
-                TaskStackBuilder.create(context)
-                        .addNextIntentWithParentStack(intent)
-                        .getPendingIntent(
-                                new Random().nextInt(),
-                                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        return resultIntent;
+        return TaskStackBuilder.create(context)
+                .addNextIntentWithParentStack(intent)
+                .getPendingIntent(
+                        new Random().nextInt(),
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
     /**
