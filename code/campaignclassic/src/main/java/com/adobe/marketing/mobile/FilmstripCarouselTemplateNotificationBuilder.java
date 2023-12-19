@@ -320,6 +320,10 @@ public class FilmstripCarouselTemplateNotificationBuilder {
         NotificationCompat.Builder builder;
 
         if (handlingIntent) {
+            // we need to create a silent notification as this will be re-displaying a notification
+            // rather than showing a new one.
+            // the silent sound is set on the notification channel and notification builder.
+            Log.trace(CampaignPushConstants.LOG_TAG, SELF_TAG, "Building a silent notification.");
             builder =
                     new NotificationCompat.Builder(
                                     context,
@@ -330,6 +334,7 @@ public class FilmstripCarouselTemplateNotificationBuilder {
                             .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
                             .setCustomContentView(smallLayout)
                             .setCustomBigContentView(expandedLayout);
+            AEPPushNotificationBuilder.setSound(builder, pushTemplate, context, true);
         } else {
             builder =
                     new NotificationCompat.Builder(context, channelId)
@@ -338,6 +343,7 @@ public class FilmstripCarouselTemplateNotificationBuilder {
                             .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
                             .setCustomContentView(smallLayout)
                             .setCustomBigContentView(expandedLayout);
+            AEPPushNotificationBuilder.setSound(builder, pushTemplate, context, false);
         }
 
         AEPPushNotificationBuilder.setSmallIcon(
@@ -349,7 +355,6 @@ public class FilmstripCarouselTemplateNotificationBuilder {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             AEPPushNotificationBuilder.setVisibility(builder, pushTemplate);
         }
-        AEPPushNotificationBuilder.setSound(builder, pushTemplate, context);
 
         // if API level is below 26 (prior to notification channels) then notification priority is
         // set on the notification builder

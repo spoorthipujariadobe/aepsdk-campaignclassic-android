@@ -93,7 +93,7 @@ public class AutoCarouselTemplateNotificationBuilder {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             AEPPushNotificationBuilder.setVisibility(builder, pushTemplate);
         }
-        AEPPushNotificationBuilder.setSound(builder, pushTemplate, context);
+        AEPPushNotificationBuilder.setSound(builder, pushTemplate, context, false);
 
         // if API level is below 26 (prior to notification channels) then notification priority is
         // set on the notification builder

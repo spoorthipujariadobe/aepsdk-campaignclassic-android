@@ -279,20 +279,56 @@ class AEPPushNotificationBuilder {
      * @param pushTemplate {@link AEPPushTemplate} containing the message data from the received
      *     push notification
      * @param context the application {@link Context}
+     * @param isSilent {@code boolean} signaling if a silent sound should be assigned to the
+     *     provided {@code NotificationCompat.Builder}
      */
     static void setSound(
             final NotificationCompat.Builder notificationBuilder,
             final AEPPushTemplate pushTemplate,
-            final Context context) {
-        if (!StringUtils.isNullOrEmpty(pushTemplate.getSound())) {
-            notificationBuilder.setSound(
-                    CampaignPushUtils.getSoundUriForResourceName(pushTemplate.getSound(), context));
+            final Context context,
+            final boolean isSilent) {
+        if (isSilent) {
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "Setting a silent sound on the notification.");
+            notificationBuilder.setSound(null);
             return;
         }
+
+        if (StringUtils.isNullOrEmpty(pushTemplate.getSound())) {
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "No custom sound found in the push template, using the default notification"
+                            + " sound.");
+            notificationBuilder.setSound(
+                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+            return;
+        }
+
+        Log.trace(
+                CampaignPushConstants.LOG_TAG,
+                SELF_TAG,
+                "Setting sound from bundle named %s.",
+                pushTemplate.getSound());
         notificationBuilder.setSound(
-                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+                CampaignPushUtils.getSoundUriForResourceName(pushTemplate.getSound(), context));
     }
 
+    /**
+     * Sets the sound for the provided {@code NotificationChannel}. If a sound is received from the
+     * payload, the same is used. If a sound is not received from the payload, the default sound is
+     * used. The sound name from the payload should also include the format of the sound file. eg:
+     * sound.mp3
+     *
+     * @param notificationChannel the {@link NotificationChannel} to assign the sound to
+     * @param pushTemplate {@link AEPPushTemplate} containing the message data from the received
+     *     push notification
+     * @param context the application {@link Context}
+     * @param isSilent {@code boolean} signaling if a silent sound should be assigned to the
+     *     provided {@code NotificationChannel}
+     */
     static void setSound(
             final NotificationChannel notificationChannel,
             final AEPPushTemplate pushTemplate,
@@ -300,16 +336,34 @@ class AEPPushNotificationBuilder {
             final boolean isSilent) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (isSilent) {
+                Log.trace(
+                        CampaignPushConstants.LOG_TAG,
+                        SELF_TAG,
+                        "Setting a silent sound on channel named %s.",
+                        notificationChannel.getName());
                 notificationChannel.setSound(null, null);
                 return;
             }
 
-            if (!StringUtils.isNullOrEmpty(pushTemplate.getSound())) {
+            if (StringUtils.isNullOrEmpty(pushTemplate.getSound())) {
+                Log.trace(
+                        CampaignPushConstants.LOG_TAG,
+                        SELF_TAG,
+                        "No custom sound found in the push template, using the default"
+                                + " notification sound.");
                 notificationChannel.setSound(
-                        CampaignPushUtils.getSoundUriForResourceName(
-                                pushTemplate.getSound(), context),
-                        null);
+                        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION), null);
+                return;
             }
+
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "Setting sound from bundle named %s.",
+                    pushTemplate.getSound());
+            notificationChannel.setSound(
+                    CampaignPushUtils.getSoundUriForResourceName(pushTemplate.getSound(), context),
+                    null);
         }
     }
 

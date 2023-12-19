@@ -92,7 +92,7 @@ public class BasicTemplateNotificationBuilder {
         }
         AEPPushNotificationBuilder.addActionButtons(
                 builder, pushTemplate, context); // Add action buttons if any
-        AEPPushNotificationBuilder.setSound(builder, pushTemplate, context);
+        AEPPushNotificationBuilder.setSound(builder, pushTemplate, context, false);
         AEPPushNotificationBuilder.setNotificationClickAction(builder, pushTemplate, context);
         AEPPushNotificationBuilder.setNotificationDeleteAction(builder, pushTemplate, context);
 
