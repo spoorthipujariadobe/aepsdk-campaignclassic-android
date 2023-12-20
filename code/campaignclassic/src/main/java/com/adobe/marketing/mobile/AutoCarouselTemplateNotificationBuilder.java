@@ -74,7 +74,12 @@ public class AutoCarouselTemplateNotificationBuilder {
 
         // set any custom colors if needed
         AEPPushNotificationBuilder.setCustomNotificationColors(
-                pushTemplate, smallLayout, expandedLayout, R.id.carousel_container_layout);
+                pushTemplate.getNotificationBackgroundColor(),
+                pushTemplate.getTitleTextColor(),
+                pushTemplate.getExpandedBodyTextColor(),
+                smallLayout,
+                expandedLayout,
+                R.id.carousel_container_layout);
 
         // Create the notification
         final NotificationCompat.Builder builder =
@@ -86,14 +91,17 @@ public class AutoCarouselTemplateNotificationBuilder {
                         .setCustomBigContentView(expandedLayout);
 
         AEPPushNotificationBuilder.setSmallIcon(
+                context,
                 builder,
-                pushTemplate,
-                context); // Small Icon must be present, otherwise the notification will not be
+                pushTemplate.getIcon(),
+                pushTemplate.getSmallIconColor()); // Small Icon must be present, otherwise the
+        // notification will not be
         // displayed.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            AEPPushNotificationBuilder.setVisibility(builder, pushTemplate);
+            AEPPushNotificationBuilder.setVisibility(
+                    builder, pushTemplate.getNotificationVisibility());
         }
-        AEPPushNotificationBuilder.setSound(builder, pushTemplate, context, false);
+        AEPPushNotificationBuilder.setSound(context, builder, pushTemplate.getSound(), false);
 
         // if API level is below 26 (prior to notification channels) then notification priority is
         // set on the notification builder
@@ -140,7 +148,8 @@ public class AutoCarouselTemplateNotificationBuilder {
                     context,
                     carouselItem,
                     R.id.carousel_item_image_view,
-                    pushTemplate,
+                    pushTemplate.getMessageId(),
+                    pushTemplate.getDeliveryId(),
                     item.getInteractionUri());
 
             // add the carousel item to the view flipper

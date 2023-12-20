@@ -39,7 +39,11 @@ public class BasicTemplateNotificationBuilder {
                 SELF_TAG,
                 "Building a basic template push notification.");
         final String channelId =
-                AEPPushNotificationBuilder.createChannelAndGetChannelID(pushTemplate, context);
+                AEPPushNotificationBuilder.createChannelAndGetChannelID(
+                        context,
+                        pushTemplate.getChannelId(),
+                        pushTemplate.getSound(),
+                        pushTemplate.getNotificationImportance());
         final String packageName =
                 ServiceProvider.getInstance()
                         .getAppContextService()
@@ -71,7 +75,12 @@ public class BasicTemplateNotificationBuilder {
 
         // set any custom colors if needed
         AEPPushNotificationBuilder.setCustomNotificationColors(
-                pushTemplate, smallLayout, expandedLayout, R.id.basic_expanded_layout);
+                pushTemplate.getNotificationBackgroundColor(),
+                pushTemplate.getTitleTextColor(),
+                pushTemplate.getExpandedBodyTextColor(),
+                smallLayout,
+                expandedLayout,
+                R.id.basic_expanded_layout);
 
         // Create the notification
         final NotificationCompat.Builder builder =
@@ -83,18 +92,30 @@ public class BasicTemplateNotificationBuilder {
                         .setCustomBigContentView(expandedLayout);
 
         AEPPushNotificationBuilder.setSmallIcon(
+                context,
                 builder,
-                pushTemplate,
-                context); // Small Icon must be present, otherwise the notification will not be
-        // displayed.
+                pushTemplate.getIcon(),
+                pushTemplate.getSmallIconColor()); // Small Icon must be present, otherwise the
+        // notification will not be displayed.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            AEPPushNotificationBuilder.setVisibility(builder, pushTemplate);
+            AEPPushNotificationBuilder.setVisibility(
+                    builder, pushTemplate.getNotificationVisibility());
         }
         AEPPushNotificationBuilder.addActionButtons(
-                builder, pushTemplate, context); // Add action buttons if any
-        AEPPushNotificationBuilder.setSound(builder, pushTemplate, context, false);
-        AEPPushNotificationBuilder.setNotificationClickAction(builder, pushTemplate, context);
-        AEPPushNotificationBuilder.setNotificationDeleteAction(builder, pushTemplate, context);
+                context,
+                builder,
+                pushTemplate.getActionButtons(),
+                pushTemplate.getMessageId(),
+                pushTemplate.getDeliveryId()); // Add action buttons if any
+        AEPPushNotificationBuilder.setSound(context, builder, pushTemplate.getSound(), false);
+        AEPPushNotificationBuilder.setNotificationClickAction(
+                context,
+                builder,
+                pushTemplate.getMessageId(),
+                pushTemplate.getDeliveryId(),
+                pushTemplate.getActionUri());
+        AEPPushNotificationBuilder.setNotificationDeleteAction(
+                context, builder, pushTemplate.getMessageId(), pushTemplate.getDeliveryId());
 
         // if API level is below 26 (prior to notification channels) then notification priority is
         // set on the notification builder

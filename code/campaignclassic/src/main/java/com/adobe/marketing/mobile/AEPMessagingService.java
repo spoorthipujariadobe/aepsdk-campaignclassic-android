@@ -13,6 +13,7 @@ package com.adobe.marketing.mobile;
 import android.app.Notification;
 import android.content.Context;
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 import androidx.core.app.NotificationManagerCompat;
 import com.adobe.marketing.mobile.services.Log;
 import com.google.firebase.messaging.FirebaseMessagingService;
@@ -73,6 +74,7 @@ public class AEPMessagingService extends FirebaseMessagingService {
         return true;
     }
 
+    @VisibleForTesting
     public static boolean handleRemoteMessageData(
             @NonNull final Context context, @NonNull final Map<String, String> messageData) {
         final NotificationManagerCompat notificationManager =

@@ -25,7 +25,11 @@ public class CarouselTemplateNotificationBuilder {
             final CarouselPushTemplate pushTemplate, final Context context)
             throws NotificationConstructionFailedException {
         final String channelId =
-                AEPPushNotificationBuilder.createChannelAndGetChannelID(pushTemplate, context);
+                AEPPushNotificationBuilder.createChannelAndGetChannelID(
+                        context,
+                        pushTemplate.getChannelId(),
+                        pushTemplate.getSound(),
+                        pushTemplate.getNotificationImportance());
         final String packageName =
                 ServiceProvider.getInstance()
                         .getAppContextService()
