@@ -18,7 +18,7 @@ import com.adobe.marketing.mobile.services.ServiceProvider;
 import com.google.android.gms.common.util.CollectionUtils;
 import java.util.List;
 
-public class CarouselTemplateNotificationBuilder {
+class CarouselTemplateNotificationBuilder {
     private static final String SELF_TAG = "CarouselTemplateNotificationBuilder";
 
     @NonNull static NotificationCompat.Builder construct(

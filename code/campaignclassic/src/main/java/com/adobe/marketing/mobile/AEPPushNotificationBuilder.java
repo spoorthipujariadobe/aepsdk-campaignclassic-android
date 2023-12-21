@@ -183,21 +183,23 @@ class AEPPushNotificationBuilder {
             final Context context,
             final NotificationManager notificationManager,
             final int importance) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // create a channel containing no sound to be used when displaying an updated carousel
-            // notification
-            final NotificationChannel silentChannel =
-                    new NotificationChannel(
-                            CampaignPushConstants.DefaultValues.SILENT_NOTIFICATION_CHANNEL_ID,
-                            DEFAULT_CHANNEL_NAME,
-                            importance);
-
-            // set no sound on the silent channel
-            setSound(context, silentChannel, null, true);
-
-            // add the silent channel to the notification manager
-            notificationManager.createNotificationChannel(silentChannel);
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O) {
+            return;
         }
+
+        // create a channel containing no sound to be used when displaying an updated carousel
+        // notification
+        final NotificationChannel silentChannel =
+                new NotificationChannel(
+                        CampaignPushConstants.DefaultValues.SILENT_NOTIFICATION_CHANNEL_ID,
+                        DEFAULT_CHANNEL_NAME,
+                        importance);
+
+        // set no sound on the silent channel
+        setSound(context, silentChannel, null, true);
+
+        // add the silent channel to the notification manager
+        notificationManager.createNotificationChannel(silentChannel);
     }
 
     /**
@@ -219,7 +221,7 @@ class AEPPushNotificationBuilder {
         final int iconFromPayload =
                 CampaignPushUtils.getSmallIconWithResourceName(smallIcon, context);
         final int iconFromMobileCore = MobileCore.getSmallIconResourceID();
-        int iconResourceId = 0;
+        int iconResourceId;
 
         if (isValidIcon(iconFromPayload)) {
             iconResourceId = iconFromPayload;
@@ -234,6 +236,7 @@ class AEPPushNotificationBuilder {
                         CampaignPushConstants.LOG_TAG,
                         SELF_TAG,
                         "No valid small icon found. Notification will not be displayed.");
+                return;
             }
         }
 
@@ -331,36 +334,38 @@ class AEPPushNotificationBuilder {
             final NotificationChannel notificationChannel,
             final String customSound,
             final boolean isSilent) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (isSilent) {
-                Log.trace(
-                        CampaignPushConstants.LOG_TAG,
-                        SELF_TAG,
-                        "Setting a silent sound on channel named %s.",
-                        notificationChannel.getName());
-                notificationChannel.setSound(null, null);
-                return;
-            }
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O) {
+            return;
+        }
 
-            if (StringUtils.isNullOrEmpty(customSound)) {
-                Log.trace(
-                        CampaignPushConstants.LOG_TAG,
-                        SELF_TAG,
-                        "No custom sound found in the push template, using the default"
-                                + " notification sound.");
-                notificationChannel.setSound(
-                        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION), null);
-                return;
-            }
-
+        if (isSilent) {
             Log.trace(
                     CampaignPushConstants.LOG_TAG,
                     SELF_TAG,
-                    "Setting sound from bundle named %s.",
-                    customSound);
-            notificationChannel.setSound(
-                    CampaignPushUtils.getSoundUriForResourceName(customSound, context), null);
+                    "Setting a silent sound on channel named %s.",
+                    notificationChannel.getName());
+            notificationChannel.setSound(null, null);
+            return;
         }
+
+        if (StringUtils.isNullOrEmpty(customSound)) {
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "No custom sound found in the push template, using the default"
+                            + " notification sound.");
+            notificationChannel.setSound(
+                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION), null);
+            return;
+        }
+
+        Log.trace(
+                CampaignPushConstants.LOG_TAG,
+                SELF_TAG,
+                "Setting sound from bundle named %s.",
+                customSound);
+        notificationChannel.setSound(
+                CampaignPushUtils.getSoundUriForResourceName(customSound, context), null);
     }
 
     /**

@@ -22,7 +22,7 @@ import com.adobe.marketing.mobile.services.caching.CacheService;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AutoCarouselTemplateNotificationBuilder {
+class AutoCarouselTemplateNotificationBuilder {
     private static final String SELF_TAG = "AutoCarouselTemplateNotificationBuilder";
 
     static NotificationCompat.Builder construct(

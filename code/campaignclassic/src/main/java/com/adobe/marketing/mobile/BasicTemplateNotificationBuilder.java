@@ -21,7 +21,7 @@ import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.services.ServiceProvider;
 import com.adobe.marketing.mobile.services.caching.CacheService;
 
-public class BasicTemplateNotificationBuilder {
+class BasicTemplateNotificationBuilder {
     private static final String SELF_TAG = "BasicTemplateNotificationBuilder";
 
     @NonNull static NotificationCompat.Builder construct(

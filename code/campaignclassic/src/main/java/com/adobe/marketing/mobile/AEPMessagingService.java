@@ -41,6 +41,18 @@ public class AEPMessagingService extends FirebaseMessagingService {
         handleRemoteMessage(this, remoteMessage);
     }
 
+    /**
+     * Builds an {@link AEPPushPayload} then constructs a {@link Notification} using the {@code
+     * RemoteMessage} payload. The built notification is then passed to the {@link
+     * NotificationManagerCompat} to be displayed. If any exceptions are thrown when building the
+     * {@code AEPPushPayload} or {@code Notification}, this method will return false signaling that
+     * the remote message was not handled by the {@code AEPMessagingService}.
+     *
+     * @param context the application {@link Context}
+     * @param remoteMessage the {@link RemoteMessage} containing a push notification payload
+     * @return {@code boolean} signaling if the {@link AEPMessagingService} handled the remote
+     *     message
+     */
     public static boolean handleRemoteMessage(
             @NonNull final Context context, @NonNull final RemoteMessage remoteMessage) {
         final NotificationManagerCompat notificationManager =
@@ -74,6 +86,18 @@ public class AEPMessagingService extends FirebaseMessagingService {
         return true;
     }
 
+    /**
+     * Builds an {@link AEPPushPayload} then constructs a {@link Notification} using the {@code
+     * Map<String, String>} payload. The built notification is then passed to the {@link
+     * NotificationManagerCompat} to be displayed. If any exceptions are thrown when building the
+     * {@code AEPPushPayload} or {@code Notification}, this method will return false signaling that
+     * the remote message was not handled by the {@code AEPMessagingService}.
+     *
+     * @param context the application {@link Context}
+     * @param messageData the {@link Map<String, String>} containing a push notification payload
+     * @return {@code boolean} signaling if the {@link AEPMessagingService} handled the remote
+     *     message
+     */
     @VisibleForTesting
     public static boolean handleRemoteMessageData(
             @NonNull final Context context, @NonNull final Map<String, String> messageData) {

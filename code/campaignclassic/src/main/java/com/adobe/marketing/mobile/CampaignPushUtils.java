@@ -55,6 +55,14 @@ import java.util.concurrent.TimeUnit;
 class CampaignPushUtils {
     private static final String SELF_TAG = "CampaignPushUtils";
 
+    private static class ExecutorHolder {
+        static final ExecutorService INSTANCE = Executors.newSingleThreadExecutor();
+    }
+
+    private static ExecutorService getExecutor() {
+        return CampaignPushUtils.ExecutorHolder.INSTANCE;
+    }
+
     private static class DownloadImageCallable implements Callable<Bitmap> {
         final String url;
 
@@ -108,17 +116,14 @@ class CampaignPushUtils {
             return bitmap;
         }
     }
-    ;
 
     static Bitmap download(final String url) {
         Bitmap bitmap = null;
-        final ExecutorService executorService = Executors.newSingleThreadExecutor();
+        final ExecutorService executorService = getExecutor();
         final Future<Bitmap> downloadTask = executorService.submit(new DownloadImageCallable(url));
 
         try {
-            bitmap = downloadTask.get(1, TimeUnit.SECONDS);
-            executorService.shutdown();
-            executorService.awaitTermination(1, TimeUnit.SECONDS);
+            bitmap = downloadTask.get(10, TimeUnit.SECONDS);
         } catch (final Exception e) {
             downloadTask.cancel(true);
         }
@@ -223,19 +228,16 @@ class CampaignPushUtils {
     static String getAssetCacheLocation() {
         final DeviceInforming deviceInfoService =
                 ServiceProvider.getInstance().getDeviceInfoService();
-        String assetCacheLocation = null;
-        if (deviceInfoService != null) {
-            final File applicationCacheDir = deviceInfoService.getApplicationCacheDir();
-            if (applicationCacheDir != null) {
-                assetCacheLocation =
-                        applicationCacheDir
-                                + File.separator
-                                + CampaignPushConstants.CACHE_BASE_DIR
-                                + File.separator
-                                + CampaignPushConstants.PUSH_IMAGE_CACHE;
-            }
-        }
-        return assetCacheLocation;
+        if (deviceInfoService == null) return null;
+        final File applicationCacheDir = deviceInfoService.getApplicationCacheDir();
+
+        return (applicationCacheDir == null)
+                ? null
+                : applicationCacheDir
+                        + File.separator
+                        + CampaignPushConstants.CACHE_BASE_DIR
+                        + File.separator
+                        + CampaignPushConstants.PUSH_IMAGE_CACHE;
     }
 
     /**
@@ -338,25 +340,13 @@ class CampaignPushUtils {
                 centerIndex,
                 listSize);
         if (action.equals(CampaignPushConstants.IntentActions.FILMSTRIP_LEFT_CLICKED)) {
-            newCenterIndex = centerIndex - 1;
-            newLeftIndex = newCenterIndex - 1 < 0 ? listSize - 1 : newCenterIndex - 1;
+            newCenterIndex = (centerIndex - 1 + listSize) % listSize;
+            newLeftIndex = (newCenterIndex - 1 + listSize) % listSize;
             newRightIndex = centerIndex;
-
-            if (newCenterIndex < 0) {
-                newCenterIndex = listSize - 1;
-                newLeftIndex = newCenterIndex - 1;
-                newRightIndex = 0;
-            }
         } else if (action.equals(CampaignPushConstants.IntentActions.FILMSTRIP_RIGHT_CLICKED)) {
-            newCenterIndex = centerIndex + 1;
+            newCenterIndex = (centerIndex + 1) % listSize;
             newLeftIndex = centerIndex;
-            newRightIndex = newCenterIndex + 1 == listSize ? 0 : newCenterIndex + 1;
-
-            if (newCenterIndex == listSize) {
-                newCenterIndex = 0;
-                newLeftIndex = listSize - 1;
-                newRightIndex = 1;
-            }
+            newRightIndex = (newCenterIndex + 1) % listSize;
         }
 
         newIndices.add(newLeftIndex);

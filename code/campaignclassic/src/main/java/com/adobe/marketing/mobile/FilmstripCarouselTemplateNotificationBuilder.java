@@ -31,7 +31,7 @@ import com.google.android.gms.common.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FilmstripCarouselTemplateNotificationBuilder {
+class FilmstripCarouselTemplateNotificationBuilder {
     private static final String SELF_TAG = "FilmstripCarouselTemplateNotificationBuilder";
 
     static NotificationCompat.Builder construct(
@@ -129,15 +129,17 @@ public class FilmstripCarouselTemplateNotificationBuilder {
 
         return createNotificationBuilder(
                 context,
-                channelId,
-                pushTemplate.getSound(),
-                centerImageIndex,
-                pushTemplate.getBadgeCount(),
-                downloadedImageUris,
-                imageCaptions,
-                imageClickActions,
                 expandedLayout,
                 smallLayout,
+                centerImageIndex,
+                pushTemplate.getBadgeCount(),
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
+                        ? pushTemplate.getNotificationVisibility()
+                        : pushTemplate.getNotificationPriority(),
+                pushTemplate.getNotificationImportance(),
+                true,
+                channelId,
+                pushTemplate.getSound(),
                 titleText,
                 smallBodyText,
                 expandedBodyText,
@@ -148,11 +150,9 @@ public class FilmstripCarouselTemplateNotificationBuilder {
                 pushTemplate.getDeliveryId(),
                 pushTemplate.getIcon(),
                 pushTemplate.getSmallIconColor(),
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
-                        ? pushTemplate.getNotificationVisibility()
-                        : pushTemplate.getNotificationPriority(),
-                pushTemplate.getNotificationImportance(),
-                false);
+                downloadedImageUris,
+                imageCaptions,
+                imageClickActions);
     }
 
     static void handleIntent(final Context context, final Intent intent) {
@@ -291,15 +291,15 @@ public class FilmstripCarouselTemplateNotificationBuilder {
         final Notification notification =
                 createNotificationBuilder(
                                 context,
-                                channelId,
-                                customSound,
-                                newCenterIndex,
-                                badgeCount,
-                                imageUrls,
-                                imageCaptions,
-                                imageClickActions,
                                 expandedLayout,
                                 smallLayout,
+                                newCenterIndex,
+                                badgeCount,
+                                visibility,
+                                importance,
+                                true,
+                                channelId,
+                                customSound,
                                 titleText,
                                 bodyText,
                                 expandedBodyText,
@@ -310,9 +310,9 @@ public class FilmstripCarouselTemplateNotificationBuilder {
                                 deliveryId,
                                 smallIcon,
                                 smallIconColor,
-                                visibility,
-                                importance,
-                                true)
+                                imageUrls,
+                                imageCaptions,
+                                imageClickActions)
                         .build();
 
         notificationManager.notify(messageId.hashCode(), notification);
@@ -320,15 +320,15 @@ public class FilmstripCarouselTemplateNotificationBuilder {
 
     private static NotificationCompat.Builder createNotificationBuilder(
             final Context context,
-            final String channelId,
-            final String customSound,
-            final int centerImageIndex,
-            final int badgeCount,
-            final ArrayList<String> downloadedImageUris,
-            final ArrayList<String> imageCaptions,
-            final ArrayList<String> imageClickActions,
             final RemoteViews expandedLayout,
             final RemoteViews smallLayout,
+            final int centerImageIndex,
+            final int badgeCount,
+            final int visibility,
+            final int importance,
+            final boolean handlingIntent,
+            final String channelId,
+            final String customSound,
             final String titleText,
             final String bodyText,
             final String expandedBodyText,
@@ -339,9 +339,9 @@ public class FilmstripCarouselTemplateNotificationBuilder {
             final String deliveryId,
             final String smallIcon,
             final String smallIconColor,
-            final int visibility,
-            final int importance,
-            final boolean handlingIntent) {
+            final ArrayList<String> downloadedImageUris,
+            final ArrayList<String> imageCaptions,
+            final ArrayList<String> imageClickActions) {
 
         // assign a click action pending intent to the center image view
         AEPPushNotificationBuilder.setRemoteViewClickAction(
@@ -411,25 +411,20 @@ public class FilmstripCarouselTemplateNotificationBuilder {
             Log.trace(CampaignPushConstants.LOG_TAG, SELF_TAG, "Building a silent notification.");
             builder =
                     new NotificationCompat.Builder(
-                                    context,
-                                    CampaignPushConstants.DefaultValues
-                                            .SILENT_NOTIFICATION_CHANNEL_ID)
-                            .setNumber(badgeCount)
-                            .setAutoCancel(true)
-                            .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
-                            .setCustomContentView(smallLayout)
-                            .setCustomBigContentView(expandedLayout);
+                            context,
+                            CampaignPushConstants.DefaultValues.SILENT_NOTIFICATION_CHANNEL_ID);
+
             AEPPushNotificationBuilder.setSound(context, builder, customSound, true);
         } else {
-            builder =
-                    new NotificationCompat.Builder(context, channelId)
-                            .setNumber(badgeCount)
-                            .setAutoCancel(true)
-                            .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
-                            .setCustomContentView(smallLayout)
-                            .setCustomBigContentView(expandedLayout);
+            builder = new NotificationCompat.Builder(context, channelId);
             AEPPushNotificationBuilder.setSound(context, builder, customSound, false);
         }
+
+        builder.setNumber(badgeCount)
+                .setAutoCancel(true)
+                .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
+                .setCustomContentView(smallLayout)
+                .setCustomBigContentView(expandedLayout);
 
         AEPPushNotificationBuilder.setSmallIcon(
                 context,
