@@ -20,13 +20,15 @@ import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.util.DataReader;
 import com.adobe.marketing.mobile.util.DataReaderException;
 import com.adobe.marketing.mobile.util.StringUtils;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 class AEPPushTemplate {
 
@@ -40,7 +42,7 @@ class AEPPushTemplate {
     }
 
     /** Class representing the action button with label, link and type */
-    class ActionButton {
+    static class ActionButton {
         private final String label;
         private final String link;
         private final ActionType type;
@@ -116,7 +118,7 @@ class AEPPushTemplate {
     private final String imageUrl;
     private final AEPPushTemplate.ActionType actionType;
     private final String actionUri;
-    private final List<AEPPushTemplate.ActionButton> actionButtons;
+    private final String actionButtonsString;
     private final Map<String, String> data;
     private final String messageId;
     private final String deliveryId;
@@ -136,6 +138,11 @@ class AEPPushTemplate {
     // Optional, Color for the notification's background. Represented as six character hex, e.g.
     // 00FF00
     private final String notificationBackgroundColor;
+    // Optional, If present, show a "remind later" button using the value provided as its label
+    private final String remindLaterText;
+    // Optional, If present, schedule this notification to be re-delivered at this epoch timestamp
+    // (in seconds) provided.
+    private final long remindLaterTimestamp;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     static final Map<String, Integer> notificationImportanceMap =
@@ -239,6 +246,11 @@ class AEPPushTemplate {
                         data,
                         CampaignPushConstants.PushPayloadKeys.NOTIFICATION_BACKGROUND_COLOR,
                         null);
+        this.remindLaterText =
+                DataReader.optString(
+                        messageData, CampaignPushConstants.PushPayloadKeys.REMIND_LATER_TEXT, "");
+        final String timestampString = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.REMIND_LATER_TIMESTAMP, null);
+        this.remindLaterTimestamp = StringUtils.isNullOrEmpty(timestampString) ? CampaignPushConstants.DefaultValues.DEFAULT_REMIND_LATER_TIMESTAMP : Long.parseLong(timestampString);
 
         try {
             final String count = data.get(CampaignPushConstants.PushPayloadKeys.BADGE_NUMBER);
@@ -273,9 +285,7 @@ class AEPPushTemplate {
         this.actionType =
                 getActionTypeFromString(
                         data.get(CampaignPushConstants.PushPayloadKeys.ACTION_TYPE));
-        this.actionButtons =
-                getActionButtonsFromString(
-                        data.get(CampaignPushConstants.PushPayloadKeys.ACTION_BUTTONS));
+        this.actionButtonsString = data.get(CampaignPushConstants.PushPayloadKeys.ACTION_BUTTONS);
     }
 
     @NonNull String getTitle() {
@@ -347,6 +357,14 @@ class AEPPushTemplate {
         return notificationBackgroundColor;
     }
 
+    @Nullable String getRemindLaterText() {
+        return remindLaterText;
+    }
+
+    long getRemindLaterTimestamp() {
+        return remindLaterTimestamp;
+    }
+
     /** @return an {@link AEPPushTemplate.ActionType} */
     @Nullable AEPPushTemplate.ActionType getActionType() {
         return actionType;
@@ -356,13 +374,8 @@ class AEPPushTemplate {
         return actionUri;
     }
 
-    /**
-     * Returns list of action buttons which provides label, action type and action link
-     *
-     * @return List of {@link AEPPushTemplate.ActionButton}
-     */
-    @Nullable List<AEPPushTemplate.ActionButton> getActionButtons() {
-        return actionButtons;
+    @Nullable String getActionButtonsString() {
+        return actionButtonsString;
     }
 
     @NonNull Map<String, String> getData() {
@@ -385,7 +398,7 @@ class AEPPushTemplate {
         return payloadVersion;
     }
 
-    private ActionType getActionTypeFromString(final String type) {
+    private static ActionType getActionTypeFromString(final String type) {
         if (StringUtils.isNullOrEmpty(type)) {
             return ActionType.NONE;
         }
@@ -404,7 +417,7 @@ class AEPPushTemplate {
         return ActionType.NONE;
     }
 
-    private List<ActionButton> getActionButtonsFromString(final String actionButtons) {
+    static List<ActionButton> getActionButtonsFromString(final String actionButtons) {
         if (actionButtons == null) {
             Log.debug(
                     CampaignPushConstants.LOG_TAG,
@@ -433,7 +446,7 @@ class AEPPushTemplate {
         return actionButtonList;
     }
 
-    private ActionButton getActionButton(final JSONObject jsonObject) {
+    private static ActionButton getActionButton(final JSONObject jsonObject) {
         try {
             final String label = jsonObject.getString(ActionButtons.LABEL);
             if (label.isEmpty()) {
@@ -445,7 +458,6 @@ class AEPPushTemplate {
             if (type.equals(ActionButtonType.WEBURL) || type.equals(ActionButtonType.DEEPLINK)) {
                 uri = jsonObject.optString(ActionButtons.URI);
             }
-
             Log.trace(
                     CampaignPushConstants.LOG_TAG,
                     SELF_TAG,

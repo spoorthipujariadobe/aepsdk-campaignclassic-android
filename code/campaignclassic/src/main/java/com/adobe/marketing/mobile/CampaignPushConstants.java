@@ -21,8 +21,6 @@ final class CampaignPushConstants {
     static final String LOG_TAG = "CampaignClassicExtension";
     static final String CACHE_BASE_DIR = "campaignclassic";
     static final String PUSH_IMAGE_CACHE = "pushimagecache";
-    static final String DATASTORE_NAME = "ADOBEMOBILE_CAMPAIGNCLASSIC";
-    static final String SMALL_ICON_RESOURCE_ID_DATASTORE_KEY = "smalliconid";
 
     final class NotificationAction {
         static final String DISMISSED = "Notification Dismissed";
@@ -56,8 +54,12 @@ final class CampaignPushConstants {
         static final int AUTO_CAROUSEL_MINIMUM_IMAGE_COUNT = 1;
         static final int CENTER_INDEX = 1;
         static final int FILMSTRIP_CAROUSEL_MINIMUM_IMAGE_COUNT = 3;
+        static final int ACTION_BUTTON_CAPACITY = 3;
         static final long PUSH_NOTIFICATION_IMAGE_CACHE_EXPIRY_IN_MILLISECONDS =
                 259200000; // 3 days
+        static final long DEFAULT_REMIND_LATER_TIMESTAMP =
+                -1L; // -1L means that no remind later timestamp was found in the action button
+        // payload
 
         private DefaultValues() {}
     }
@@ -65,15 +67,19 @@ final class CampaignPushConstants {
     final class IntentActions {
         static final String FILMSTRIP_LEFT_CLICKED = "filmstrip_left";
         static final String FILMSTRIP_RIGHT_CLICKED = "filmstrip_right";
+        static final String REMIND_LATER_CLICKED = "remind_clicked";
+        static final String SCHEDULED_NOTIFICATION_BROADCAST = "scheduled_notification_broadcast";
 
         private IntentActions() {}
     }
 
     final class IntentKeys {
         static final String CENTER_IMAGE_INDEX = "centerImageIndex";
+        static final String IMAGE_URI = "imageUri";
         static final String IMAGE_URLS = "imageUrls";
         static final String IMAGE_CAPTIONS = "imageCaptions";
         static final String IMAGE_CLICK_ACTIONS = "imageClickActions";
+        static final String ACTION_URI = "actionUri";
         static final String CHANNEL_ID = "channelId";
         static final String CUSTOM_SOUND = "customSound";
         static final String TITLE_TEXT = "titleText";
@@ -89,6 +95,9 @@ final class CampaignPushConstants {
         static final String SMALL_ICON_COLOR = "smallIconColor";
         static final String VISIBILITY = "visibility";
         static final String IMPORTANCE = "importance";
+        static final String REMIND_TS = "remindTimestamp";
+        static final String REMIND_LABEL = "remindLaterLabel";
+        static final String ACTION_BUTTONS_STRING = "actionButtonsString";
 
         private IntentKeys() {}
     }

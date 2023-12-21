@@ -15,6 +15,7 @@ import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import com.adobe.marketing.mobile.services.Log;
+import java.util.List;
 
 class LegacyNotificationBuilder {
     private static final String SELF_TAG = "LegacyNotificationBuilder";
@@ -54,10 +55,11 @@ class LegacyNotificationBuilder {
             AEPPushNotificationBuilder.setVisibility(
                     builder, pushTemplate.getNotificationVisibility());
         }
+
         AEPPushNotificationBuilder.addActionButtons(
                 context,
                 builder,
-                pushTemplate.getActionButtons(),
+                pushTemplate.getActionButtonsString(),
                 pushTemplate.getMessageId(),
                 pushTemplate.getDeliveryId()); // Add action buttons if any
         AEPPushNotificationBuilder.setSound(context, builder, pushTemplate.getSound(), false);
