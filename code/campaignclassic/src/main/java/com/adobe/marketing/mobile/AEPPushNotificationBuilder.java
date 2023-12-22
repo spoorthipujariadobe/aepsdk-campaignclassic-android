@@ -487,7 +487,8 @@ class AEPPushNotificationBuilder {
             final String actionButtonsString,
             final String messageId,
             final String deliveryId) {
-        final List<AEPPushTemplate.ActionButton> actionButtons = AEPPushTemplate.getActionButtonsFromString(actionButtonsString);
+        final List<AEPPushTemplate.ActionButton> actionButtons =
+                AEPPushTemplate.getActionButtonsFromString(actionButtonsString);
         if (actionButtons == null || actionButtons.isEmpty()) {
             return;
         }

@@ -15,7 +15,6 @@ import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import com.adobe.marketing.mobile.services.Log;
-import java.util.List;
 
 class LegacyNotificationBuilder {
     private static final String SELF_TAG = "LegacyNotificationBuilder";

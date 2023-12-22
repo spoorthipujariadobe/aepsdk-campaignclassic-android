@@ -30,7 +30,6 @@ import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.services.ServiceProvider;
 import com.adobe.marketing.mobile.services.caching.CacheService;
 import com.adobe.marketing.mobile.util.StringUtils;
-
 import java.util.Calendar;
 
 class BasicTemplateNotificationBuilder {
@@ -343,7 +342,8 @@ class BasicTemplateNotificationBuilder {
                 (int) (intentExtras.getLong(CampaignPushConstants.IntentKeys.REMIND_TS));
         final Calendar calendar = Calendar.getInstance();
         if (remindLaterTimestamp > 0) {
-            // calculate difference in fire date. if fire date is greater than 0 then we want to schedule a reminder notification.
+            // calculate difference in fire date. if fire date is greater than 0 then we want to
+            // schedule a reminder notification.
             final int secondsUntilFireDate =
                     remindLaterTimestamp - (int) (calendar.getTimeInMillis() / 1000);
 
@@ -352,7 +352,8 @@ class BasicTemplateNotificationBuilder {
                 // schedule a pending intent to be broadcast at the specified timestamp
                 final PendingIntent pendingIntent =
                         createPendingIntentForScheduledNotification(context, intent);
-                final AlarmManager alarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
+                final AlarmManager alarmManager =
+                        (AlarmManager) context.getSystemService(ALARM_SERVICE);
 
                 if (alarmManager != null) {
                     alarmManager.setExactAndAllowWhileIdle(

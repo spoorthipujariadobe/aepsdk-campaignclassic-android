@@ -20,15 +20,13 @@ import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.util.DataReader;
 import com.adobe.marketing.mobile.util.DataReaderException;
 import com.adobe.marketing.mobile.util.StringUtils;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 class AEPPushTemplate {
 
@@ -249,8 +247,13 @@ class AEPPushTemplate {
         this.remindLaterText =
                 DataReader.optString(
                         messageData, CampaignPushConstants.PushPayloadKeys.REMIND_LATER_TEXT, "");
-        final String timestampString = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.REMIND_LATER_TIMESTAMP, null);
-        this.remindLaterTimestamp = StringUtils.isNullOrEmpty(timestampString) ? CampaignPushConstants.DefaultValues.DEFAULT_REMIND_LATER_TIMESTAMP : Long.parseLong(timestampString);
+        final String timestampString =
+                DataReader.optString(
+                        data, CampaignPushConstants.PushPayloadKeys.REMIND_LATER_TIMESTAMP, null);
+        this.remindLaterTimestamp =
+                StringUtils.isNullOrEmpty(timestampString)
+                        ? CampaignPushConstants.DefaultValues.DEFAULT_REMIND_LATER_TIMESTAMP
+                        : Long.parseLong(timestampString);
 
         try {
             final String count = data.get(CampaignPushConstants.PushPayloadKeys.BADGE_NUMBER);
