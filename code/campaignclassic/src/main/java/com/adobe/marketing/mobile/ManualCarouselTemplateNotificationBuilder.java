@@ -33,12 +33,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ManualCarouselTemplateNotificationBuilder {
+class ManualCarouselTemplateNotificationBuilder {
     private static final String SELF_TAG = "ManualCarouselTemplateNotificationBuilder";
     private static final String IMAGE_URIS_KEY = "imageUris";
     private static final String IMAGE_CAPTIONS_KEY = "imageCaptions";
     private static final String IMAGE_ACTIONS_KEY = "imageActions";
-    private static CarouselPushTemplate pushTemplate;
 
     static NotificationCompat.Builder construct(
             final CarouselPushTemplate pushTemplate,
@@ -64,12 +63,10 @@ public class ManualCarouselTemplateNotificationBuilder {
                             + " constructed.");
         }
 
-        ManualCarouselTemplateNotificationBuilder.pushTemplate = pushTemplate;
-
         // load images into the carousel
         final ArrayList<CarouselPushTemplate.CarouselItem> items = pushTemplate.getCarouselItems();
         final Map<String, ArrayList<String>> extractedItemData =
-                populateImages(context, cacheService, expandedLayout, items, packageName);
+                populateImages(context, cacheService, expandedLayout, items, packageName, pushTemplate.getMessageId(), pushTemplate.getDeliveryId());
 
         final ArrayList<String> downloadedImageUris = extractedItemData.get(IMAGE_URIS_KEY);
         final ArrayList<String> imageCaptions = extractedItemData.get(IMAGE_CAPTIONS_KEY);
@@ -98,14 +95,30 @@ public class ManualCarouselTemplateNotificationBuilder {
                 CampaignPushConstants.DefaultValues.CENTER_INDEX; // center index defaults to 1
         return createNotificationBuilder(
                 context,
-                channelId,
-                centerImageIndex,
-                downloadedImageUris,
-                imageCaptions,
-                imageClickActions,
                 expandedLayout,
                 smallLayout,
-                false);
+                centerImageIndex,
+                pushTemplate.getBadgeCount(),
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
+                        ? pushTemplate.getNotificationVisibility()
+                        : pushTemplate.getNotificationPriority(),
+                pushTemplate.getNotificationImportance(),
+                true,
+                channelId,
+                pushTemplate.getSound(),
+                titleText,
+                smallBodyText,
+                expandedBodyText,
+                pushTemplate.getNotificationBackgroundColor(),
+                pushTemplate.getTitleTextColor(),
+                pushTemplate.getExpandedBodyTextColor(),
+                pushTemplate.getMessageId(),
+                pushTemplate.getDeliveryId(),
+                pushTemplate.getIcon(),
+                pushTemplate.getSmallIconColor(),
+                downloadedImageUris,
+                imageCaptions,
+                imageClickActions);
     }
 
     static void handleIntent(final Context context, final Intent intent) {
@@ -140,6 +153,11 @@ public class ManualCarouselTemplateNotificationBuilder {
         final ArrayList<String> imageClickActions =
                 (ArrayList<String>)
                         intentExtras.get(CampaignPushConstants.IntentKeys.IMAGE_CLICK_ACTIONS);
+        final String titleText =
+                intentExtras.getString(CampaignPushConstants.IntentKeys.TITLE_TEXT);
+        final String bodyText = intentExtras.getString(CampaignPushConstants.IntentKeys.BODY_TEXT);
+        final String expandedBodyText =
+                intentExtras.getString(CampaignPushConstants.IntentKeys.EXPANDED_BODY_TEXT);
 
         if (cacheService != null && !CollectionUtils.isEmpty(imageUrls)) {
             for (final String imageUri : imageUrls) {
@@ -156,11 +174,10 @@ public class ManualCarouselTemplateNotificationBuilder {
                 new RemoteViews(packageName, R.layout.push_template_collapsed);
         final RemoteViews expandedLayout =
                 new RemoteViews(packageName, R.layout.push_template_manual_carousel);
-        smallLayout.setTextViewText(R.id.notification_title, pushTemplate.getTitle());
-        smallLayout.setTextViewText(R.id.notification_body, pushTemplate.getBody());
-        expandedLayout.setTextViewText(R.id.notification_title, pushTemplate.getTitle());
-        expandedLayout.setTextViewText(
-                R.id.notification_body_expanded, pushTemplate.getExpandedBodyText());
+        smallLayout.setTextViewText(R.id.notification_title, titleText);
+        smallLayout.setTextViewText(R.id.notification_body, bodyText);
+        expandedLayout.setTextViewText(R.id.notification_title, titleText);
+        expandedLayout.setTextViewText(R.id.notification_body_expanded, expandedBodyText);
 
         final String action = intent.getAction();
         int centerImageIndex =
@@ -201,48 +218,121 @@ public class ManualCarouselTemplateNotificationBuilder {
                         imageClickActions.get(newCenterIndex));
         items.add(centerCarouselItem);
 
-        populateImages(context, cacheService, expandedLayout, items, packageName);
-
+        final String messageId =
+                intentExtras.getString(CampaignPushConstants.IntentKeys.MESSAGE_ID);
+        final String deliveryId =
+                intentExtras.getString(CampaignPushConstants.IntentKeys.DELIVERY_ID);
+        final int badgeCount = intentExtras.getInt(CampaignPushConstants.IntentKeys.BADGE_COUNT);
+        final int visibility = intentExtras.getInt(CampaignPushConstants.IntentKeys.VISIBILITY);
+        final int importance = intentExtras.getInt(CampaignPushConstants.IntentKeys.IMPORTANCE);
         final String channelId =
                 intentExtras.getString(CampaignPushConstants.IntentKeys.CHANNEL_ID);
+        final String notificationBackgroundColor =
+                intentExtras.getString(
+                        CampaignPushConstants.IntentKeys.NOTIFICATION_BACKGROUND_COLOR);
+        final String titleTextColor =
+                intentExtras.getString(CampaignPushConstants.IntentKeys.TITLE_TEXT_COLOR);
+        final String expandedBodyTextColor =
+                intentExtras.getString(CampaignPushConstants.IntentKeys.EXPANDED_BODY_TEXT_COLOR);
+        final String smallIcon =
+                intentExtras.getString(CampaignPushConstants.IntentKeys.SMALL_ICON);
+        final String smallIconColor =
+                intentExtras.getString(CampaignPushConstants.IntentKeys.SMALL_ICON_COLOR);
+        final String customSound =
+                intentExtras.getString(CampaignPushConstants.IntentKeys.CUSTOM_SOUND);
+
+        populateImages(context, cacheService, expandedLayout, items, packageName, messageId, deliveryId);
+
         final Notification notification =
                 createNotificationBuilder(
-                                context,
-                                channelId,
-                                newCenterIndex,
-                                imageUrls,
-                                imageCaptions,
-                                imageClickActions,
-                                expandedLayout,
-                                smallLayout,
-                                true)
+                        context,
+                        expandedLayout,
+                        smallLayout,
+                        newCenterIndex,
+                        badgeCount,
+                        visibility,
+                        importance,
+                        true,
+                        channelId,
+                        customSound,
+                        titleText,
+                        bodyText,
+                        expandedBodyText,
+                        notificationBackgroundColor,
+                        titleTextColor,
+                        expandedBodyTextColor,
+                        messageId,
+                        deliveryId,
+                        smallIcon,
+                        smallIconColor,
+                        imageUrls,
+                        imageCaptions,
+                        imageClickActions)
                         .build();
 
-        notificationManager.notify(pushTemplate.getMessageId().hashCode(), notification);
+        notificationManager.notify(messageId.hashCode(), notification);
     }
 
     private static NotificationCompat.Builder createNotificationBuilder(
             final Context context,
-            final String channelId,
-            final int centerImageIndex,
-            final ArrayList<String> downloadedImageUris,
-            final ArrayList<String> imageCaptions,
-            final ArrayList<String> imageClickActions,
             final RemoteViews expandedLayout,
             final RemoteViews smallLayout,
-            final boolean handlingIntent) {
-        // assign a click action pending intent to the center image view
-        AEPPushNotificationBuilder.setRemoteViewClickAction(context, expandedLayout, R.id.manual_carousel_filmstrip_center, pushTemplate, imageClickActions.get(centerImageIndex));
+            final int centerImageIndex,
+            final int badgeCount,
+            final int visibility,
+            final int importance,
+            final boolean handlingIntent,
+            final String channelId,
+            final String customSound,
+            final String titleText,
+            final String bodyText,
+            final String expandedBodyText,
+            final String notificationBackgroundColor,
+            final String titleTextColor,
+            final String expandedBodyTextColor,
+            final String messageId,
+            final String deliveryId,
+            final String smallIcon,
+            final String smallIconColor,
+            final ArrayList<String> downloadedImageUris,
+            final ArrayList<String> imageCaptions,
+            final ArrayList<String> imageClickActions) {
+
+        AEPPushNotificationBuilder.setRemoteViewClickAction(
+                context,
+                expandedLayout,
+                R.id.manual_carousel_filmstrip_center,
+                messageId,
+                deliveryId,
+                imageClickActions.get(centerImageIndex));
 
         // set any custom colors if needed
         AEPPushNotificationBuilder.setCustomNotificationColors(
-                pushTemplate, smallLayout, expandedLayout, R.id.carousel_container_layout);
+                notificationBackgroundColor,
+                titleTextColor,
+                expandedBodyTextColor,
+                smallLayout,
+                expandedLayout,
+                R.id.carousel_container_layout);
 
         // handle left and right navigation buttons
         final Intent clickIntent =
                 createClickIntent(
                         context,
                         channelId,
+                        customSound,
+                        titleText,
+                        bodyText,
+                        expandedBodyText,
+                        notificationBackgroundColor,
+                        titleTextColor,
+                        expandedBodyTextColor,
+                        messageId,
+                        deliveryId,
+                        smallIcon,
+                        smallIconColor,
+                        visibility,
+                        importance,
                         centerImageIndex,
                         downloadedImageUris,
                         imageCaptions,
@@ -255,7 +345,7 @@ public class ManualCarouselTemplateNotificationBuilder {
                         clickIntent,
                         PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
 
-        clickIntent.setAction(CampaignPushConstants.IntentActions.MANUAL_CAROUSEL_RIGHT_CLICKED);
+        clickIntent.setAction(CampaignPushConstants.IntentActions.FILMSTRIP_RIGHT_CLICKED);
         final PendingIntent pendingIntentRightButton =
                 PendingIntent.getBroadcast(
                         context,
@@ -267,37 +357,39 @@ public class ManualCarouselTemplateNotificationBuilder {
         expandedLayout.setOnClickPendingIntent(R.id.rightImageButton, pendingIntentRightButton);
 
         NotificationCompat.Builder builder;
+
         if (handlingIntent) {
+            // we need to create a silent notification as this will be re-displaying a notification
+            // rather than showing a new one.
+            // the silent sound is set on the notification channel and notification builder.
+            Log.trace(CampaignPushConstants.LOG_TAG, SELF_TAG, "Building a silent notification.");
             builder =
                     new NotificationCompat.Builder(
-                                    context,
-                                    CampaignPushConstants.DefaultValues
-                                            .SILENT_NOTIFICATION_CHANNEL_ID)
-                            .setNumber(pushTemplate.getBadgeCount())
-                            .setAutoCancel(true)
-                            .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
-                            .setCustomContentView(smallLayout)
-                            .setCustomBigContentView(expandedLayout);
+                            context,
+                            CampaignPushConstants.DefaultValues.SILENT_NOTIFICATION_CHANNEL_ID);
+
+            AEPPushNotificationBuilder.setSound(context, builder, customSound, true);
         } else {
-            builder =
-                    new NotificationCompat.Builder(context, channelId)
-                            .setNumber(pushTemplate.getBadgeCount())
-                            .setAutoCancel(true)
-                            .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
-                            .setCustomContentView(smallLayout)
-                            .setCustomBigContentView(expandedLayout);
+            builder = new NotificationCompat.Builder(context, channelId);
+            AEPPushNotificationBuilder.setSound(context, builder, customSound, false);
         }
+
+        builder.setNumber(badgeCount)
+                .setAutoCancel(true)
+                .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
+                .setCustomContentView(smallLayout)
+                .setCustomBigContentView(expandedLayout);
 
         AEPPushNotificationBuilder.setSmallIcon(
+                context,
                 builder,
-                pushTemplate,
-                context); // Small Icon must be present, otherwise the notification will not be
-        // displayed.
+                smallIcon,
+                smallIconColor); // Small Icon must be present, otherwise the notification will not
+        // be displayed.
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            AEPPushNotificationBuilder.setVisibility(builder, pushTemplate);
+            AEPPushNotificationBuilder.setVisibility(builder, visibility);
         }
-        AEPPushNotificationBuilder.setSound(builder, pushTemplate, context);
 
         // if API level is below 26 (prior to notification channels) then notification priority is
         // set on the notification builder
@@ -314,24 +406,53 @@ public class ManualCarouselTemplateNotificationBuilder {
     private static Intent createClickIntent(
             final Context context,
             final String channelId,
+            final String customSound,
+            final String title,
+            final String bodyText,
+            final String expandedBodyText,
+            final String notificationBackgroundColor,
+            final String titleTextColor,
+            final String bodyTextColor,
+            final String messageId,
+            final String deliveryId,
+            final String smallIcon,
+            final String smallIconColor,
+            final int visibility,
+            final int importance,
             final int centerIndex,
             final ArrayList<String> imageUrls,
             final ArrayList<String> imageCaptions,
             final ArrayList<String> imageClickActions) {
         final Intent clickIntent =
                 new Intent(
-                        CampaignPushConstants.IntentActions.MANUAL_CAROUSEL_LEFT_CLICKED,
+                        CampaignPushConstants.IntentActions.FILMSTRIP_LEFT_CLICKED,
                         null,
                         context,
                         AEPPushTemplateBroadcastReceiver.class);
         clickIntent.setClass(context, AEPPushTemplateBroadcastReceiver.class);
         clickIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         clickIntent.putExtra(CampaignPushConstants.IntentKeys.CHANNEL_ID, channelId);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.CUSTOM_SOUND, customSound);
         clickIntent.putExtra(CampaignPushConstants.IntentKeys.CENTER_IMAGE_INDEX, centerIndex);
         clickIntent.putExtra(CampaignPushConstants.IntentKeys.IMAGE_URLS, imageUrls);
         clickIntent.putExtra(CampaignPushConstants.IntentKeys.IMAGE_CAPTIONS, imageCaptions);
         clickIntent.putExtra(
                 CampaignPushConstants.IntentKeys.IMAGE_CLICK_ACTIONS, imageClickActions);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.TITLE_TEXT, title);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.BODY_TEXT, bodyText);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.EXPANDED_BODY_TEXT, expandedBodyText);
+        clickIntent.putExtra(
+                CampaignPushConstants.IntentKeys.NOTIFICATION_BACKGROUND_COLOR,
+                notificationBackgroundColor);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.TITLE_TEXT_COLOR, titleTextColor);
+        clickIntent.putExtra(
+                CampaignPushConstants.IntentKeys.EXPANDED_BODY_TEXT_COLOR, bodyTextColor);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.MESSAGE_ID, messageId);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.DELIVERY_ID, deliveryId);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.SMALL_ICON, smallIcon);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.SMALL_ICON_COLOR, smallIconColor);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.VISIBILITY, visibility);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.IMPORTANCE, importance);
 
         return clickIntent;
     }
@@ -341,7 +462,9 @@ public class ManualCarouselTemplateNotificationBuilder {
             final CacheService cacheService,
             final RemoteViews expandedLayout,
             final ArrayList<CarouselPushTemplate.CarouselItem> items,
-            final String packageName) {
+            final String packageName,
+            final String messsageId,
+            final String deliveryId) {
         final ArrayList<String> downloadedImageUris = new ArrayList<>();
         final ArrayList<String> imageCaptions = new ArrayList<>();
         final ArrayList<String> imageClickActions = new ArrayList<>();
@@ -370,7 +493,7 @@ public class ManualCarouselTemplateNotificationBuilder {
             carouselItem.setTextViewText(R.id.carousel_item_caption, item.getCaptionText());
 
             // assign a click action pending intent for each carousel item
-            AEPPushNotificationBuilder.setRemoteViewClickAction(context, carouselItem, R.id.carousel_item_image_view, pushTemplate, item.getInteractionUri());
+            AEPPushNotificationBuilder.setRemoteViewClickAction(context, carouselItem, R.id.carousel_item_image_view, messsageId, deliveryId, item.getInteractionUri());
 
             // add the carousel item to the view flipper
             expandedLayout.addView(R.id.manual_carousel_view_flipper, carouselItem);

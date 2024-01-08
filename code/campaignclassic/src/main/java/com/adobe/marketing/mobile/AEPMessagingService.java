@@ -18,6 +18,8 @@ import androidx.core.app.NotificationManagerCompat;
 import com.adobe.marketing.mobile.services.Log;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+
+import java.util.HashMap;
 import java.util.Map;
 
 /**
