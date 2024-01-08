@@ -66,7 +66,14 @@ class ManualCarouselTemplateNotificationBuilder {
         // load images into the carousel
         final ArrayList<CarouselPushTemplate.CarouselItem> items = pushTemplate.getCarouselItems();
         final Map<String, ArrayList<String>> extractedItemData =
-                populateImages(context, cacheService, expandedLayout, items, packageName, pushTemplate.getMessageId(), pushTemplate.getDeliveryId());
+                populateImages(
+                        context,
+                        cacheService,
+                        expandedLayout,
+                        items,
+                        packageName,
+                        pushTemplate.getMessageId(),
+                        pushTemplate.getDeliveryId());
 
         final ArrayList<String> downloadedImageUris = extractedItemData.get(IMAGE_URIS_KEY);
         final ArrayList<String> imageCaptions = extractedItemData.get(IMAGE_CAPTIONS_KEY);
@@ -241,33 +248,34 @@ class ManualCarouselTemplateNotificationBuilder {
         final String customSound =
                 intentExtras.getString(CampaignPushConstants.IntentKeys.CUSTOM_SOUND);
 
-        populateImages(context, cacheService, expandedLayout, items, packageName, messageId, deliveryId);
+        populateImages(
+                context, cacheService, expandedLayout, items, packageName, messageId, deliveryId);
 
         final Notification notification =
                 createNotificationBuilder(
-                        context,
-                        expandedLayout,
-                        smallLayout,
-                        newCenterIndex,
-                        badgeCount,
-                        visibility,
-                        importance,
-                        true,
-                        channelId,
-                        customSound,
-                        titleText,
-                        bodyText,
-                        expandedBodyText,
-                        notificationBackgroundColor,
-                        titleTextColor,
-                        expandedBodyTextColor,
-                        messageId,
-                        deliveryId,
-                        smallIcon,
-                        smallIconColor,
-                        imageUrls,
-                        imageCaptions,
-                        imageClickActions)
+                                context,
+                                expandedLayout,
+                                smallLayout,
+                                newCenterIndex,
+                                badgeCount,
+                                visibility,
+                                importance,
+                                true,
+                                channelId,
+                                customSound,
+                                titleText,
+                                bodyText,
+                                expandedBodyText,
+                                notificationBackgroundColor,
+                                titleTextColor,
+                                expandedBodyTextColor,
+                                messageId,
+                                deliveryId,
+                                smallIcon,
+                                smallIconColor,
+                                imageUrls,
+                                imageCaptions,
+                                imageClickActions)
                         .build();
 
         notificationManager.notify(messageId.hashCode(), notification);
@@ -301,7 +309,7 @@ class ManualCarouselTemplateNotificationBuilder {
         AEPPushNotificationBuilder.setRemoteViewClickAction(
                 context,
                 expandedLayout,
-                R.id.manual_carousel_filmstrip_center,
+                R.id.carousel_item_image_view,
                 messageId,
                 deliveryId,
                 imageClickActions.get(centerImageIndex));
@@ -345,7 +353,7 @@ class ManualCarouselTemplateNotificationBuilder {
                         clickIntent,
                         PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
 
-        clickIntent.setAction(CampaignPushConstants.IntentActions.FILMSTRIP_RIGHT_CLICKED);
+        clickIntent.setAction(CampaignPushConstants.IntentActions.MANUAL_CAROUSEL_RIGHT_CLICKED);
         final PendingIntent pendingIntentRightButton =
                 PendingIntent.getBroadcast(
                         context,
@@ -425,7 +433,7 @@ class ManualCarouselTemplateNotificationBuilder {
             final ArrayList<String> imageClickActions) {
         final Intent clickIntent =
                 new Intent(
-                        CampaignPushConstants.IntentActions.FILMSTRIP_LEFT_CLICKED,
+                        CampaignPushConstants.IntentActions.MANUAL_CAROUSEL_LEFT_CLICKED,
                         null,
                         context,
                         AEPPushTemplateBroadcastReceiver.class);
@@ -463,7 +471,7 @@ class ManualCarouselTemplateNotificationBuilder {
             final RemoteViews expandedLayout,
             final ArrayList<CarouselPushTemplate.CarouselItem> items,
             final String packageName,
-            final String messsageId,
+            final String messageId,
             final String deliveryId) {
         final ArrayList<String> downloadedImageUris = new ArrayList<>();
         final ArrayList<String> imageCaptions = new ArrayList<>();
@@ -471,7 +479,6 @@ class ManualCarouselTemplateNotificationBuilder {
         final Map<String, ArrayList<String>> itemData = new HashMap<>();
         final long imageProcessingStartTime = System.currentTimeMillis();
 
-        expandedLayout.removeAllViews(R.id.manual_carousel_view_flipper);
         for (final CarouselPushTemplate.CarouselItem item : items) {
             final String imageUri = item.getImageUri();
             final Bitmap pushImage = CampaignPushUtils.downloadImage(cacheService, imageUri);
@@ -493,7 +500,13 @@ class ManualCarouselTemplateNotificationBuilder {
             carouselItem.setTextViewText(R.id.carousel_item_caption, item.getCaptionText());
 
             // assign a click action pending intent for each carousel item
-            AEPPushNotificationBuilder.setRemoteViewClickAction(context, carouselItem, R.id.carousel_item_image_view, messsageId, deliveryId, item.getInteractionUri());
+            AEPPushNotificationBuilder.setRemoteViewClickAction(
+                    context,
+                    carouselItem,
+                    R.id.carousel_item_image_view,
+                    messageId,
+                    deliveryId,
+                    item.getInteractionUri());
 
             // add the carousel item to the view flipper
             expandedLayout.addView(R.id.manual_carousel_view_flipper, carouselItem);
