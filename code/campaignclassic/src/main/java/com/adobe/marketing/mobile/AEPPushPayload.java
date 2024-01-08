@@ -20,9 +20,9 @@ import java.util.Map;
  * provided {@link RemoteMessage}.
  */
 public class AEPPushPayload {
-    private final Map<String, String> messageData;
-    private final String messageId;
-    private final String deliveryId;
+    private Map<String, String> messageData;
+    private String messageId;
+    private String deliveryId;
 
     /**
      * Constructor
@@ -39,30 +39,23 @@ public class AEPPushPayload {
             throw new IllegalArgumentException(
                     "Failed to create AEPPushPayload, remote message is null.");
         }
-
-        final Map<String, String> messageData = message.getData();
-        if (MapUtils.isNullOrEmpty(messageData)) {
-            throw new IllegalArgumentException(
-                    "Failed to create AEPPushPayload, remote message data payload is null or"
-                            + " empty.");
-        }
-
-        messageId = messageData.get(CampaignPushConstants.Tracking.Keys.MESSAGE_ID);
-        if (StringUtils.isNullOrEmpty(messageId)) {
-            throw new IllegalArgumentException(
-                    "Failed to create AEPPushPayload, message id is null or empty.");
-        }
-
-        deliveryId = messageData.get(CampaignPushConstants.Tracking.Keys.DELIVERY_ID);
-        if (StringUtils.isNullOrEmpty(deliveryId)) {
-            throw new IllegalArgumentException(
-                    "Failed to create AEPPushPayload, delivery id is null or empty.");
-        }
-
-        this.messageData = messageData;
+        validateMessageData(message.getData());
     }
 
-    public AEPPushPayload(final Map<String, String> messageData) {
+    /**
+     * Constructor
+     *
+     * <p>Provides the AEPPushPayload object
+     *
+     * @param messageData {@link Map<String, String>} containing the message data present in a
+     *     notification received from {@link com.google.firebase.messaging.FirebaseMessagingService}
+     * @throws IllegalArgumentException if the message data, message id, or delivery id is null
+     */
+    public AEPPushPayload(final Map<String, String> messageData) throws IllegalArgumentException {
+        validateMessageData(messageData);
+    }
+
+    private void validateMessageData(final Map<String, String> messageData) {
         if (MapUtils.isNullOrEmpty(messageData)) {
             throw new IllegalArgumentException(
                     "Failed to create AEPPushPayload, remote message data payload is null or"

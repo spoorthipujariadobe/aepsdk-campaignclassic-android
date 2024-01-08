@@ -46,6 +46,7 @@ final class CampaignPushConstants {
     final class DefaultValues {
         static final String SILENT_NOTIFICATION_CHANNEL_ID = "silent";
         static final String LEGACY_PAYLOAD_VERSION_STRING = "0";
+        static final String SILENT_NOTIFICATION_CHANNEL_ID = "silent";
         static final int CAROUSEL_MAX_BITMAP_WIDTH = 300;
         static final int CAROUSEL_MAX_BITMAP_HEIGHT = 200;
         static final String AUTO_CAROUSEL_MODE = "auto";
@@ -76,6 +77,20 @@ final class CampaignPushConstants {
         static final String IMAGE_CAPTIONS = "imageCaptions";
         static final String IMAGE_CLICK_ACTIONS = "imageClickActions";
         static final String CHANNEL_ID = "channelId";
+        static final String CUSTOM_SOUND = "customSound";
+        static final String TITLE_TEXT = "titleText";
+        static final String BODY_TEXT = "bodyText";
+        static final String EXPANDED_BODY_TEXT = "expandedBodyText";
+        static final String NOTIFICATION_BACKGROUND_COLOR = "notificationBackgroundColor";
+        static final String TITLE_TEXT_COLOR = "titleTextColor";
+        static final String EXPANDED_BODY_TEXT_COLOR = "expandedBodyTextColor";
+        static final String MESSAGE_ID = "messageId";
+        static final String DELIVERY_ID = "deliveryId";
+        static final String BADGE_COUNT = "badgeCount";
+        static final String SMALL_ICON = "smallIcon";
+        static final String SMALL_ICON_COLOR = "smallIconColor";
+        static final String VISIBILITY = "visibility";
+        static final String IMPORTANCE = "importance";
 
         private IntentKeys() {}
     }

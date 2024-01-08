@@ -18,14 +18,18 @@ import com.adobe.marketing.mobile.services.ServiceProvider;
 import com.google.android.gms.common.util.CollectionUtils;
 import java.util.List;
 
-public class CarouselTemplateNotificationBuilder {
+class CarouselTemplateNotificationBuilder {
     private static final String SELF_TAG = "CarouselTemplateNotificationBuilder";
 
     @NonNull static NotificationCompat.Builder construct(
             final CarouselPushTemplate pushTemplate, final Context context)
             throws NotificationConstructionFailedException {
         final String channelId =
-                AEPPushNotificationBuilder.createChannelAndGetChannelID(pushTemplate, context);
+                AEPPushNotificationBuilder.createChannelAndGetChannelID(
+                        context,
+                        pushTemplate.getChannelId(),
+                        pushTemplate.getSound(),
+                        pushTemplate.getNotificationImportance());
         final String packageName =
                 ServiceProvider.getInstance()
                         .getAppContextService()

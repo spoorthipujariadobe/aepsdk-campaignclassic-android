@@ -9,7 +9,7 @@
         android:id="@+id/notification_title"
         style="@style/TextAppearance.Compat.Notification.Title"
         android:layout_width="wrap_content"
-        android:layout_height="30dp"
+        android:layout_height="20dp"
         android:layout_gravity="start"
         android:textAlignment="viewStart"/>
 
@@ -25,8 +25,9 @@
     <ViewFlipper
         android:id="@+id/manual_carousel_view_flipper"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="300dp"
         android:layout_centerInParent="true"
+        android:adjustViewBounds="true"
         android:layout_below="@id/notification_body_expanded"
         android:inAnimation="@android:anim/slide_in_left"
         android:outAnimation="@android:anim/slide_out_right">
@@ -36,14 +37,15 @@
         android:id="@+id/leftImageButton"
         android:layout_width="30dp"
         android:layout_height="40dp"
-        android:layout_marginTop="130dp"
+        android:layout_marginTop="120dp"
         android:background="@drawable/skipleft" />
 
     <ImageButton
         android:id="@+id/rightImageButton"
         android:layout_width="30dp"
         android:layout_height="40dp"
-        android:layout_marginTop="130dp"
+        android:layout_marginTop="120dp"
+        android:layout_alignEnd="@id/manual_carousel_view_flipper"
         android:layout_alignParentEnd="true"
         android:background="@drawable/skipright" />
 </RelativeLayout>

@@ -92,25 +92,27 @@ class AEPPushNotificationBuilder {
      * received from the payload, Campaign Classic extension's default channel is used. For Android
      * versions below O, no channel is created. Just return the obtained channel ID.
      *
-     * @param pushTemplate {@link AEPPushTemplate} containing the message data from the received
-     *     push notification
      * @param context the application {@link Context}
+     * @param channelId {@code String} containing the notification channel id
+     * @param customSound {@code String} containing the custom sound to use
+     * @param importance {@code int} containing the notification importance
      * @return the channel ID
      */
     @NonNull static String createChannelAndGetChannelID(
-            final AEPPushTemplate pushTemplate, final Context context) {
+            final Context context,
+            final String channelId,
+            final String customSound,
+            final int importance) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             // For Android versions below O, no channel is created. Just return the obtained channel
             // ID.
-            return pushTemplate.getChannelId() == null
-                    ? DEFAULT_CHANNEL_ID
-                    : pushTemplate.getChannelId();
+            return channelId == null ? DEFAULT_CHANNEL_ID : channelId;
         } else {
             // For Android versions O and above, create a channel if it does not exist and return
             // the channel ID.
             final NotificationManager notificationManager =
                     (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            final String channelIdFromPayload = pushTemplate.getChannelId();
+            final String channelIdFromPayload = channelId;
 
             // if a channel from the payload is not null and if a channel exists for the channel ID
             // from the payload, use the same channel ID.
@@ -134,18 +136,16 @@ class AEPPushNotificationBuilder {
 
                 final NotificationChannel channel =
                         new NotificationChannel(
-                                channelIdFromPayload,
-                                DEFAULT_CHANNEL_NAME,
-                                pushTemplate.getNotificationImportance());
+                                channelIdFromPayload, DEFAULT_CHANNEL_NAME, importance);
 
                 // set a custom sound on the channel
-                setSound(channel, pushTemplate, context, false);
+                setSound(context, channel, customSound, false);
 
                 // add the channel to the notification manager
                 notificationManager.createNotificationChannel(channel);
 
                 // setup a silent channel for notification carousel item change
-                setupSilentNotificationChannel(context, notificationManager, pushTemplate);
+                setupSilentNotificationChannel(context, notificationManager, importance);
 
                 return channelIdFromPayload;
             } else {
@@ -159,7 +159,6 @@ class AEPPushNotificationBuilder {
 
             // Use the default channel ID if the channel ID from the payload is null or if a channel
             // does not exist for the channel ID from the payload.
-            final String channelId = DEFAULT_CHANNEL_ID;
             if (notificationManager.getNotificationChannel(DEFAULT_CHANNEL_ID) != null) {
                 Log.debug(
                         CampaignPushConstants.LOG_TAG,
@@ -173,34 +172,34 @@ class AEPPushNotificationBuilder {
                         "Creating a new channel for the default channel ID: " + channelId + ".");
                 final NotificationChannel channel =
                         new NotificationChannel(
-                                channelId,
-                                DEFAULT_CHANNEL_NAME,
-                                pushTemplate.getNotificationImportance());
+                                DEFAULT_CHANNEL_ID, DEFAULT_CHANNEL_NAME, importance);
                 notificationManager.createNotificationChannel(channel);
             }
-            return channelId;
+            return DEFAULT_CHANNEL_ID;
         }
     }
 
     private static void setupSilentNotificationChannel(
             final Context context,
             final NotificationManager notificationManager,
-            final AEPPushTemplate pushTemplate) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // create a channel containing no sound to be used when displaying an updated carousel
-            // notification
-            final NotificationChannel silentChannel =
-                    new NotificationChannel(
-                            CampaignPushConstants.DefaultValues.SILENT_NOTIFICATION_CHANNEL_ID,
-                            DEFAULT_CHANNEL_NAME,
-                            pushTemplate.getNotificationImportance());
-
-            // set no sound on the silent channel
-            setSound(silentChannel, pushTemplate, context, true);
-
-            // add the silent channel to the notification manager
-            notificationManager.createNotificationChannel(silentChannel);
+            final int importance) {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O) {
+            return;
         }
+
+        // create a channel containing no sound to be used when displaying an updated carousel
+        // notification
+        final NotificationChannel silentChannel =
+                new NotificationChannel(
+                        CampaignPushConstants.DefaultValues.SILENT_NOTIFICATION_CHANNEL_ID,
+                        DEFAULT_CHANNEL_NAME,
+                        importance);
+
+        // set no sound on the silent channel
+        setSound(context, silentChannel, null, true);
+
+        // add the silent channel to the notification manager
+        notificationManager.createNotificationChannel(silentChannel);
     }
 
     /**
@@ -209,19 +208,20 @@ class AEPPushNotificationBuilder {
      * MobileCore.setSmallIcon(). If a small icon is not set using MobileCore.setSmallIcon(), we use
      * the default small icon of the application.
      *
-     * @param pushTemplate {@link AEPPushTemplate} containing the message data from the received
-     *     push notification
      * @param context the application {@link Context}
+     * @param smallIcon {@code String} containing the small icon to use
+     * @param smallIconColor {@code String} containing the small icon color to use
      * @param builder the notification builder
      */
     static void setSmallIcon(
+            final Context context,
             final NotificationCompat.Builder builder,
-            final AEPPushTemplate pushTemplate,
-            final Context context) {
+            final String smallIcon,
+            final String smallIconColor) {
         final int iconFromPayload =
-                CampaignPushUtils.getSmallIconWithResourceName(pushTemplate.getIcon(), context);
+                CampaignPushUtils.getSmallIconWithResourceName(smallIcon, context);
         final int iconFromMobileCore = MobileCore.getSmallIconResourceID();
-        int iconResourceId = 0;
+        int iconResourceId;
 
         if (isValidIcon(iconFromPayload)) {
             iconResourceId = iconFromPayload;
@@ -236,10 +236,11 @@ class AEPPushNotificationBuilder {
                         CampaignPushConstants.LOG_TAG,
                         SELF_TAG,
                         "No valid small icon found. Notification will not be displayed.");
+                return;
             }
         }
 
-        final String iconColorHex = pushTemplate.getSmallIconColor();
+        final String iconColorHex = smallIconColor;
         setSmallIconColor(builder, iconColorHex);
 
         builder.setSmallIcon(iconResourceId);
@@ -247,8 +248,7 @@ class AEPPushNotificationBuilder {
     /**
      * Sets a custom color to the notification's small icon.
      *
-     * @param builder {@link AEPPushTemplate} containing the message data from the received push
-     *     notification
+     * @param builder the notification builder
      * @param iconColorHex {@code String} containing a color code to be used in customizing the
      *     small icon color
      */
@@ -275,22 +275,45 @@ class AEPPushNotificationBuilder {
      * used. If a sound is not received from the payload, the default sound is used The sound name
      * from the payload should also include the format of the sound file. eg: sound.mp3
      *
-     * @param notificationBuilder the notification builder
-     * @param pushTemplate {@link AEPPushTemplate} containing the message data from the received
-     *     push notification
      * @param context the application {@link Context}
+     * @param notificationBuilder the notification builder
+     * @param customSound {@code String} containing the custom sound file name to load from the
+     *     bundled assets
+     * @param isSilent {@code boolean} signaling if a silent sound should be assigned to the
+     *     provided {@code NotificationCompat.Builder}
      */
     static void setSound(
+            final Context context,
             final NotificationCompat.Builder notificationBuilder,
-            final AEPPushTemplate pushTemplate,
-            final Context context) {
-        if (!StringUtils.isNullOrEmpty(pushTemplate.getSound())) {
-            notificationBuilder.setSound(
-                    CampaignPushUtils.getSoundUriForResourceName(pushTemplate.getSound(), context));
+            final String customSound,
+            final boolean isSilent) {
+        if (isSilent) {
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "Setting a silent sound on the notification.");
+            notificationBuilder.setSound(null);
             return;
         }
+
+        if (StringUtils.isNullOrEmpty(customSound)) {
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "No custom sound found in the push template, using the default notification"
+                            + " sound.");
+            notificationBuilder.setSound(
+                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+            return;
+        }
+
+        Log.trace(
+                CampaignPushConstants.LOG_TAG,
+                SELF_TAG,
+                "Setting sound from bundle named %s.",
+                customSound);
         notificationBuilder.setSound(
-                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+                CampaignPushUtils.getSoundUriForResourceName(customSound, context));
     }
 
     static void setSound(
@@ -314,20 +337,76 @@ class AEPPushNotificationBuilder {
     }
 
     /**
-     * Sets the large icon for the notification. If a large icon url is received from the payload,
-     * the image is downloaded and the notification style is set to BigPictureStyle. If large icon
-     * url is not received from the payload, default style is used for the notification.
+     * Sets the sound for the provided {@code NotificationChannel}. If a sound is received from the
+     * payload, the same is used. If a sound is not received from the payload, the default sound is
+     * used. The sound name from the payload should also include the format of the sound file. eg:
+     * sound.mp3
+     *
+     * @param context the application {@link Context}
+     * @param notificationChannel the {@link NotificationChannel} to assign the sound to
+     * @param customSound {@code String} containing the custom sound file name to load from the
+     *     bundled assets
+     * @param isSilent {@code boolean} signaling if a silent sound should be assigned to the
+     *     provided {@code NotificationChannel}
+     */
+    static void setSound(
+            final Context context,
+            final NotificationChannel notificationChannel,
+            final String customSound,
+            final boolean isSilent) {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O) {
+            return;
+        }
+
+        if (isSilent) {
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "Setting a silent sound on channel named %s.",
+                    notificationChannel.getName());
+            notificationChannel.setSound(null, null);
+            return;
+        }
+
+        if (StringUtils.isNullOrEmpty(customSound)) {
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "No custom sound found in the push template, using the default"
+                            + " notification sound.");
+            notificationChannel.setSound(
+                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION), null);
+            return;
+        }
+
+        Log.trace(
+                CampaignPushConstants.LOG_TAG,
+                SELF_TAG,
+                "Setting sound from bundle named %s.",
+                customSound);
+        notificationChannel.setSound(
+                CampaignPushUtils.getSoundUriForResourceName(customSound, context), null);
+    }
+
+    /**
+     * Sets the image url as the large icon for the notification. If a large icon url is received
+     * from the payload, the image is downloaded and the notification style is set to
+     * BigPictureStyle. If large icon url is not received from the payload, default style is used
+     * for the notification.
      *
      * @param notificationBuilder the notification builder
-     * @param pushTemplate {@link AEPPushTemplate} containing the message data from the received
-     *     push notification
+     * @param imageUrl {@code String} containing the image url
+     * @param title {@code String} containing the title
+     * @param bodyText {@code String} containing the body text
      */
     static void setLargeIcon(
             final NotificationCompat.Builder notificationBuilder,
-            final AEPPushTemplate pushTemplate) {
+            final String imageUrl,
+            final String title,
+            final String bodyText) {
         // Quick bail out if there is no image url
-        if (StringUtils.isNullOrEmpty(pushTemplate.getImageUrl())) return;
-        Bitmap bitmap = CampaignPushUtils.download(pushTemplate.getImageUrl());
+        if (StringUtils.isNullOrEmpty(imageUrl)) return;
+        Bitmap bitmap = CampaignPushUtils.download(imageUrl);
 
         // Bail out if the download fails
         if (bitmap == null) return;
@@ -336,25 +415,29 @@ class AEPPushNotificationBuilder {
                 new NotificationCompat.BigPictureStyle();
         bigPictureStyle.bigPicture(bitmap);
         bigPictureStyle.bigLargeIcon(null);
-        bigPictureStyle.setBigContentTitle(pushTemplate.getTitle());
-        bigPictureStyle.setSummaryText(pushTemplate.getBody());
+        bigPictureStyle.setBigContentTitle(title);
+        bigPictureStyle.setSummaryText(bodyText);
         notificationBuilder.setStyle(bigPictureStyle);
     }
 
     /**
      * Sets the click action for the notification buttons.
      *
-     * @param notificationBuilder the notification builder
-     * @param pushTemplate {@link AEPPushTemplate} containing the message data from the received
-     *     push notification
      * @param context the application {@link Context}
+     * @param notificationBuilder the notification builder
+     * @param messageId {@code String} containing the message id from the received push notification
+     * @param deliveryId {@code String} containing the delivery id from the received push
+     *     notification
+     * @param actionUri the action uri
      */
     static void setNotificationClickAction(
+            final Context context,
             final NotificationCompat.Builder notificationBuilder,
-            final AEPPushTemplate pushTemplate,
-            final Context context) {
+            final String messageId,
+            final String deliveryId,
+            final String actionUri) {
         final PendingIntent pendingIntent =
-                createPendingIntent(pushTemplate, context, pushTemplate.getActionUri(), null);
+                createPendingIntent(context, messageId, deliveryId, actionUri, null);
         notificationBuilder.setContentIntent(pendingIntent);
     }
 
@@ -366,27 +449,26 @@ class AEPPushNotificationBuilder {
      *     template
      * @param targetViewResourceId {@code int} containing the resource id of the view to attach the
      *     click action
-     * @param pushTemplate {@link AEPPushTemplate} containing the message data from the received
-     *     push notification
-
+     * @param messageId {@code String} containing the message id from the received push notification
+     * @param deliveryId {@code String} containing the delivery id from the received push
+     *     notification
      * @param actionUri {@code String} containing the action uri defined for the push template image
      */
     static void setRemoteViewClickAction(
             final Context context,
             final RemoteViews pushTemplateRemoteView,
             final int targetViewResourceId,
-            final AEPPushTemplate pushTemplate,
+            final String messageId,
+            final String deliveryId,
             final String actionUri) {
         final PendingIntent pendingIntent =
-                createPendingIntent(pushTemplate, context, actionUri, null);
+                createPendingIntent(context, messageId, deliveryId, actionUri, null);
         pushTemplateRemoteView.setOnClickPendingIntent(targetViewResourceId, pendingIntent);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     static void setVisibility(
-            final NotificationCompat.Builder notificationBuilder,
-            final AEPPushTemplate pushTemplate) {
-        final int visibility = pushTemplate.getNotificationVisibility();
+            final NotificationCompat.Builder notificationBuilder, final int visibility) {
         switch (visibility) {
             case NotificationCompat.VISIBILITY_PUBLIC:
                 notificationBuilder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
@@ -411,16 +493,20 @@ class AEPPushNotificationBuilder {
     /**
      * Adds action buttons for the notification.
      *
-     * @param builder the notification builder
-     * @param pushTemplate {@link AEPPushTemplate} containing the message data from the received
-     *     push notification
      * @param context the application {@link Context}
+     * @param builder the notification builder
+     * @param actionButtons {@link List<AEPPushTemplate.ActionButton>} containing action buttons to
+     *     attach to the notification
+     * @param messageId {@code String} containing the message id from the received push notification
+     * @param deliveryId {@code String} containing the delivery id from the received push
+     *     notification
      */
     static void addActionButtons(
+            final Context context,
             final NotificationCompat.Builder builder,
-            final AEPPushTemplate pushTemplate,
-            final Context context) {
-        final List<AEPPushTemplate.ActionButton> actionButtons = pushTemplate.getActionButtons();
+            final List<AEPPushTemplate.ActionButton> actionButtons,
+            final String messageId,
+            final String deliveryId) {
         if (actionButtons == null || actionButtons.isEmpty()) {
             return;
         }
@@ -432,10 +518,15 @@ class AEPPushNotificationBuilder {
                     || eachButton.getType() == AEPPushTemplate.ActionType.WEBURL) {
                 pendingIntent =
                         createPendingIntent(
-                                pushTemplate, context, eachButton.getLink(), eachButton.getLabel());
+                                context,
+                                messageId,
+                                deliveryId,
+                                eachButton.getLink(),
+                                eachButton.getLabel());
             } else {
                 pendingIntent =
-                        createPendingIntent(pushTemplate, context, null, eachButton.getLabel());
+                        createPendingIntent(
+                                context, messageId, deliveryId, null, eachButton.getLabel());
             }
             builder.addAction(0, eachButton.getLabel(), pendingIntent);
         }
@@ -444,25 +535,25 @@ class AEPPushNotificationBuilder {
     /**
      * Creates a pending intent for the notification.
      *
-     * @param pushTemplate {@link AEPPushTemplate} containing the message data from the received
-     *     push notification
      * @param context the application {@link Context}
+     * @param messageId {@code String} containing the message id from the received push notification
+     * @param deliveryId {@code String} containing the delivery id from the received push
+     *     notification
      * @param actionUri the action uri
      * @param actionID the action ID
      * @return the pending intent
      */
     private static PendingIntent createPendingIntent(
-            final AEPPushTemplate pushTemplate,
             final Context context,
+            final String messageId,
+            final String deliveryId,
             final String actionUri,
             final String actionID) {
         final Intent intent = new Intent(CampaignPushConstants.NotificationAction.BUTTON_CLICKED);
         intent.setClass(context.getApplicationContext(), CampaignPushTrackerActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        intent.putExtra(
-                CampaignPushConstants.Tracking.Keys.MESSAGE_ID, pushTemplate.getMessageId());
-        intent.putExtra(
-                CampaignPushConstants.Tracking.Keys.DELIVERY_ID, pushTemplate.getDeliveryId());
+        intent.putExtra(CampaignPushConstants.Tracking.Keys.MESSAGE_ID, messageId);
+        intent.putExtra(CampaignPushConstants.Tracking.Keys.DELIVERY_ID, deliveryId);
         addActionDetailsToIntent(intent, actionUri, actionID);
 
         // adding tracking details
@@ -476,22 +567,22 @@ class AEPPushNotificationBuilder {
     /**
      * Sets the delete action for the notification.
      *
-     * @param builder the notification builder
-     * @param pushTemplate {@link AEPPushTemplate} containing the message data from the received
-     *     push notification
      * @param context the application {@link Context}
+     * @param builder the notification builder
+     * @param messageId {@code String} containing the message id from the received push notification
+     * @param deliveryId {@code String} containing the delivery id from the received push
+     *     notification
      */
     static void setNotificationDeleteAction(
+            final Context context,
             final NotificationCompat.Builder builder,
-            final AEPPushTemplate pushTemplate,
-            final Context context) {
+            final String messageId,
+            final String deliveryId) {
         final Intent deleteIntent = new Intent(CampaignPushConstants.NotificationAction.DISMISSED);
         deleteIntent.setClass(context, CampaignPushTrackerActivity.class);
         deleteIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        deleteIntent.putExtra(
-                CampaignPushConstants.Tracking.Keys.MESSAGE_ID, pushTemplate.getMessageId());
-        deleteIntent.putExtra(
-                CampaignPushConstants.Tracking.Keys.DELIVERY_ID, pushTemplate.getDeliveryId());
+        deleteIntent.putExtra(CampaignPushConstants.Tracking.Keys.MESSAGE_ID, messageId);
+        deleteIntent.putExtra(CampaignPushConstants.Tracking.Keys.DELIVERY_ID, deliveryId);
 
         final PendingIntent intent =
                 PendingIntent.getActivity(
@@ -533,63 +624,67 @@ class AEPPushNotificationBuilder {
     /**
      * Sets custom colors to UI elements present in the specified {@code RemoteViews} object.
      *
-     * @param pushTemplate {@link AEPPushTemplate} object containing color customization values
+     * @param backgroundColor {@code String} containing the hex color code for the notification
+     *     background
+     * @param titleTextColor {@code String} containing the hex color code for the notification title
+     *     text
+     * @param expandedBodyTextColor {@code String} containing the hex color code for the expanded
+     *     notification body text
      * @param smallLayout {@link RemoteViews} object for a collapsed custom notification
      * @param expandedLayout {@code RemoteViews} object for an expanded custom notification
      * @param containerViewId {@code int} containing the resource id of the layout container
      */
     static void setCustomNotificationColors(
-            final AEPPushTemplate pushTemplate,
+            final String backgroundColor,
+            final String titleTextColor,
+            final String expandedBodyTextColor,
             final RemoteViews smallLayout,
             final RemoteViews expandedLayout,
             final int containerViewId) {
         // get custom color from hex string and set it the notification background
-        final String backgroundColorHex = pushTemplate.getNotificationBackgroundColor();
-        if (!StringUtils.isNullOrEmpty(backgroundColorHex)) {
+        if (!StringUtils.isNullOrEmpty(backgroundColor)) {
             setElementColor(
                     smallLayout,
                     R.id.basic_small_layout,
-                    "#" + backgroundColorHex,
+                    "#" + backgroundColor,
                     CampaignPushConstants.MethodNames.SET_BACKGROUND_COLOR,
                     CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BACKGROUND);
             setElementColor(
                     expandedLayout,
                     containerViewId,
-                    "#" + backgroundColorHex,
+                    "#" + backgroundColor,
                     CampaignPushConstants.MethodNames.SET_BACKGROUND_COLOR,
                     CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BACKGROUND);
         }
 
         // get custom color from hex string and set it the notification title
-        final String titleColorHex = pushTemplate.getTitleTextColor();
-        if (!StringUtils.isNullOrEmpty(titleColorHex)) {
+        if (!StringUtils.isNullOrEmpty(titleTextColor)) {
             setElementColor(
                     smallLayout,
                     R.id.notification_title,
-                    "#" + titleColorHex,
+                    "#" + titleTextColor,
                     CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
                     CampaignPushConstants.FriendlyViewNames.NOTIFICATION_TITLE);
             setElementColor(
                     expandedLayout,
                     R.id.notification_title,
-                    "#" + titleColorHex,
+                    "#" + titleTextColor,
                     CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
                     CampaignPushConstants.FriendlyViewNames.NOTIFICATION_TITLE);
         }
 
         // get custom color from hex string and set it the notification body text
-        final String bodyColorHex = pushTemplate.getExpandedBodyTextColor();
-        if (!StringUtils.isNullOrEmpty(bodyColorHex)) {
+        if (!StringUtils.isNullOrEmpty(expandedBodyTextColor)) {
             setElementColor(
                     smallLayout,
                     R.id.notification_body,
-                    "#" + bodyColorHex,
+                    "#" + expandedBodyTextColor,
                     CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
                     CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BODY_TEXT);
             setElementColor(
                     expandedLayout,
                     R.id.notification_body_expanded,
-                    "#" + bodyColorHex,
+                    "#" + expandedBodyTextColor,
                     CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
                     CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BODY_TEXT);
         }
