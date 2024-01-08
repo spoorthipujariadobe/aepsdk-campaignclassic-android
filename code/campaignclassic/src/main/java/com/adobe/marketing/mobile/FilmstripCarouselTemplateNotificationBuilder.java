@@ -318,6 +318,7 @@ class FilmstripCarouselTemplateNotificationBuilder {
         notificationManager.notify(messageId.hashCode(), notification);
     }
 
+    // TODO: refactor to use private builder object as the parameter list is quite lengthy
     private static NotificationCompat.Builder createNotificationBuilder(
             final Context context,
             final RemoteViews expandedLayout,

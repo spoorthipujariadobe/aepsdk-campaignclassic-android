@@ -60,25 +60,23 @@ public class AEPMessagingService extends FirebaseMessagingService {
         AEPPushPayload payload;
         try {
             payload = new AEPPushPayload(remoteMessage);
+            final Notification notification =
+                    AEPPushNotificationBuilder.buildPushNotification(payload, context);
+            notificationManager.notify(payload.getMessageId().hashCode(), notification);
         } catch (final IllegalArgumentException exception) {
             Log.error(
                     CampaignPushConstants.LOG_TAG,
                     SELF_TAG,
-                    "Failed to create push payload object, an exception occurred:" + " %s",
+                    "Failed to create a push notification, an illegal argument exception occurred:"
+                            + " %s",
                     exception.getLocalizedMessage());
             return false;
-        }
-
-        try {
-            final Notification notification =
-                    AEPPushNotificationBuilder.buildPushNotification(payload, context);
-            // display notification
-            notificationManager.notify(payload.getMessageId().hashCode(), notification);
         } catch (final NotificationConstructionFailedException exception) {
             Log.error(
                     CampaignPushConstants.LOG_TAG,
                     SELF_TAG,
-                    "Failed to create a push notification, an exception occurred:" + " %s",
+                    "Failed to create a push notification, a notification construction failed"
+                            + " exception occurred: %s",
                     exception.getLocalizedMessage());
             return false;
         }
@@ -106,25 +104,23 @@ public class AEPMessagingService extends FirebaseMessagingService {
         AEPPushPayload payload;
         try {
             payload = new AEPPushPayload(messageData);
+            final Notification notification =
+                    AEPPushNotificationBuilder.buildPushNotification(payload, context);
+            notificationManager.notify(payload.getMessageId().hashCode(), notification);
         } catch (final IllegalArgumentException exception) {
             Log.error(
                     CampaignPushConstants.LOG_TAG,
                     SELF_TAG,
-                    "Failed to create push payload object, an exception occurred:" + " %s",
+                    "Failed to create a push notification, an illegal argument exception occurred:"
+                            + " %s",
                     exception.getLocalizedMessage());
             return false;
-        }
-
-        try {
-            final Notification notification =
-                    AEPPushNotificationBuilder.buildPushNotification(payload, context);
-            // display notification
-            notificationManager.notify(payload.getMessageId().hashCode(), notification);
         } catch (final NotificationConstructionFailedException exception) {
             Log.error(
                     CampaignPushConstants.LOG_TAG,
                     SELF_TAG,
-                    "Failed to create a push notification, an exception occurred:" + " %s",
+                    "Failed to create a push notification, a notification construction failed"
+                            + " exception occurred: %s",
                     exception.getLocalizedMessage());
             return false;
         }

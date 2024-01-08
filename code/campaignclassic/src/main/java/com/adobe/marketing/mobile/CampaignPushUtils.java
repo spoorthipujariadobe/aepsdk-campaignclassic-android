@@ -54,6 +54,9 @@ import java.util.concurrent.TimeUnit;
  */
 class CampaignPushUtils {
     private static final String SELF_TAG = "CampaignPushUtils";
+    private static final int FULL_BITMAP_QUALITY = 100;
+    private static final int DOWNLOAD_TIMEOUT = 10;
+    private static final int MINIMUM_FILMSTRIP_SIZE = 3;
 
     private static class ExecutorHolder {
         static final ExecutorService INSTANCE = Executors.newSingleThreadExecutor();
@@ -123,7 +126,7 @@ class CampaignPushUtils {
         final Future<Bitmap> downloadTask = executorService.submit(new DownloadImageCallable(url));
 
         try {
-            bitmap = downloadTask.get(10, TimeUnit.SECONDS);
+            bitmap = downloadTask.get(DOWNLOAD_TIMEOUT, TimeUnit.SECONDS);
         } catch (final Exception e) {
             downloadTask.cancel(true);
         }
@@ -188,7 +191,7 @@ class CampaignPushUtils {
      */
     static InputStream bitmapToInputStream(final Bitmap bitmap) {
         final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+        bitmap.compress(Bitmap.CompressFormat.PNG, FULL_BITMAP_QUALITY, byteArrayOutputStream);
         final byte[] bitmapData = byteArrayOutputStream.toByteArray();
         return new ByteArrayInputStream(bitmapData);
     }
@@ -327,7 +330,7 @@ class CampaignPushUtils {
      */
     static List<Integer> calculateNewIndices(
             final int centerIndex, final int listSize, final String action) {
-        if (listSize < 3) return null;
+        if (listSize < MINIMUM_FILMSTRIP_SIZE) return null;
 
         final List<Integer> newIndices = new ArrayList<>();
         int newCenterIndex = 0;
