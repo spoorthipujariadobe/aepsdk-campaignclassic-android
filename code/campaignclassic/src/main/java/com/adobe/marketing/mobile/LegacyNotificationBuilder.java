@@ -16,7 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import com.adobe.marketing.mobile.services.Log;
 
-public class LegacyNotificationBuilder {
+class LegacyNotificationBuilder {
     private static final String SELF_TAG = "LegacyNotificationBuilder";
 
     @NonNull static NotificationCompat.Builder construct(
@@ -26,7 +26,11 @@ public class LegacyNotificationBuilder {
                 SELF_TAG,
                 "Building a legacy style push notification.");
         final String channelId =
-                AEPPushNotificationBuilder.createChannelAndGetChannelID(pushTemplate, context);
+                AEPPushNotificationBuilder.createChannelAndGetChannelID(
+                        context,
+                        pushTemplate.getChannelId(),
+                        pushTemplate.getSound(),
+                        pushTemplate.getNotificationImportance());
         final NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(context, channelId)
                         .setContentTitle(pushTemplate.getTitle())
@@ -35,20 +39,36 @@ public class LegacyNotificationBuilder {
                         .setPriority(pushTemplate.getNotificationPriority())
                         .setAutoCancel(true);
 
-        AEPPushNotificationBuilder.setLargeIcon(builder, pushTemplate);
-        AEPPushNotificationBuilder.setSmallIcon(
+        AEPPushNotificationBuilder.setLargeIcon(
                 builder,
-                pushTemplate,
-                context); // Small Icon must be present, otherwise the notification will not be
-        // displayed.
+                pushTemplate.getImageUrl(),
+                pushTemplate.getTitle(),
+                pushTemplate.getExpandedBodyText());
+        AEPPushNotificationBuilder.setSmallIcon(
+                context,
+                builder,
+                pushTemplate.getIcon(),
+                pushTemplate.getSmallIconColor()); // Small Icon must be present, otherwise the
+        // notification will not be displayed.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            AEPPushNotificationBuilder.setVisibility(builder, pushTemplate);
+            AEPPushNotificationBuilder.setVisibility(
+                    builder, pushTemplate.getNotificationVisibility());
         }
         AEPPushNotificationBuilder.addActionButtons(
-                builder, pushTemplate, context); // Add action buttons if any
-        AEPPushNotificationBuilder.setSound(builder, pushTemplate, context);
-        AEPPushNotificationBuilder.setNotificationClickAction(builder, pushTemplate, context);
-        AEPPushNotificationBuilder.setNotificationDeleteAction(builder, pushTemplate, context);
+                context,
+                builder,
+                pushTemplate.getActionButtons(),
+                pushTemplate.getMessageId(),
+                pushTemplate.getDeliveryId()); // Add action buttons if any
+        AEPPushNotificationBuilder.setSound(context, builder, pushTemplate.getSound(), false);
+        AEPPushNotificationBuilder.setNotificationClickAction(
+                context,
+                builder,
+                pushTemplate.getMessageId(),
+                pushTemplate.getDeliveryId(),
+                pushTemplate.getActionUri());
+        AEPPushNotificationBuilder.setNotificationDeleteAction(
+                context, builder, pushTemplate.getMessageId(), pushTemplate.getDeliveryId());
 
         return builder;
     }

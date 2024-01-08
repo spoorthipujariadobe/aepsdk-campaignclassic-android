@@ -19,5 +19,6 @@
         android:exported="false"
         android:launchMode="singleInstance"
         android:theme="@style/Messaging.Style.Transparent"/>
+        <receiver android:name="com.adobe.marketing.mobile.AEPPushTemplateBroadcastReceiver" />
         </application>
 </manifest>

@@ -19,19 +19,31 @@ import androidx.core.app.NotificationCompat;
 import com.adobe.marketing.mobile.campaignclassic.R;
 import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.services.ServiceProvider;
-import com.adobe.marketing.mobile.util.StringUtils;
+import com.adobe.marketing.mobile.services.caching.CacheService;
 
-public class BasicTemplateNotificationBuilder {
+class BasicTemplateNotificationBuilder {
     private static final String SELF_TAG = "BasicTemplateNotificationBuilder";
 
     @NonNull static NotificationCompat.Builder construct(
-            final BasicPushTemplate pushTemplate, final Context context) {
+            final BasicPushTemplate pushTemplate, final Context context)
+            throws NotificationConstructionFailedException {
+
+        if (pushTemplate == null) {
+            throw new NotificationConstructionFailedException(
+                    "Invalid push template received, filmstrip carousel notification will not be"
+                            + " constructed.");
+        }
+
         Log.trace(
                 CampaignPushConstants.LOG_TAG,
                 SELF_TAG,
                 "Building a basic template push notification.");
         final String channelId =
-                AEPPushNotificationBuilder.createChannelAndGetChannelID(pushTemplate, context);
+                AEPPushNotificationBuilder.createChannelAndGetChannelID(
+                        context,
+                        pushTemplate.getChannelId(),
+                        pushTemplate.getSound(),
+                        pushTemplate.getNotificationImportance());
         final String packageName =
                 ServiceProvider.getInstance()
                         .getAppContextService()
@@ -41,15 +53,18 @@ public class BasicTemplateNotificationBuilder {
                 new RemoteViews(packageName, R.layout.push_template_collapsed);
         final RemoteViews expandedLayout =
                 new RemoteViews(packageName, R.layout.push_template_expanded);
+        final CacheService cacheService = ServiceProvider.getInstance().getCacheService();
+
+        if (cacheService == null) {
+            throw new NotificationConstructionFailedException(
+                    "Cache service is null, basic push notification will not be constructed.");
+        }
 
         // get push payload data
-        final String imageUrl = pushTemplate.getImageUrl();
-        if (!StringUtils.isNullOrEmpty(imageUrl)) {
-            final Bitmap image = CampaignPushUtils.download(imageUrl);
-            if (image != null) {
-                smallLayout.setImageViewBitmap(R.id.template_image, image);
-                expandedLayout.setImageViewBitmap(R.id.expanded_template_image, image);
-            }
+        final String imageUri = pushTemplate.getImageUrl();
+        final Bitmap pushImage = CampaignPushUtils.downloadImage(cacheService, imageUri);
+        if (pushImage != null) {
+            expandedLayout.setImageViewBitmap(R.id.expanded_template_image, pushImage);
         }
 
         smallLayout.setTextViewText(R.id.notification_title, pushTemplate.getTitle());
@@ -58,50 +73,14 @@ public class BasicTemplateNotificationBuilder {
         expandedLayout.setTextViewText(
                 R.id.notification_body_expanded, pushTemplate.getExpandedBodyText());
 
-        // get custom color from hex string and set it the notification background
-        final String backgroundColorHex = pushTemplate.getNotificationBackgroundColor();
-        AEPPushNotificationBuilder.setElementColor(
+        // set any custom colors if needed
+        AEPPushNotificationBuilder.setCustomNotificationColors(
+                pushTemplate.getNotificationBackgroundColor(),
+                pushTemplate.getTitleTextColor(),
+                pushTemplate.getExpandedBodyTextColor(),
                 smallLayout,
-                R.id.basic_small_layout,
-                "#" + backgroundColorHex,
-                CampaignPushConstants.MethodNames.SET_BACKGROUND_COLOR,
-                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BACKGROUND);
-        AEPPushNotificationBuilder.setElementColor(
                 expandedLayout,
-                R.id.basic_expanded_layout,
-                "#" + backgroundColorHex,
-                CampaignPushConstants.MethodNames.SET_BACKGROUND_COLOR,
-                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BACKGROUND);
-
-        // get custom color from hex string and set it the notification title
-        final String titleColorHex = pushTemplate.getTitleTextColor();
-        AEPPushNotificationBuilder.setElementColor(
-                smallLayout,
-                R.id.notification_title,
-                "#" + titleColorHex,
-                CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
-                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_TITLE);
-        AEPPushNotificationBuilder.setElementColor(
-                expandedLayout,
-                R.id.notification_title,
-                "#" + titleColorHex,
-                CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
-                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_TITLE);
-
-        // get custom color from hex string and set it the notification body text
-        final String bodyColorHex = pushTemplate.getExpandedBodyTextColor();
-        AEPPushNotificationBuilder.setElementColor(
-                smallLayout,
-                R.id.notification_body,
-                "#" + bodyColorHex,
-                CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
-                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BODY_TEXT);
-        AEPPushNotificationBuilder.setElementColor(
-                smallLayout,
-                R.id.notification_body_expanded,
-                "#" + bodyColorHex,
-                CampaignPushConstants.MethodNames.SET_TEXT_COLOR,
-                CampaignPushConstants.FriendlyViewNames.NOTIFICATION_BODY_TEXT);
+                R.id.basic_expanded_layout);
 
         // Create the notification
         final NotificationCompat.Builder builder =
@@ -113,18 +92,30 @@ public class BasicTemplateNotificationBuilder {
                         .setCustomBigContentView(expandedLayout);
 
         AEPPushNotificationBuilder.setSmallIcon(
+                context,
                 builder,
-                pushTemplate,
-                context); // Small Icon must be present, otherwise the notification will not be
-        // displayed.
+                pushTemplate.getIcon(),
+                pushTemplate.getSmallIconColor()); // Small Icon must be present, otherwise the
+        // notification will not be displayed.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            AEPPushNotificationBuilder.setVisibility(builder, pushTemplate);
+            AEPPushNotificationBuilder.setVisibility(
+                    builder, pushTemplate.getNotificationVisibility());
         }
         AEPPushNotificationBuilder.addActionButtons(
-                builder, pushTemplate, context); // Add action buttons if any
-        AEPPushNotificationBuilder.setSound(builder, pushTemplate, context);
-        AEPPushNotificationBuilder.setNotificationClickAction(builder, pushTemplate, context);
-        AEPPushNotificationBuilder.setNotificationDeleteAction(builder, pushTemplate, context);
+                context,
+                builder,
+                pushTemplate.getActionButtons(),
+                pushTemplate.getMessageId(),
+                pushTemplate.getDeliveryId()); // Add action buttons if any
+        AEPPushNotificationBuilder.setSound(context, builder, pushTemplate.getSound(), false);
+        AEPPushNotificationBuilder.setNotificationClickAction(
+                context,
+                builder,
+                pushTemplate.getMessageId(),
+                pushTemplate.getDeliveryId(),
+                pushTemplate.getActionUri());
+        AEPPushNotificationBuilder.setNotificationDeleteAction(
+                context, builder, pushTemplate.getMessageId(), pushTemplate.getDeliveryId());
 
         // if API level is below 26 (prior to notification channels) then notification priority is
         // set on the notification builder

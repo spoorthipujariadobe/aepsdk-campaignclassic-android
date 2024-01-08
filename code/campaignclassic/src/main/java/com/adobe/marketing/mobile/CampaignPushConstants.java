@@ -19,6 +19,10 @@ final class CampaignPushConstants {
     private CampaignPushConstants() {}
 
     static final String LOG_TAG = "CampaignClassicExtension";
+    static final String CACHE_BASE_DIR = "campaignclassic";
+    static final String PUSH_IMAGE_CACHE = "pushimagecache";
+    static final String DATASTORE_NAME = "ADOBEMOBILE_CAMPAIGNCLASSIC";
+    static final String SMALL_ICON_RESOURCE_ID_DATASTORE_KEY = "smalliconid";
 
     final class NotificationAction {
         static final String DISMISSED = "Notification Dismissed";
@@ -43,13 +47,50 @@ final class CampaignPushConstants {
 
     final class DefaultValues {
         static final String LEGACY_PAYLOAD_VERSION_STRING = "0";
-        static final int CAROUSEL_MINIMUM_IMAGE_COUNT = 1;
+        static final String SILENT_NOTIFICATION_CHANNEL_ID = "silent";
         static final int CAROUSEL_MAX_BITMAP_WIDTH = 300;
         static final int CAROUSEL_MAX_BITMAP_HEIGHT = 200;
         static final String AUTO_CAROUSEL_MODE = "auto";
+        static final String MANUAL_CAROUSEL_MODE = "manual";
         static final String FILMSTRIP_CAROUSEL_MODE = "filmstrip";
+        static final int AUTO_CAROUSEL_MINIMUM_IMAGE_COUNT = 1;
+        static final int CENTER_INDEX = 1;
+        static final int FILMSTRIP_CAROUSEL_MINIMUM_IMAGE_COUNT = 3;
+        static final long PUSH_NOTIFICATION_IMAGE_CACHE_EXPIRY_IN_MILLISECONDS =
+                259200000; // 3 days
 
         private DefaultValues() {}
+    }
+
+    final class IntentActions {
+        static final String FILMSTRIP_LEFT_CLICKED = "filmstrip_left";
+        static final String FILMSTRIP_RIGHT_CLICKED = "filmstrip_right";
+
+        private IntentActions() {}
+    }
+
+    final class IntentKeys {
+        static final String CENTER_IMAGE_INDEX = "centerImageIndex";
+        static final String IMAGE_URLS = "imageUrls";
+        static final String IMAGE_CAPTIONS = "imageCaptions";
+        static final String IMAGE_CLICK_ACTIONS = "imageClickActions";
+        static final String CHANNEL_ID = "channelId";
+        static final String CUSTOM_SOUND = "customSound";
+        static final String TITLE_TEXT = "titleText";
+        static final String BODY_TEXT = "bodyText";
+        static final String EXPANDED_BODY_TEXT = "expandedBodyText";
+        static final String NOTIFICATION_BACKGROUND_COLOR = "notificationBackgroundColor";
+        static final String TITLE_TEXT_COLOR = "titleTextColor";
+        static final String EXPANDED_BODY_TEXT_COLOR = "expandedBodyTextColor";
+        static final String MESSAGE_ID = "messageId";
+        static final String DELIVERY_ID = "deliveryId";
+        static final String BADGE_COUNT = "badgeCount";
+        static final String SMALL_ICON = "smallIcon";
+        static final String SMALL_ICON_COLOR = "smallIconColor";
+        static final String VISIBILITY = "visibility";
+        static final String IMPORTANCE = "importance";
+
+        private IntentKeys() {}
     }
 
     final class MethodNames {

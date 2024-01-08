@@ -12,18 +12,38 @@ package com.adobe.marketing.mobile;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.RectF;
 import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import com.adobe.marketing.mobile.services.DeviceInforming;
 import com.adobe.marketing.mobile.services.Log;
+import com.adobe.marketing.mobile.services.ServiceProvider;
+import com.adobe.marketing.mobile.services.caching.CacheEntry;
+import com.adobe.marketing.mobile.services.caching.CacheExpiry;
+import com.adobe.marketing.mobile.services.caching.CacheResult;
+import com.adobe.marketing.mobile.services.caching.CacheService;
 import com.adobe.marketing.mobile.util.StringUtils;
+import com.adobe.marketing.mobile.util.UrlUtils;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Utility class for building push notifications.
@@ -34,42 +54,81 @@ import java.net.URL;
  */
 class CampaignPushUtils {
     private static final String SELF_TAG = "CampaignPushUtils";
+    private static final int FULL_BITMAP_QUALITY = 100;
+    private static final int DOWNLOAD_TIMEOUT = 10;
+    private static final int MINIMUM_FILMSTRIP_SIZE = 3;
 
-    static Bitmap download(@NonNull final String url) {
-        Bitmap bitmap = null;
-        HttpURLConnection connection = null;
-        InputStream inputStream = null;
+    private static class ExecutorHolder {
+        static final ExecutorService INSTANCE = Executors.newSingleThreadExecutor();
+    }
 
-        try {
-            final URL imageUrl = new URL(url);
-            connection = (HttpURLConnection) imageUrl.openConnection();
-            inputStream = connection.getInputStream();
-            bitmap = BitmapFactory.decodeStream(inputStream);
-        } catch (IOException e) {
-            Log.warning(
-                    CampaignPushConstants.LOG_TAG,
-                    SELF_TAG,
-                    "Failed to download push notification image from url (%s). Exception: %s",
-                    url,
-                    e.getMessage());
-        } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    Log.warning(
-                            CampaignPushConstants.LOG_TAG,
-                            SELF_TAG,
-                            "IOException during closing Input stream while push notification image"
-                                    + " from url (%s). Exception: %s ",
-                            url,
-                            e.getMessage());
+    private static ExecutorService getExecutor() {
+        return CampaignPushUtils.ExecutorHolder.INSTANCE;
+    }
+
+    private static class DownloadImageCallable implements Callable<Bitmap> {
+        final String url;
+
+        DownloadImageCallable(final String url) {
+            this.url = url;
+        }
+
+        @Override
+        public Bitmap call() {
+            Bitmap bitmap = null;
+            HttpURLConnection connection = null;
+            InputStream inputStream = null;
+
+            try {
+                final URL imageUrl = new URL(url);
+                connection = (HttpURLConnection) imageUrl.openConnection();
+                inputStream = connection.getInputStream();
+                bitmap = BitmapFactory.decodeStream(inputStream);
+            } catch (final IOException e) {
+                Log.warning(
+                        CampaignPushConstants.LOG_TAG,
+                        SELF_TAG,
+                        "Failed to download push notification image from url (%s). Exception: %s",
+                        url,
+                        e.getMessage());
+            } finally {
+                if (inputStream != null) {
+                    try {
+                        inputStream.close();
+                    } catch (final IOException e) {
+                        Log.warning(
+                                CampaignPushConstants.LOG_TAG,
+                                SELF_TAG,
+                                "IOException during closing Input stream while push notification"
+                                        + " image from url (%s). Exception: %s ",
+                                url,
+                                e.getMessage());
+                    }
+                }
+
+                if (connection != null) {
+                    connection.disconnect();
                 }
             }
 
-            if (connection != null) {
-                connection.disconnect();
-            }
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "Downloaded push notification image from url (%s)",
+                    url);
+            return bitmap;
+        }
+    }
+
+    static Bitmap download(final String url) {
+        Bitmap bitmap = null;
+        final ExecutorService executorService = getExecutor();
+        final Future<Bitmap> downloadTask = executorService.submit(new DownloadImageCallable(url));
+
+        try {
+            bitmap = downloadTask.get(DOWNLOAD_TIMEOUT, TimeUnit.SECONDS);
+        } catch (final Exception e) {
+            downloadTask.cancel(true);
         }
 
         return bitmap;
@@ -122,5 +181,190 @@ class CampaignPushUtils {
             return 0;
         }
         return context.getResources().getIdentifier(iconName, "drawable", context.getPackageName());
+    }
+
+    /**
+     * Converts a {@code Bitmap} into an {@code InputStream} to be used in caching images.
+     *
+     * @param bitmap {@link Bitmap} to be converted into an {@link InputStream}
+     * @return an {@code InputStream} created from the provided bitmap
+     */
+    static InputStream bitmapToInputStream(final Bitmap bitmap) {
+        final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, FULL_BITMAP_QUALITY, byteArrayOutputStream);
+        final byte[] bitmapData = byteArrayOutputStream.toByteArray();
+        return new ByteArrayInputStream(bitmapData);
+    }
+
+    /**
+     * Writes a {@code InputStream} to the Campaign Classic extension's asset cache location.
+     *
+     * @param cacheService {@link CacheService} the AEPSDK cache service
+     * @param bitmapInputStream {@link InputStream} created from a download {@link Bitmap}
+     * @param imageUri {@code String} containing the image uri to be used a cache key
+     */
+    static void cacheBitmapInputStream(
+            final CacheService cacheService,
+            final InputStream bitmapInputStream,
+            final String imageUri) {
+        Log.trace(
+                CampaignPushConstants.LOG_TAG,
+                SELF_TAG,
+                "Caching image downloaded from %s.",
+                imageUri);
+        // cache push notification images for 3 days
+        final CacheEntry cacheEntry =
+                new CacheEntry(
+                        bitmapInputStream,
+                        CacheExpiry.after(
+                                CampaignPushConstants.DefaultValues
+                                        .PUSH_NOTIFICATION_IMAGE_CACHE_EXPIRY_IN_MILLISECONDS),
+                        null);
+        cacheService.set(CampaignPushUtils.getAssetCacheLocation(), imageUri, cacheEntry);
+    }
+
+    /**
+     * Retrieves the Campaign Classic extension's asset cache location.
+     *
+     * @return {@code String} containing the Campaign Classic extension's asset cache location
+     */
+    static String getAssetCacheLocation() {
+        final DeviceInforming deviceInfoService =
+                ServiceProvider.getInstance().getDeviceInfoService();
+        if (deviceInfoService == null) return null;
+        final File applicationCacheDir = deviceInfoService.getApplicationCacheDir();
+
+        return (applicationCacheDir == null)
+                ? null
+                : applicationCacheDir
+                        + File.separator
+                        + CampaignPushConstants.CACHE_BASE_DIR
+                        + File.separator
+                        + CampaignPushConstants.PUSH_IMAGE_CACHE;
+    }
+
+    /**
+     * Downloads an image using the provided uri {@code String}. Prior to downloading, the image uri
+     * is used o retrieve a {@code CacheResult} containing a previously cached image. If no cache
+     * result is returned then a call to {@link CampaignPushUtils#download(String)} is made to
+     * download then cache the image.
+     *
+     * <p>If a valid cache result is returned then no image is downloaded. Instead, a {@code Bitmap}
+     * is created from the cache result and returned by this method.
+     *
+     * @param cacheService the AEPSDK {@link CacheService} to use for caching or retrieving
+     *     downloaded image assets
+     * @param uri {@code String} containing an image asset url
+     * @return {@link Bitmap} containing the image referenced by the {@code String} uri
+     */
+    static Bitmap downloadImage(final CacheService cacheService, final String uri) {
+        if (StringUtils.isNullOrEmpty(uri)) {
+            return null;
+        }
+        final String cacheLocation = CampaignPushUtils.getAssetCacheLocation();
+        final CacheResult cacheResult = cacheService.get(cacheLocation, uri);
+
+        if (cacheResult != null) {
+            Log.trace(CampaignPushConstants.LOG_TAG, SELF_TAG, "Found cached image for %s.", uri);
+            return BitmapFactory.decodeStream(cacheResult.getData());
+        }
+
+        if (!UrlUtils.isValidUrl(uri)) {
+            return null;
+        }
+
+        final Bitmap image = CampaignPushUtils.download(uri);
+
+        if (image == null) return null;
+
+        Log.trace(
+                CampaignPushConstants.LOG_TAG,
+                SELF_TAG,
+                "Successfully download image from %s",
+                uri);
+        // scale down the bitmap to 300dp x 200dp as we don't want to use a full
+        // size image due to memory constraints
+        Bitmap pushImage = scaleBitmap(image);
+        // write bitmap to cache
+        try (final InputStream bitmapInputStream =
+                CampaignPushUtils.bitmapToInputStream(pushImage)) {
+            CampaignPushUtils.cacheBitmapInputStream(cacheService, bitmapInputStream, uri);
+        } catch (final IOException exception) {
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "Exception occurred creating an input stream from a" + " bitmap: %s.",
+                    exception.getLocalizedMessage());
+        }
+        return pushImage;
+    }
+
+    private static Bitmap scaleBitmap(final Bitmap downloadedBitmap) {
+        final Matrix matrix = new Matrix();
+        matrix.setRectToRect(
+                new RectF(0, 0, downloadedBitmap.getWidth(), downloadedBitmap.getHeight()),
+                new RectF(
+                        0,
+                        0,
+                        CampaignPushConstants.DefaultValues.CAROUSEL_MAX_BITMAP_WIDTH,
+                        CampaignPushConstants.DefaultValues.CAROUSEL_MAX_BITMAP_HEIGHT),
+                Matrix.ScaleToFit.CENTER);
+        return Bitmap.createBitmap(
+                downloadedBitmap,
+                0,
+                0,
+                downloadedBitmap.getWidth(),
+                downloadedBitmap.getHeight(),
+                matrix,
+                true);
+    }
+
+    /**
+     * Calculates a new left, center, and right index given the current center index, total number
+     * of images, and the intent action.
+     *
+     * @param centerIndex {@code int} containing the current center image index
+     * @param listSize {@code int} containing the total number of images
+     * @param action {@code String} containing the action found in the broadcast {@link Intent}
+     * @return {@link List<Integer>} containing the new calculated indices
+     */
+    static List<Integer> calculateNewIndices(
+            final int centerIndex, final int listSize, final String action) {
+        if (listSize < MINIMUM_FILMSTRIP_SIZE) return null;
+
+        final List<Integer> newIndices = new ArrayList<>();
+        int newCenterIndex = 0;
+        int newLeftIndex = 0;
+        int newRightIndex = 0;
+        Log.trace(
+                CampaignPushConstants.LOG_TAG,
+                SELF_TAG,
+                "Current center index is %d and list size is %d.",
+                centerIndex,
+                listSize);
+        if (action.equals(CampaignPushConstants.IntentActions.FILMSTRIP_LEFT_CLICKED)) {
+            newCenterIndex = (centerIndex - 1 + listSize) % listSize;
+            newLeftIndex = (newCenterIndex - 1 + listSize) % listSize;
+            newRightIndex = centerIndex;
+        } else if (action.equals(CampaignPushConstants.IntentActions.FILMSTRIP_RIGHT_CLICKED)) {
+            newCenterIndex = (centerIndex + 1) % listSize;
+            newLeftIndex = centerIndex;
+            newRightIndex = (newCenterIndex + 1) % listSize;
+        }
+
+        newIndices.add(newLeftIndex);
+        newIndices.add(newCenterIndex);
+        newIndices.add(newRightIndex);
+
+        Log.trace(
+                CampaignPushConstants.LOG_TAG,
+                SELF_TAG,
+                "Calculated new indices. New center index is %d, new left index is %d, and new"
+                        + " right index is %d.",
+                newCenterIndex,
+                newLeftIndex,
+                newRightIndex);
+
+        return newIndices;
     }
 }
