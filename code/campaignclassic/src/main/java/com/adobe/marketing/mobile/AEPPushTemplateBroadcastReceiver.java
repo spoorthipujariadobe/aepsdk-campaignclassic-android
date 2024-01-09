@@ -35,6 +35,11 @@ public class AEPPushTemplateBroadcastReceiver extends BroadcastReceiver {
             case CampaignPushConstants.IntentActions.MANUAL_CAROUSEL_RIGHT_CLICKED:
                 ManualCarouselTemplateNotificationBuilder.handleIntent(context, intent);
                 break;
+            case CampaignPushConstants.IntentActions.REMIND_LATER_CLICKED:
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    BasicTemplateNotificationBuilder.handleRemindIntent(context, intent);
+                }
+                break;
             case CampaignPushConstants.IntentActions.SCHEDULED_NOTIFICATION_BROADCAST:
                 BasicTemplateNotificationBuilder.handleScheduledIntent(context, intent);
                 break;

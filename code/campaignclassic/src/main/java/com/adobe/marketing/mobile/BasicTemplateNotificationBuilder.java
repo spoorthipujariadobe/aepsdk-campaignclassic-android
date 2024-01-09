@@ -10,8 +10,6 @@
 */
 package com.adobe.marketing.mobile;
 
-import static android.content.Context.ALARM_SERVICE;
-
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -341,31 +339,47 @@ class BasicTemplateNotificationBuilder {
         final int remindLaterTimestamp =
                 (int) (intentExtras.getLong(CampaignPushConstants.IntentKeys.REMIND_TS));
         final Calendar calendar = Calendar.getInstance();
+        final NotificationManagerCompat notificationManager =
+                NotificationManagerCompat.from(context);
+        final String messageId =
+                intentExtras.getString(CampaignPushConstants.IntentKeys.MESSAGE_ID);
+
         if (remindLaterTimestamp > 0) {
             // calculate difference in fire date. if fire date is greater than 0 then we want to
             // schedule a reminder notification.
             final int secondsUntilFireDate =
                     remindLaterTimestamp - (int) (calendar.getTimeInMillis() / 1000);
+            if (secondsUntilFireDate <= 0) {
+                Log.trace(
+                        CampaignPushConstants.LOG_TAG,
+                        SELF_TAG,
+                        "Remind later date is before the current date. Will not reschedule the"
+                                + " notification.",
+                        secondsUntilFireDate);
+                // cancel the displayed notification
+                notificationManager.cancel(messageId.hashCode());
+                return;
+            }
 
-            if (secondsUntilFireDate > 0) {
-                calendar.add(Calendar.SECOND, secondsUntilFireDate);
-                // schedule a pending intent to be broadcast at the specified timestamp
-                final PendingIntent pendingIntent =
-                        createPendingIntentForScheduledNotification(context, intent);
-                final AlarmManager alarmManager =
-                        (AlarmManager) context.getSystemService(ALARM_SERVICE);
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "Remind later pressed, will reschedule the notification to be displayed %d"
+                            + " seconds from now",
+                    secondsUntilFireDate);
+            calendar.add(Calendar.SECOND, secondsUntilFireDate);
+            // schedule a pending intent to be broadcast at the specified timestamp
+            final PendingIntent pendingIntent =
+                    createPendingIntentForScheduledNotification(context, intent);
+            final AlarmManager alarmManager =
+                    (AlarmManager) context.getSystemService(android.content.Context.ALARM_SERVICE);
 
-                if (alarmManager != null) {
-                    alarmManager.setExactAndAllowWhileIdle(
-                            AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+            if (alarmManager != null) {
+                alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
 
-                    // cancel the displayed notification
-                    final NotificationManagerCompat notificationManager =
-                            NotificationManagerCompat.from(context);
-                    final String messageId =
-                            intentExtras.getString(CampaignPushConstants.IntentKeys.MESSAGE_ID);
-                    notificationManager.cancel(messageId.hashCode());
-                }
+                // cancel the displayed notification
+                notificationManager.cancel(messageId.hashCode());
             }
         }
     }
