@@ -111,15 +111,15 @@ public class CampaignPushTrackerActivity extends Activity {
     private Map<String, String> getTrackInfo(final Intent intent) {
         final Map<String, String> trackInfo = new HashMap<>();
         final Bundle extras = intent.getExtras();
-        if (extras != null) {
-            for (final String key : extras.keySet()) {
-                final Object value = extras.get(key);
-                if (value != null) {
-                    if (key.equals(CampaignPushConstants.Tracking.Keys.MESSAGE_ID)) {
-                        trackInfo.put(key, value.toString());
-                    } else if (key.equals(CampaignPushConstants.Tracking.Keys.DELIVERY_ID)) {
-                        trackInfo.put(key, value.toString());
-                    }
+        if (extras == null) return trackInfo;
+
+        for (final String key : extras.keySet()) {
+            final Object value = extras.get(key);
+            if (value != null) {
+                if (key.equals(CampaignPushConstants.Tracking.Keys.MESSAGE_ID)) {
+                    trackInfo.put(key, value.toString());
+                } else if (key.equals(CampaignPushConstants.Tracking.Keys.DELIVERY_ID)) {
+                    trackInfo.put(key, value.toString());
                 }
             }
         }

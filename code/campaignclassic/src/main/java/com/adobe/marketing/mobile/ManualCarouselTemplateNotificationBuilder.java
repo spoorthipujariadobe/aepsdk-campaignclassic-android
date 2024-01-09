@@ -190,20 +190,8 @@ class ManualCarouselTemplateNotificationBuilder {
         int centerImageIndex =
                 intentExtras.getInt(CampaignPushConstants.IntentKeys.CENTER_IMAGE_INDEX);
 
-        final List<Integer> newIndices;
-        if (CampaignPushConstants.IntentActions.MANUAL_CAROUSEL_LEFT_CLICKED.equals(action)) {
-            newIndices =
-                    CampaignPushUtils.calculateNewIndices(
-                            centerImageIndex,
-                            imageUrls.size(),
-                            CampaignPushConstants.IntentActions.MANUAL_CAROUSEL_LEFT_CLICKED);
-        } else {
-            newIndices =
-                    CampaignPushUtils.calculateNewIndices(
-                            centerImageIndex,
-                            imageUrls.size(),
-                            CampaignPushConstants.IntentActions.MANUAL_CAROUSEL_RIGHT_CLICKED);
-        }
+        final List<Integer> newIndices =
+                CampaignPushUtils.calculateNewIndices(centerImageIndex, imageUrls.size(), action);
 
         int newCenterIndex;
         if (newIndices == null) {
@@ -325,26 +313,35 @@ class ManualCarouselTemplateNotificationBuilder {
 
         // handle left and right navigation buttons
         final Intent clickIntent =
-                createClickIntent(
+                new Intent(
+                        CampaignPushConstants.IntentActions.MANUAL_CAROUSEL_LEFT_CLICKED,
+                        null,
                         context,
-                        channelId,
-                        customSound,
-                        titleText,
-                        bodyText,
-                        expandedBodyText,
-                        notificationBackgroundColor,
-                        titleTextColor,
-                        expandedBodyTextColor,
-                        messageId,
-                        deliveryId,
-                        smallIcon,
-                        smallIconColor,
-                        visibility,
-                        importance,
-                        centerImageIndex,
-                        downloadedImageUris,
-                        imageCaptions,
-                        imageClickActions);
+                        AEPPushTemplateBroadcastReceiver.class);
+        clickIntent.setClass(context, AEPPushTemplateBroadcastReceiver.class);
+        clickIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.CHANNEL_ID, channelId);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.CUSTOM_SOUND, customSound);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.CENTER_IMAGE_INDEX, centerImageIndex);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.IMAGE_URLS, downloadedImageUris);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.IMAGE_CAPTIONS, imageCaptions);
+        clickIntent.putExtra(
+                CampaignPushConstants.IntentKeys.IMAGE_CLICK_ACTIONS, imageClickActions);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.TITLE_TEXT, titleText);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.BODY_TEXT, bodyText);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.EXPANDED_BODY_TEXT, expandedBodyText);
+        clickIntent.putExtra(
+                CampaignPushConstants.IntentKeys.NOTIFICATION_BACKGROUND_COLOR,
+                notificationBackgroundColor);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.TITLE_TEXT_COLOR, titleTextColor);
+        clickIntent.putExtra(
+                CampaignPushConstants.IntentKeys.EXPANDED_BODY_TEXT_COLOR, expandedBodyTextColor);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.MESSAGE_ID, messageId);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.DELIVERY_ID, deliveryId);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.SMALL_ICON, smallIcon);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.SMALL_ICON_COLOR, smallIconColor);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.VISIBILITY, visibility);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.IMPORTANCE, importance);
 
         final PendingIntent pendingIntentLeftButton =
                 PendingIntent.getBroadcast(
@@ -409,60 +406,6 @@ class ManualCarouselTemplateNotificationBuilder {
         }
 
         return builder;
-    }
-
-    private static Intent createClickIntent(
-            final Context context,
-            final String channelId,
-            final String customSound,
-            final String title,
-            final String bodyText,
-            final String expandedBodyText,
-            final String notificationBackgroundColor,
-            final String titleTextColor,
-            final String bodyTextColor,
-            final String messageId,
-            final String deliveryId,
-            final String smallIcon,
-            final String smallIconColor,
-            final int visibility,
-            final int importance,
-            final int centerIndex,
-            final ArrayList<String> imageUrls,
-            final ArrayList<String> imageCaptions,
-            final ArrayList<String> imageClickActions) {
-        final Intent clickIntent =
-                new Intent(
-                        CampaignPushConstants.IntentActions.MANUAL_CAROUSEL_LEFT_CLICKED,
-                        null,
-                        context,
-                        AEPPushTemplateBroadcastReceiver.class);
-        clickIntent.setClass(context, AEPPushTemplateBroadcastReceiver.class);
-        clickIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        clickIntent.putExtra(CampaignPushConstants.IntentKeys.CHANNEL_ID, channelId);
-        clickIntent.putExtra(CampaignPushConstants.IntentKeys.CUSTOM_SOUND, customSound);
-        clickIntent.putExtra(CampaignPushConstants.IntentKeys.CENTER_IMAGE_INDEX, centerIndex);
-        clickIntent.putExtra(CampaignPushConstants.IntentKeys.IMAGE_URLS, imageUrls);
-        clickIntent.putExtra(CampaignPushConstants.IntentKeys.IMAGE_CAPTIONS, imageCaptions);
-        clickIntent.putExtra(
-                CampaignPushConstants.IntentKeys.IMAGE_CLICK_ACTIONS, imageClickActions);
-        clickIntent.putExtra(CampaignPushConstants.IntentKeys.TITLE_TEXT, title);
-        clickIntent.putExtra(CampaignPushConstants.IntentKeys.BODY_TEXT, bodyText);
-        clickIntent.putExtra(CampaignPushConstants.IntentKeys.EXPANDED_BODY_TEXT, expandedBodyText);
-        clickIntent.putExtra(
-                CampaignPushConstants.IntentKeys.NOTIFICATION_BACKGROUND_COLOR,
-                notificationBackgroundColor);
-        clickIntent.putExtra(CampaignPushConstants.IntentKeys.TITLE_TEXT_COLOR, titleTextColor);
-        clickIntent.putExtra(
-                CampaignPushConstants.IntentKeys.EXPANDED_BODY_TEXT_COLOR, bodyTextColor);
-        clickIntent.putExtra(CampaignPushConstants.IntentKeys.MESSAGE_ID, messageId);
-        clickIntent.putExtra(CampaignPushConstants.IntentKeys.DELIVERY_ID, deliveryId);
-        clickIntent.putExtra(CampaignPushConstants.IntentKeys.SMALL_ICON, smallIcon);
-        clickIntent.putExtra(CampaignPushConstants.IntentKeys.SMALL_ICON_COLOR, smallIconColor);
-        clickIntent.putExtra(CampaignPushConstants.IntentKeys.VISIBILITY, visibility);
-        clickIntent.putExtra(CampaignPushConstants.IntentKeys.IMPORTANCE, importance);
-
-        return clickIntent;
     }
 
     private static Map<String, ArrayList<String>> populateImages(

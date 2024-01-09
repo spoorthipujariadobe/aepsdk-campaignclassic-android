@@ -10,6 +10,7 @@
 */
 package com.adobe.marketing.mobile;
 
+import androidx.annotation.NonNull;
 import com.adobe.marketing.mobile.util.MapUtils;
 import com.adobe.marketing.mobile.util.StringUtils;
 import com.google.firebase.messaging.RemoteMessage;
@@ -77,15 +78,15 @@ public class AEPPushPayload {
         this.messageData = messageData;
     }
 
-    Map<String, String> getMessageData() {
+    @NonNull Map<String, String> getMessageData() {
         return messageData;
     }
 
-    String getMessageId() {
+    @NonNull String getMessageId() {
         return messageId;
     }
 
-    String getDeliveryId() {
+    @NonNull String getDeliveryId() {
         return deliveryId;
     }
 }

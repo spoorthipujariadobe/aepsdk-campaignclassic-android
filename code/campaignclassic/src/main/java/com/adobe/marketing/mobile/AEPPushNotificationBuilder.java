@@ -316,26 +316,6 @@ class AEPPushNotificationBuilder {
                 CampaignPushUtils.getSoundUriForResourceName(customSound, context));
     }
 
-    static void setSound(
-            final NotificationChannel notificationChannel,
-            final AEPPushTemplate pushTemplate,
-            final Context context,
-            final boolean isSilent) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (isSilent) {
-                notificationChannel.setSound(null, null);
-                return;
-            }
-
-            if (!StringUtils.isNullOrEmpty(pushTemplate.getSound())) {
-                notificationChannel.setSound(
-                        CampaignPushUtils.getSoundUriForResourceName(
-                                pushTemplate.getSound(), context),
-                        null);
-            }
-        }
-    }
-
     /**
      * Sets the sound for the provided {@code NotificationChannel}. If a sound is received from the
      * payload, the same is used. If a sound is not received from the payload, the default sound is
