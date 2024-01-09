@@ -26,18 +26,18 @@ public class AEPPushTemplateBroadcastReceiver extends BroadcastReceiver {
             return;
         }
 
-        if (intent.getAction().equals(CampaignPushConstants.IntentActions.FILMSTRIP_LEFT_CLICKED)
-                || intent.getAction()
-                        .equals(CampaignPushConstants.IntentActions.FILMSTRIP_RIGHT_CLICKED)) {
-            FilmstripCarouselTemplateNotificationBuilder.handleIntent(context, intent);
-        } else if (intent.getAction()
-                .equals(CampaignPushConstants.IntentActions.REMIND_LATER_CLICKED)) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                BasicTemplateNotificationBuilder.handleRemindIntent(context, intent);
-            }
-        } else if (intent.getAction()
-                .equals(CampaignPushConstants.IntentActions.SCHEDULED_NOTIFICATION_BROADCAST)) {
-            BasicTemplateNotificationBuilder.handleScheduledIntent(context, intent);
+        switch (action) {
+            case CampaignPushConstants.IntentActions.FILMSTRIP_LEFT_CLICKED:
+            case CampaignPushConstants.IntentActions.FILMSTRIP_RIGHT_CLICKED:
+                FilmstripCarouselTemplateNotificationBuilder.handleIntent(context, intent);
+                break;
+            case CampaignPushConstants.IntentActions.MANUAL_CAROUSEL_LEFT_CLICKED:
+            case CampaignPushConstants.IntentActions.MANUAL_CAROUSEL_RIGHT_CLICKED:
+                ManualCarouselTemplateNotificationBuilder.handleIntent(context, intent);
+                break;
+            case CampaignPushConstants.IntentActions.SCHEDULED_NOTIFICATION_BROADCAST:
+                BasicTemplateNotificationBuilder.handleScheduledIntent(context, intent);
+                break;
         }
     }
 }

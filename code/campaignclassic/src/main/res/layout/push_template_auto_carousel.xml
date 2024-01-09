@@ -29,7 +29,7 @@
         android:autoStart="true"
         android:flipInterval="4000"
         android:layout_gravity="center"
-        android:scaleType="centerInside"
+        android:scaleType="centerCrop"
         android:adjustViewBounds="true"
         android:layout_below="@id/notification_body_expanded"
         android:inAnimation="@android:anim/slide_in_left"

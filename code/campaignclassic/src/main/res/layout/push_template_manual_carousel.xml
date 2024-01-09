@@ -26,11 +26,11 @@
         android:id="@+id/manual_carousel_view_flipper"
         android:layout_width="match_parent"
         android:layout_height="300dp"
+        android:layout_gravity="center"
+        android:scaleType="centerCrop"
         android:layout_centerInParent="true"
         android:adjustViewBounds="true"
-        android:layout_below="@id/notification_body_expanded"
-        android:inAnimation="@android:anim/slide_in_left"
-        android:outAnimation="@android:anim/slide_out_right">
+        android:layout_below="@id/notification_body_expanded">
     </ViewFlipper>
 
     <ImageButton

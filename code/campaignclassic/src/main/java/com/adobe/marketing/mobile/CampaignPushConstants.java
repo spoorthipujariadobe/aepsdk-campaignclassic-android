@@ -22,7 +22,7 @@ final class CampaignPushConstants {
     static final String CACHE_BASE_DIR = "campaignclassic";
     static final String PUSH_IMAGE_CACHE = "pushimagecache";
 
-    final class NotificationAction {
+    static final class NotificationAction {
         static final String DISMISSED = "Notification Dismissed";
         static final String OPENED = "Notification Opened";
         static final String BUTTON_CLICKED = "Notification Button Clicked";
@@ -30,8 +30,8 @@ final class CampaignPushConstants {
         private NotificationAction() {}
     }
 
-    final class Tracking {
-        final class Keys {
+    static final class Tracking {
+        static final class Keys {
             static final String ACTION_ID = "actionId";
             static final String ACTION_URI = "actionUri";
             static final String DELIVERY_ID = "_dId";
@@ -43,15 +43,16 @@ final class CampaignPushConstants {
         private Tracking() {}
     }
 
-    final class DefaultValues {
-        static final String LEGACY_PAYLOAD_VERSION_STRING = "0";
+    static final class DefaultValues {
         static final String SILENT_NOTIFICATION_CHANNEL_ID = "silent";
+        static final String LEGACY_PAYLOAD_VERSION_STRING = "0";
         static final int CAROUSEL_MAX_BITMAP_WIDTH = 300;
         static final int CAROUSEL_MAX_BITMAP_HEIGHT = 200;
         static final String AUTO_CAROUSEL_MODE = "auto";
         static final String MANUAL_CAROUSEL_MODE = "manual";
         static final String FILMSTRIP_CAROUSEL_MODE = "filmstrip";
         static final int AUTO_CAROUSEL_MINIMUM_IMAGE_COUNT = 1;
+        static final int MANUAL_CAROUSEL_MINIMUM_IMAGE_COUNT = 1;
         static final int CENTER_INDEX = 1;
         static final int FILMSTRIP_CAROUSEL_MINIMUM_IMAGE_COUNT = 3;
         static final int ACTION_BUTTON_CAPACITY = 3;
@@ -64,16 +65,18 @@ final class CampaignPushConstants {
         private DefaultValues() {}
     }
 
-    final class IntentActions {
+    static final class IntentActions {
         static final String FILMSTRIP_LEFT_CLICKED = "filmstrip_left";
         static final String FILMSTRIP_RIGHT_CLICKED = "filmstrip_right";
         static final String REMIND_LATER_CLICKED = "remind_clicked";
         static final String SCHEDULED_NOTIFICATION_BROADCAST = "scheduled_notification_broadcast";
+        static final String MANUAL_CAROUSEL_LEFT_CLICKED = "manual_left";
+        static final String MANUAL_CAROUSEL_RIGHT_CLICKED = "manual_right";
 
         private IntentActions() {}
     }
 
-    final class IntentKeys {
+    static final class IntentKeys {
         static final String CENTER_IMAGE_INDEX = "centerImageIndex";
         static final String IMAGE_URI = "imageUri";
         static final String IMAGE_URLS = "imageUrls";
@@ -102,14 +105,14 @@ final class CampaignPushConstants {
         private IntentKeys() {}
     }
 
-    final class MethodNames {
+    static final class MethodNames {
         static final String SET_BACKGROUND_COLOR = "setBackgroundColor";
         static final String SET_TEXT_COLOR = "setTextColor";
 
         private MethodNames() {}
     }
 
-    final class FriendlyViewNames {
+    static final class FriendlyViewNames {
         static final String NOTIFICATION_BACKGROUND = "notification background";
         static final String NOTIFICATION_TITLE = "notification title";
         static final String NOTIFICATION_BODY_TEXT = "notification body text";
@@ -117,7 +120,7 @@ final class CampaignPushConstants {
         private FriendlyViewNames() {}
     }
 
-    final class PushPayloadKeys {
+    static final class PushPayloadKeys {
         public static final String TEMPLATE_TYPE = "adb_template_type";
         public static final String TITLE = "adb_title";
         public static final String BODY = "adb_body";
