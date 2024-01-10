@@ -10,6 +10,7 @@
 */
 package com.adobe.marketing.mobile;
 
+import androidx.annotation.NonNull;
 import com.adobe.marketing.mobile.util.MapUtils;
 import com.adobe.marketing.mobile.util.StringUtils;
 import com.google.firebase.messaging.RemoteMessage;
@@ -22,6 +23,7 @@ import java.util.Map;
 public class AEPPushPayload {
     private Map<String, String> messageData;
     private String messageId;
+    private String deliveryId;
 
     /**
      * Constructor
@@ -67,7 +69,7 @@ public class AEPPushPayload {
                     "Failed to create AEPPushPayload, message id is null or empty.");
         }
 
-        final String deliveryId = messageData.get(CampaignPushConstants.Tracking.Keys.DELIVERY_ID);
+        deliveryId = messageData.get(CampaignPushConstants.Tracking.Keys.DELIVERY_ID);
         if (StringUtils.isNullOrEmpty(deliveryId)) {
             throw new IllegalArgumentException(
                     "Failed to create AEPPushPayload, delivery id is null or empty.");
@@ -76,11 +78,15 @@ public class AEPPushPayload {
         this.messageData = messageData;
     }
 
-    Map<String, String> getMessageData() {
+    @NonNull Map<String, String> getMessageData() {
         return messageData;
     }
 
-    String getMessageId() {
+    @NonNull String getMessageId() {
         return messageId;
+    }
+
+    @NonNull String getDeliveryId() {
+        return deliveryId;
     }
 }

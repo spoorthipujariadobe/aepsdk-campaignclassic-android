@@ -25,10 +25,15 @@ public class AEPPushTemplateBroadcastReceiver extends BroadcastReceiver {
             return;
         }
 
-        if (intent.getAction().equals(CampaignPushConstants.IntentActions.FILMSTRIP_LEFT_CLICKED)
-                || intent.getAction()
-                        .equals(CampaignPushConstants.IntentActions.FILMSTRIP_RIGHT_CLICKED)) {
-            FilmstripCarouselTemplateNotificationBuilder.handleIntent(context, intent);
+        switch (action) {
+            case CampaignPushConstants.IntentActions.FILMSTRIP_LEFT_CLICKED:
+            case CampaignPushConstants.IntentActions.FILMSTRIP_RIGHT_CLICKED:
+                FilmstripCarouselTemplateNotificationBuilder.handleIntent(context, intent);
+                break;
+            case CampaignPushConstants.IntentActions.MANUAL_CAROUSEL_LEFT_CLICKED:
+            case CampaignPushConstants.IntentActions.MANUAL_CAROUSEL_RIGHT_CLICKED:
+                ManualCarouselTemplateNotificationBuilder.handleIntent(context, intent);
+                break;
         }
     }
 }
