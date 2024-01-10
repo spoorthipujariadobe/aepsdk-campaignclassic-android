@@ -144,7 +144,7 @@ class BasicTemplateNotificationBuilder {
 
         // Create the notification
         final NotificationCompat.Builder builder =
-                new NotificationCompat.Builder(context, channelId)
+                new NotificationCompat.Builder(context, channelIdToUse)
                         .setNumber(badgeCount)
                         .setAutoCancel(true)
                         .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
@@ -180,7 +180,7 @@ class BasicTemplateNotificationBuilder {
                             imageUri,
                             actionUri,
                             actionButtonsString,
-                            channelId,
+                            channelIdToUse,
                             customSound,
                             titleText,
                             bodyText,
