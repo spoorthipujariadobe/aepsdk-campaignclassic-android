@@ -22,23 +22,9 @@ class InputBoxPushTemplate extends AEPPushTemplate {
     private final String feedbackReceivedText;
     // Optional, Once feedback has been submitted, use this as the notification's image
     private final String feedbackReceivedImage;
-    // Optional, If present, show a "remind later" button using the value provided as its label
-    private final String remindLaterText;
-    // Optional, If present, schedule this notification to be re-delivered at this epoch timestamp
-    // (in seconds) provided.
-    private final long remindLaterTimestamp;
 
     InputBoxPushTemplate(@NonNull final Map<String, String> messageData) {
         super(messageData);
-        this.remindLaterText =
-                DataReader.optString(
-                        messageData, CampaignPushConstants.PushPayloadKeys.REMIND_LATER_TEXT, "");
-        this.remindLaterTimestamp =
-                Long.parseLong(
-                        DataReader.optString(
-                                messageData,
-                                CampaignPushConstants.PushPayloadKeys.REMIND_LATER_TIMESTAMP,
-                                ""));
         this.inputFieldText =
                 DataReader.optString(
                         messageData, CampaignPushConstants.PushPayloadKeys.INPUT_FIELD_TEXT, "");
@@ -52,14 +38,6 @@ class InputBoxPushTemplate extends AEPPushTemplate {
                         messageData,
                         CampaignPushConstants.PushPayloadKeys.FEEDBACK_RECEIVED_IMAGE,
                         "");
-    }
-
-    @Nullable String getRemindLaterText() {
-        return remindLaterText;
-    }
-
-    long getRemindLaterTimestamp() {
-        return remindLaterTimestamp;
     }
 
     @Nullable String getInputFieldText() {

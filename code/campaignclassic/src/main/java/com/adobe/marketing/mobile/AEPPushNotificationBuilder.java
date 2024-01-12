@@ -475,8 +475,8 @@ class AEPPushNotificationBuilder {
      *
      * @param context the application {@link Context}
      * @param builder the notification builder
-     * @param actionButtons {@link List<AEPPushTemplate.ActionButton>} containing action buttons to
-     *     attach to the notification
+     * @param actionButtonsString {@code String} a JSON string containing action buttons to attach
+     *     to the notification
      * @param messageId {@code String} containing the message id from the received push notification
      * @param deliveryId {@code String} containing the delivery id from the received push
      *     notification
@@ -484,9 +484,11 @@ class AEPPushNotificationBuilder {
     static void addActionButtons(
             final Context context,
             final NotificationCompat.Builder builder,
-            final List<AEPPushTemplate.ActionButton> actionButtons,
+            final String actionButtonsString,
             final String messageId,
             final String deliveryId) {
+        final List<AEPPushTemplate.ActionButton> actionButtons =
+                AEPPushTemplate.getActionButtonsFromString(actionButtonsString);
         if (actionButtons == null || actionButtons.isEmpty()) {
             return;
         }

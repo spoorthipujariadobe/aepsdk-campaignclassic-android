@@ -54,10 +54,11 @@ class LegacyNotificationBuilder {
             AEPPushNotificationBuilder.setVisibility(
                     builder, pushTemplate.getNotificationVisibility());
         }
+
         AEPPushNotificationBuilder.addActionButtons(
                 context,
                 builder,
-                pushTemplate.getActionButtons(),
+                pushTemplate.getActionButtonsString(),
                 pushTemplate.getMessageId(),
                 pushTemplate.getDeliveryId()); // Add action buttons if any
         AEPPushNotificationBuilder.setSound(context, builder, pushTemplate.getSound(), false);
