@@ -56,6 +56,8 @@ final class CampaignPushConstants {
         static final int CENTER_INDEX = 1;
         static final int FILMSTRIP_CAROUSEL_MINIMUM_IMAGE_COUNT = 3;
         static final int ACTION_BUTTON_CAPACITY = 3;
+        // TODO: revisit this value. should cache time be configurable rather than have a static
+        // value?
         static final long PUSH_NOTIFICATION_IMAGE_CACHE_EXPIRY_IN_MILLISECONDS =
                 259200000; // 3 days
         static final long DEFAULT_REMIND_LATER_TIMESTAMP =

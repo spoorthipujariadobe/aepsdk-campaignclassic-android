@@ -336,8 +336,8 @@ class BasicTemplateNotificationBuilder {
 
         // set the calender time to the remind timestamp to allow the notification to be displayed
         // at the later time
-        final int remindLaterTimestamp =
-                (int) (intentExtras.getLong(CampaignPushConstants.IntentKeys.REMIND_TS));
+        final long remindLaterTimestamp =
+                intentExtras.getLong(CampaignPushConstants.IntentKeys.REMIND_TS);
         final Calendar calendar = Calendar.getInstance();
         final NotificationManagerCompat notificationManager =
                 NotificationManagerCompat.from(context);
@@ -347,8 +347,8 @@ class BasicTemplateNotificationBuilder {
         if (remindLaterTimestamp > 0) {
             // calculate difference in fire date. if fire date is greater than 0 then we want to
             // schedule a reminder notification.
-            final int secondsUntilFireDate =
-                    remindLaterTimestamp - (int) (calendar.getTimeInMillis() / 1000);
+            final long secondsUntilFireDate =
+                    remindLaterTimestamp - calendar.getTimeInMillis() / 1000;
             if (secondsUntilFireDate <= 0) {
                 Log.trace(
                         CampaignPushConstants.LOG_TAG,
@@ -367,7 +367,7 @@ class BasicTemplateNotificationBuilder {
                     "Remind later pressed, will reschedule the notification to be displayed %d"
                             + " seconds from now",
                     secondsUntilFireDate);
-            calendar.add(Calendar.SECOND, secondsUntilFireDate);
+            calendar.add(Calendar.SECOND, (int) secondsUntilFireDate);
             // schedule a pending intent to be broadcast at the specified timestamp
             final PendingIntent pendingIntent =
                     createPendingIntentForScheduledNotification(context, intent);
