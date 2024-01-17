@@ -141,6 +141,15 @@ class AEPPushTemplate {
     // Optional, If present, schedule this notification to be re-delivered at this epoch timestamp
     // (in seconds) provided.
     private final long remindLaterTimestamp;
+    // Optional, If present and a notification with the same tag is already being shown, the new
+    // notification replaces the existing one in the notification drawer.
+    private final String tag;
+    // Optional, If present sets the "ticker" text, which is sent to accessibility services.
+    private final String ticker;
+    // Optional, when set to false or unset, the notification is automatically dismissed when the
+    // user clicks it in the panel. When set to true, the notification persists even when the user
+    // clicks it.
+    private final boolean sticky;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     static final Map<String, Integer> notificationImportanceMap =
@@ -254,10 +263,17 @@ class AEPPushTemplate {
                 StringUtils.isNullOrEmpty(timestampString)
                         ? CampaignPushConstants.DefaultValues.DEFAULT_REMIND_LATER_TIMESTAMP
                         : Long.parseLong(timestampString);
+        this.tag = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.TAG, null);
+        this.ticker =
+                DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.TICKER, null);
+        final String stickyValue =
+                DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.STICKY, null);
+        this.sticky =
+                StringUtils.isNullOrEmpty(stickyValue) ? false : Boolean.parseBoolean(stickyValue);
 
         try {
             final String count = data.get(CampaignPushConstants.PushPayloadKeys.BADGE_NUMBER);
-            if (count != null) {
+            if (StringUtils.isNullOrEmpty(count)) {
                 this.badgeCount = Integer.parseInt(count);
             }
         } catch (final NumberFormatException e) {
@@ -366,6 +382,18 @@ class AEPPushTemplate {
 
     long getRemindLaterTimestamp() {
         return remindLaterTimestamp;
+    }
+
+    @Nullable String getNotificationTag() {
+        return tag;
+    }
+
+    @Nullable String getNotificationTicker() {
+        return ticker;
+    }
+
+    boolean getNotificationAutoCancel() {
+        return sticky;
     }
 
     /** @return an {@link AEPPushTemplate.ActionType} */

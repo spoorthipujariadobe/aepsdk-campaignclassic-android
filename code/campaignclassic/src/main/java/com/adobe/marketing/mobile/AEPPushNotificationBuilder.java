@@ -47,6 +47,7 @@ class AEPPushNotificationBuilder {
     // used.
     // This will appear in the notification settings for the app.
     private static final String DEFAULT_CHANNEL_NAME = "Campaign Classic General Notifications";
+    private static final String SILENT_CHANNEL_NAME = "Campaign Classic Silent Notifications";
 
     /**
      * Builds a notification for the provided {@code AEPPushPayload}.
@@ -192,7 +193,7 @@ class AEPPushNotificationBuilder {
         final NotificationChannel silentChannel =
                 new NotificationChannel(
                         CampaignPushConstants.DefaultValues.SILENT_NOTIFICATION_CHANNEL_ID,
-                        DEFAULT_CHANNEL_NAME,
+                        SILENT_CHANNEL_NAME,
                         importance);
 
         // set no sound on the silent channel
@@ -272,29 +273,17 @@ class AEPPushNotificationBuilder {
 
     /**
      * Sets the sound for the notification. If a sound is received from the payload, the same is
-     * used. If a sound is not received from the payload, the default sound is used The sound name
-     * from the payload should also include the format of the sound file. eg: sound.mp3
+     * used. If a sound is not received from the payload, the default sound is used.
      *
      * @param context the application {@link Context}
      * @param notificationBuilder the notification builder
      * @param customSound {@code String} containing the custom sound file name to load from the
      *     bundled assets
-     * @param isSilent {@code boolean} signaling if a silent sound should be assigned to the
-     *     provided {@code NotificationCompat.Builder}
      */
     static void setSound(
             final Context context,
             final NotificationCompat.Builder notificationBuilder,
-            final String customSound,
-            final boolean isSilent) {
-        if (isSilent) {
-            Log.trace(
-                    CampaignPushConstants.LOG_TAG,
-                    SELF_TAG,
-                    "Setting a silent sound on the notification.");
-            notificationBuilder.setSound(null);
-            return;
-        }
+            final String customSound) {
 
         if (StringUtils.isNullOrEmpty(customSound)) {
             Log.trace(
@@ -319,15 +308,12 @@ class AEPPushNotificationBuilder {
     /**
      * Sets the sound for the provided {@code NotificationChannel}. If a sound is received from the
      * payload, the same is used. If a sound is not received from the payload, the default sound is
-     * used. The sound name from the payload should also include the format of the sound file. eg:
-     * sound.mp3
+     * used.
      *
      * @param context the application {@link Context}
      * @param notificationChannel the {@link NotificationChannel} to assign the sound to
      * @param customSound {@code String} containing the custom sound file name to load from the
      *     bundled assets
-     * @param isSilent {@code boolean} signaling if a silent sound should be assigned to the
-     *     provided {@code NotificationChannel}
      */
     static void setSound(
             final Context context,
@@ -342,8 +328,7 @@ class AEPPushNotificationBuilder {
             Log.trace(
                     CampaignPushConstants.LOG_TAG,
                     SELF_TAG,
-                    "Setting a silent sound on channel named %s.",
-                    notificationChannel.getName());
+                    "Creating a silent notification channel.");
             notificationChannel.setSound(null, null);
             return;
         }

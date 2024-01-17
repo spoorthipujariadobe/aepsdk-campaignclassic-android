@@ -103,6 +103,9 @@ final class CampaignPushConstants {
         static final String REMIND_TS = "remindTimestamp";
         static final String REMIND_LABEL = "remindLaterLabel";
         static final String ACTION_BUTTONS_STRING = "actionButtonsString";
+        static final String AUTO_CANCEL = "autoCancel";
+        static final String TAG = "tag";
+        static final String TICKER = "ticker";
 
         private IntentKeys() {}
     }
@@ -133,6 +136,9 @@ final class CampaignPushConstants {
         public static final String CHANNEL_ID = "adb_channel_id";
         public static final String ICON = "adb_icon";
         public static final String IMAGE_URL = "adb_image";
+        public static final String TAG = "adb_tag";
+        public static final String TICKER = "adb_ticker";
+        public static final String STICKY = "adb_sticky";
         public static final String ACTION_TYPE = "adb_a_type";
         public static final String ACTION_URI = "adb_uri";
         public static final String ACTION_BUTTONS = "adb_act";

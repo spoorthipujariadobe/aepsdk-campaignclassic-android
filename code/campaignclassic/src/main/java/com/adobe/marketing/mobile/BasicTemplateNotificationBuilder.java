@@ -39,7 +39,7 @@ class BasicTemplateNotificationBuilder {
 
         if (pushTemplate == null) {
             throw new NotificationConstructionFailedException(
-                    "Invalid push template received, filmstrip carousel notification will not be"
+                    "Invalid push template received, basic template notification will not be"
                             + " constructed.");
         }
 
@@ -47,6 +47,21 @@ class BasicTemplateNotificationBuilder {
                 CampaignPushConstants.LOG_TAG,
                 SELF_TAG,
                 "Building a basic template push notification.");
+
+        return createNotificationBuilder(context, pushTemplate);
+    }
+
+    private static NotificationCompat.Builder createNotificationBuilder(
+            final Context context, final BasicPushTemplate pushTemplate)
+            throws NotificationConstructionFailedException {
+
+        final String channelIdToUse =
+                AEPPushNotificationBuilder.createChannelAndGetChannelID(
+                        context,
+                        pushTemplate.getChannelId(),
+                        pushTemplate.getSound(),
+                        pushTemplate.getNotificationImportance());
+
         final String packageName =
                 ServiceProvider.getInstance()
                         .getAppContextService()
@@ -60,7 +75,8 @@ class BasicTemplateNotificationBuilder {
 
         if (cacheService == null) {
             throw new NotificationConstructionFailedException(
-                    "Cache service is null, basic push notification will not be constructed.");
+                    "Cache service is null, basic template push notification will not be"
+                            + " constructed.");
         }
 
         // get push payload data
@@ -76,68 +92,11 @@ class BasicTemplateNotificationBuilder {
         expandedLayout.setTextViewText(
                 R.id.notification_body_expanded, pushTemplate.getExpandedBodyText());
 
-        return createNotificationBuilder(
-                context,
-                expandedLayout,
-                smallLayout,
-                pushTemplate.getRemindLaterTimestamp(),
-                pushTemplate.getBadgeCount(),
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
-                        ? pushTemplate.getNotificationVisibility()
-                        : pushTemplate.getNotificationPriority(),
-                pushTemplate.getNotificationImportance(),
-                imageUri,
-                pushTemplate.getActionUri(),
-                pushTemplate.getChannelId(),
-                pushTemplate.getSound(),
-                pushTemplate.getTitle(),
-                pushTemplate.getBody(),
-                pushTemplate.getExpandedBodyText(),
+        // set any custom colors if needed
+        AEPPushNotificationBuilder.setCustomNotificationColors(
                 pushTemplate.getNotificationBackgroundColor(),
                 pushTemplate.getTitleTextColor(),
                 pushTemplate.getExpandedBodyTextColor(),
-                pushTemplate.getMessageId(),
-                pushTemplate.getDeliveryId(),
-                pushTemplate.getIcon(),
-                pushTemplate.getSmallIconColor(),
-                pushTemplate.getActionButtonsString(),
-                pushTemplate.getRemindLaterText());
-    }
-
-    private static NotificationCompat.Builder createNotificationBuilder(
-            final Context context,
-            final RemoteViews expandedLayout,
-            final RemoteViews smallLayout,
-            final long remindLaterTimestamp,
-            final int badgeCount,
-            final int visibility,
-            final int importance,
-            final String imageUri,
-            final String actionUri,
-            final String channelId,
-            final String customSound,
-            final String titleText,
-            final String bodyText,
-            final String expandedBodyText,
-            final String notificationBackgroundColor,
-            final String titleTextColor,
-            final String expandedBodyTextColor,
-            final String messageId,
-            final String deliveryId,
-            final String smallIcon,
-            final String smallIconColor,
-            final String actionButtonsString,
-            final String remindLaterText) {
-
-        final String channelIdToUse =
-                AEPPushNotificationBuilder.createChannelAndGetChannelID(
-                        context, channelId, customSound, importance);
-
-        // set any custom colors if needed
-        AEPPushNotificationBuilder.setCustomNotificationColors(
-                notificationBackgroundColor,
-                titleTextColor,
-                expandedBodyTextColor,
                 smallLayout,
                 expandedLayout,
                 R.id.basic_expanded_layout);
@@ -145,62 +104,51 @@ class BasicTemplateNotificationBuilder {
         // Create the notification
         final NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(context, channelIdToUse)
-                        .setNumber(badgeCount)
-                        .setAutoCancel(true)
+                        .setTicker(pushTemplate.getNotificationTicker())
+                        .setNumber(pushTemplate.getBadgeCount())
+                        .setAutoCancel(pushTemplate.getNotificationAutoCancel())
                         .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
                         .setCustomContentView(smallLayout)
                         .setCustomBigContentView(expandedLayout);
 
+        // small Icon must be present, otherwise the notification will not be displayed.
         AEPPushNotificationBuilder.setSmallIcon(
-                context,
-                builder,
-                smallIcon,
-                smallIconColor); // Small Icon must be present, otherwise the
-        // notification will not be displayed.
+                context, builder, pushTemplate.getIcon(), pushTemplate.getSmallIconColor());
+
+        // set notification visibility
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            AEPPushNotificationBuilder.setVisibility(builder, visibility);
+            AEPPushNotificationBuilder.setVisibility(
+                    builder, pushTemplate.getNotificationVisibility());
         }
 
+        // add any action buttons defined for the notification
         AEPPushNotificationBuilder.addActionButtons(
                 context,
                 builder,
-                actionButtonsString,
-                messageId,
-                deliveryId); // Add action buttons if any
+                pushTemplate.getActionButtonsString(),
+                pushTemplate.getMessageId(),
+                pushTemplate.getDeliveryId());
 
         // add a remind later button if we have a label and a timestamp
-        if (!StringUtils.isNullOrEmpty(remindLaterText) && remindLaterTimestamp > 0) {
+        if (!StringUtils.isNullOrEmpty(pushTemplate.getRemindLaterText())
+                && pushTemplate.getRemindLaterTimestamp() > 0) {
             final PendingIntent remindPendingIntent =
-                    createRemindPendingIntent(
-                            context,
-                            badgeCount,
-                            visibility,
-                            importance,
-                            remindLaterTimestamp,
-                            imageUri,
-                            actionUri,
-                            actionButtonsString,
-                            channelIdToUse,
-                            customSound,
-                            titleText,
-                            bodyText,
-                            expandedBodyText,
-                            notificationBackgroundColor,
-                            titleTextColor,
-                            expandedBodyTextColor,
-                            messageId,
-                            deliveryId,
-                            smallIcon,
-                            smallIconColor,
-                            remindLaterText);
-            builder.addAction(0, remindLaterText, remindPendingIntent);
+                    createRemindPendingIntent(context, channelIdToUse, pushTemplate);
+            builder.addAction(0, pushTemplate.getRemindLaterText(), remindPendingIntent);
         }
 
-        AEPPushNotificationBuilder.setSound(context, builder, customSound, false);
+        // set custom sound, note this applies to API 25 and lower only as API 26 and up set the
+        // sound on the notification channel
+        AEPPushNotificationBuilder.setSound(context, builder, pushTemplate.getSound());
+
         AEPPushNotificationBuilder.setNotificationClickAction(
-                context, builder, messageId, deliveryId, actionUri);
+                context,
+                builder,
+                pushTemplate.getMessageId(),
+                pushTemplate.getDeliveryId(),
+                pushTemplate.getActionUri());
         AEPPushNotificationBuilder.setNotificationDeleteAction(
-                context, builder, messageId, deliveryId);
+                context, builder, pushTemplate.getMessageId(), pushTemplate.getDeliveryId());
 
         // if API level is below 26 (prior to notification channels) then notification priority is
         // set on the notification builder
@@ -214,9 +162,24 @@ class BasicTemplateNotificationBuilder {
         return builder;
     }
 
-    static void handleScheduledIntent(final Context context, final Intent intent) {
-        final NotificationManagerCompat notificationManager =
-                NotificationManagerCompat.from(context);
+    private static NotificationCompat.Builder createNotificationBuilder(
+            final Context context, final Intent intent)
+            throws NotificationConstructionFailedException {
+        final Bundle intentExtras = intent.getExtras();
+        if (intentExtras == null) {
+            throw new NotificationConstructionFailedException(
+                    "Intent extras are null, will not create a notification from the received"
+                            + " intent with action "
+                            + intent.getAction());
+        }
+
+        final CacheService cacheService = ServiceProvider.getInstance().getCacheService();
+        if (cacheService == null) {
+            throw new NotificationConstructionFailedException(
+                    "Cache service is null, basic template push notification will not be"
+                            + " constructed.");
+        }
+
         final String packageName =
                 ServiceProvider.getInstance()
                         .getAppContextService()
@@ -224,24 +187,6 @@ class BasicTemplateNotificationBuilder {
                         .getPackageName();
 
         // get basic notification values from the intent extras
-        final Bundle intentExtras = intent.getExtras();
-        if (intentExtras == null) {
-            Log.trace(
-                    CampaignPushConstants.LOG_TAG,
-                    SELF_TAG,
-                    "Intent extras are null, will not schedule a notification from the received"
-                            + " intent with action %s",
-                    intent.getAction());
-            return;
-        }
-
-        final RemoteViews smallLayout =
-                new RemoteViews(packageName, R.layout.push_template_collapsed);
-        final RemoteViews expandedLayout =
-                new RemoteViews(packageName, R.layout.push_template_expanded);
-        final CacheService cacheService = ServiceProvider.getInstance().getCacheService();
-
-        // get push payload data
         final String titleText =
                 intentExtras.getString(CampaignPushConstants.IntentKeys.TITLE_TEXT);
         final String bodyText = intentExtras.getString(CampaignPushConstants.IntentKeys.BODY_TEXT);
@@ -249,6 +194,11 @@ class BasicTemplateNotificationBuilder {
                 intentExtras.getString(CampaignPushConstants.IntentKeys.EXPANDED_BODY_TEXT);
         final String imageUri = intentExtras.getString(CampaignPushConstants.IntentKeys.IMAGE_URI);
         final Bitmap pushImage = CampaignPushUtils.downloadImage(cacheService, imageUri);
+
+        final RemoteViews smallLayout =
+                new RemoteViews(packageName, R.layout.push_template_collapsed);
+        final RemoteViews expandedLayout =
+                new RemoteViews(packageName, R.layout.push_template_expanded);
 
         if (pushImage != null) {
             expandedLayout.setImageViewBitmap(R.id.expanded_template_image, pushImage);
@@ -289,35 +239,109 @@ class BasicTemplateNotificationBuilder {
                 intentExtras.getString(CampaignPushConstants.IntentKeys.CUSTOM_SOUND);
         final String actionButtonsString =
                 intentExtras.getString(CampaignPushConstants.IntentKeys.ACTION_BUTTONS_STRING);
+        final String ticker = intentExtras.getString(CampaignPushConstants.IntentKeys.TICKER);
+        final boolean autoCancel =
+                intentExtras.getBoolean(CampaignPushConstants.IntentKeys.AUTO_CANCEL);
 
-        final Notification notification =
-                createNotificationBuilder(
-                                context,
-                                expandedLayout,
-                                smallLayout,
-                                remindLaterTimestamp,
-                                badgeCount,
-                                visibility,
-                                importance,
-                                imageUri,
-                                actionUri,
-                                channelId,
-                                customSound,
-                                titleText,
-                                bodyText,
-                                expandedBodyText,
-                                notificationBackgroundColor,
-                                titleTextColor,
-                                expandedBodyTextColor,
-                                messageId,
-                                deliveryId,
-                                smallIcon,
-                                smallIconColor,
-                                actionButtonsString,
-                                remindLaterText)
-                        .build();
+        final String channelIdToUse =
+                AEPPushNotificationBuilder.createChannelAndGetChannelID(
+                        context, channelId, customSound, importance);
 
-        notificationManager.notify(messageId.hashCode(), notification);
+        // set any custom colors if needed
+        AEPPushNotificationBuilder.setCustomNotificationColors(
+                notificationBackgroundColor,
+                titleTextColor,
+                expandedBodyTextColor,
+                smallLayout,
+                expandedLayout,
+                R.id.basic_expanded_layout);
+
+        // Create the notification
+        final NotificationCompat.Builder builder =
+                new NotificationCompat.Builder(context, channelIdToUse)
+                        .setTicker(ticker)
+                        .setNumber(badgeCount)
+                        .setAutoCancel(autoCancel)
+                        .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
+                        .setCustomContentView(smallLayout)
+                        .setCustomBigContentView(expandedLayout);
+
+        // small Icon must be present, otherwise the notification will not be displayed.
+        AEPPushNotificationBuilder.setSmallIcon(context, builder, smallIcon, smallIconColor);
+
+        // set notification visibility
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            AEPPushNotificationBuilder.setVisibility(builder, visibility);
+        }
+
+        // add any action buttons defined for the notification
+        AEPPushNotificationBuilder.addActionButtons(
+                context,
+                builder,
+                actionButtonsString,
+                messageId,
+                deliveryId); // Add action buttons if any
+
+        // add a remind later button if we have a label and a timestamp
+        if (!StringUtils.isNullOrEmpty(remindLaterText) && remindLaterTimestamp > 0) {
+            final PendingIntent remindPendingIntent =
+                    createRemindPendingIntent(context, intentExtras);
+            builder.addAction(0, remindLaterText, remindPendingIntent);
+        }
+
+        // set custom sound, note this applies to API 25 and lower only as API 26 and up set the
+        // sound on the notification channel
+        AEPPushNotificationBuilder.setSound(context, builder, customSound);
+
+        AEPPushNotificationBuilder.setNotificationClickAction(
+                context, builder, messageId, deliveryId, actionUri);
+        AEPPushNotificationBuilder.setNotificationDeleteAction(
+                context, builder, messageId, deliveryId);
+
+        // if API level is below 26 (prior to notification channels) then notification priority is
+        // set on the notification builder
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.O) {
+            builder.setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setVibrate(
+                            new long[0]); // hack to enable heads up notifications as a HUD style
+            // notification requires a tone or vibration
+        }
+
+        return builder;
+    }
+
+    static void handleScheduledIntent(final Context context, final Intent intent) {
+        final Bundle intentExtras = intent.getExtras();
+        if (intentExtras == null) {
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "Intent extras are null, will not handle the scheduled intent with action %s",
+                    intent.getAction());
+            return;
+        }
+
+        final NotificationManagerCompat notificationManager =
+                NotificationManagerCompat.from(context);
+        try {
+            final Notification notification = createNotificationBuilder(context, intent).build();
+
+            // get the tag from the intent extras. if no tag was present in the payload use the
+            // message id instead as its guaranteed to always be present.
+            final String tag =
+                    !StringUtils.isNullOrEmpty(
+                                    intentExtras.getString(CampaignPushConstants.IntentKeys.TAG))
+                            ? intentExtras.getString(CampaignPushConstants.IntentKeys.TAG)
+                            : intentExtras.getString(CampaignPushConstants.IntentKeys.MESSAGE_ID);
+            notificationManager.notify(tag.hashCode(), notification);
+        } catch (final NotificationConstructionFailedException exception) {
+            Log.error(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "Failed to create a push notification, a notification construction failed"
+                            + " exception occurred: %s",
+                    exception.getLocalizedMessage());
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -341,8 +365,14 @@ class BasicTemplateNotificationBuilder {
         final Calendar calendar = Calendar.getInstance();
         final NotificationManagerCompat notificationManager =
                 NotificationManagerCompat.from(context);
-        final String messageId =
-                intentExtras.getString(CampaignPushConstants.IntentKeys.MESSAGE_ID);
+
+        // get the tag from the intent extras. if no tag was present in the payload use the message
+        // id instead as its guaranteed to always be present.
+        final String tag =
+                !StringUtils.isNullOrEmpty(
+                                intentExtras.getString(CampaignPushConstants.IntentKeys.TAG))
+                        ? intentExtras.getString(CampaignPushConstants.IntentKeys.TAG)
+                        : intentExtras.getString(CampaignPushConstants.IntentKeys.MESSAGE_ID);
 
         if (remindLaterTimestamp > 0) {
             // calculate difference in fire date. if fire date is greater than 0 then we want to
@@ -357,7 +387,7 @@ class BasicTemplateNotificationBuilder {
                                 + " notification.",
                         secondsUntilFireDate);
                 // cancel the displayed notification
-                notificationManager.cancel(messageId.hashCode());
+                notificationManager.cancel(tag.hashCode());
                 return;
             }
 
@@ -379,33 +409,13 @@ class BasicTemplateNotificationBuilder {
                         AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
 
                 // cancel the displayed notification
-                notificationManager.cancel(messageId.hashCode());
+                notificationManager.cancel(tag.hashCode());
             }
         }
     }
 
     private static PendingIntent createRemindPendingIntent(
-            final Context context,
-            final int badgeCount,
-            final int visibility,
-            final int importance,
-            final long remindTimestamp,
-            final String imageUri,
-            final String actionUri,
-            final String actionButtonsString,
-            final String channelId,
-            final String customSound,
-            final String titleText,
-            final String bodyText,
-            final String expandedBodyText,
-            final String notificationBackgroundColor,
-            final String titleTextColor,
-            final String expandedBodyTextColor,
-            final String messageId,
-            final String deliveryId,
-            final String smallIcon,
-            final String smallIconColor,
-            final String remindText) {
+            final Context context, final String channelId, final AEPPushTemplate pushTemplate) {
         final Intent remindIntent =
                 new Intent(
                         CampaignPushConstants.IntentActions.REMIND_LATER_CLICKED,
@@ -414,31 +424,78 @@ class BasicTemplateNotificationBuilder {
                         AEPPushTemplateBroadcastReceiver.class);
         remindIntent.setClass(context, AEPPushTemplateBroadcastReceiver.class);
         remindIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        remindIntent.putExtra(CampaignPushConstants.IntentKeys.IMAGE_URI, imageUri);
-        remindIntent.putExtra(CampaignPushConstants.IntentKeys.ACTION_URI, actionUri);
-        remindIntent.putExtra(CampaignPushConstants.IntentKeys.CHANNEL_ID, channelId);
-        remindIntent.putExtra(CampaignPushConstants.IntentKeys.CUSTOM_SOUND, customSound);
-        remindIntent.putExtra(CampaignPushConstants.IntentKeys.TITLE_TEXT, titleText);
-        remindIntent.putExtra(CampaignPushConstants.IntentKeys.BODY_TEXT, bodyText);
         remindIntent.putExtra(
-                CampaignPushConstants.IntentKeys.EXPANDED_BODY_TEXT, expandedBodyText);
+                CampaignPushConstants.IntentKeys.IMAGE_URI, pushTemplate.getImageUrl());
+        remindIntent.putExtra(
+                CampaignPushConstants.IntentKeys.ACTION_URI, pushTemplate.getActionUri());
+        remindIntent.putExtra(CampaignPushConstants.IntentKeys.CHANNEL_ID, channelId);
+        remindIntent.putExtra(
+                CampaignPushConstants.IntentKeys.CUSTOM_SOUND, pushTemplate.getSound());
+        remindIntent.putExtra(CampaignPushConstants.IntentKeys.TITLE_TEXT, pushTemplate.getTitle());
+        remindIntent.putExtra(CampaignPushConstants.IntentKeys.BODY_TEXT, pushTemplate.getBody());
+        remindIntent.putExtra(
+                CampaignPushConstants.IntentKeys.EXPANDED_BODY_TEXT,
+                pushTemplate.getExpandedBodyText());
         remindIntent.putExtra(
                 CampaignPushConstants.IntentKeys.NOTIFICATION_BACKGROUND_COLOR,
-                notificationBackgroundColor);
-        remindIntent.putExtra(CampaignPushConstants.IntentKeys.TITLE_TEXT_COLOR, titleTextColor);
+                pushTemplate.getNotificationBackgroundColor());
         remindIntent.putExtra(
-                CampaignPushConstants.IntentKeys.EXPANDED_BODY_TEXT_COLOR, expandedBodyTextColor);
-        remindIntent.putExtra(CampaignPushConstants.IntentKeys.MESSAGE_ID, messageId);
-        remindIntent.putExtra(CampaignPushConstants.IntentKeys.DELIVERY_ID, deliveryId);
-        remindIntent.putExtra(CampaignPushConstants.IntentKeys.SMALL_ICON, smallIcon);
-        remindIntent.putExtra(CampaignPushConstants.IntentKeys.SMALL_ICON_COLOR, smallIconColor);
-        remindIntent.putExtra(CampaignPushConstants.IntentKeys.VISIBILITY, visibility);
-        remindIntent.putExtra(CampaignPushConstants.IntentKeys.IMPORTANCE, importance);
-        remindIntent.putExtra(CampaignPushConstants.IntentKeys.BADGE_COUNT, badgeCount);
-        remindIntent.putExtra(CampaignPushConstants.IntentKeys.REMIND_TS, remindTimestamp);
-        remindIntent.putExtra(CampaignPushConstants.IntentKeys.REMIND_LABEL, remindText);
+                CampaignPushConstants.IntentKeys.TITLE_TEXT_COLOR,
+                pushTemplate.getTitleTextColor());
         remindIntent.putExtra(
-                CampaignPushConstants.IntentKeys.ACTION_BUTTONS_STRING, actionButtonsString);
+                CampaignPushConstants.IntentKeys.EXPANDED_BODY_TEXT_COLOR,
+                pushTemplate.getExpandedBodyTextColor());
+        remindIntent.putExtra(
+                CampaignPushConstants.IntentKeys.MESSAGE_ID, pushTemplate.getMessageId());
+        remindIntent.putExtra(
+                CampaignPushConstants.IntentKeys.DELIVERY_ID, pushTemplate.getDeliveryId());
+        remindIntent.putExtra(CampaignPushConstants.IntentKeys.SMALL_ICON, pushTemplate.getIcon());
+        remindIntent.putExtra(
+                CampaignPushConstants.IntentKeys.SMALL_ICON_COLOR,
+                pushTemplate.getSmallIconColor());
+        remindIntent.putExtra(
+                CampaignPushConstants.IntentKeys.VISIBILITY,
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
+                        ? pushTemplate.getNotificationVisibility()
+                        : pushTemplate.getNotificationPriority());
+        remindIntent.putExtra(
+                CampaignPushConstants.IntentKeys.IMPORTANCE,
+                pushTemplate.getNotificationImportance());
+        remindIntent.putExtra(
+                CampaignPushConstants.IntentKeys.BADGE_COUNT, pushTemplate.getBadgeCount());
+        remindIntent.putExtra(
+                CampaignPushConstants.IntentKeys.REMIND_TS, pushTemplate.getRemindLaterTimestamp());
+        remindIntent.putExtra(
+                CampaignPushConstants.IntentKeys.REMIND_LABEL, pushTemplate.getRemindLaterText());
+        remindIntent.putExtra(
+                CampaignPushConstants.IntentKeys.ACTION_BUTTONS_STRING,
+                pushTemplate.getActionButtonsString());
+        remindIntent.putExtra(
+                CampaignPushConstants.IntentKeys.AUTO_CANCEL,
+                pushTemplate.getNotificationAutoCancel());
+        remindIntent.putExtra(
+                CampaignPushConstants.IntentKeys.TAG, pushTemplate.getNotificationTag());
+        remindIntent.putExtra(
+                CampaignPushConstants.IntentKeys.TICKER, pushTemplate.getNotificationTicker());
+
+        return PendingIntent.getBroadcast(
+                context,
+                0,
+                remindIntent,
+                PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    private static PendingIntent createRemindPendingIntent(
+            final Context context, final Bundle intentExtras) {
+        final Intent remindIntent =
+                new Intent(
+                        CampaignPushConstants.IntentActions.REMIND_LATER_CLICKED,
+                        null,
+                        context,
+                        AEPPushTemplateBroadcastReceiver.class);
+        remindIntent.setClass(context, AEPPushTemplateBroadcastReceiver.class);
+        remindIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        remindIntent.putExtras(intentExtras);
 
         return PendingIntent.getBroadcast(
                 context,
@@ -449,20 +506,20 @@ class BasicTemplateNotificationBuilder {
 
     private static PendingIntent createPendingIntentForScheduledNotification(
             final Context context, final Intent intent) {
-        final Intent remindIntent =
+        final Intent scheduledIntent =
                 new Intent(
                         CampaignPushConstants.IntentActions.SCHEDULED_NOTIFICATION_BROADCAST,
                         null,
                         context,
                         AEPPushTemplateBroadcastReceiver.class);
-        remindIntent.setClass(context, AEPPushTemplateBroadcastReceiver.class);
-        remindIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        remindIntent.putExtras(intent.getExtras());
+        scheduledIntent.setClass(context, AEPPushTemplateBroadcastReceiver.class);
+        scheduledIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        scheduledIntent.putExtras(intent.getExtras());
 
         return PendingIntent.getBroadcast(
                 context,
                 0,
-                remindIntent,
+                scheduledIntent,
                 PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
     }
 }

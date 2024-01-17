@@ -24,6 +24,7 @@ public class AEPPushPayload {
     private Map<String, String> messageData;
     private String messageId;
     private String deliveryId;
+    private String tag;
 
     /**
      * Constructor
@@ -41,6 +42,12 @@ public class AEPPushPayload {
                     "Failed to create AEPPushPayload, remote message is null.");
         }
         validateMessageData(message.getData());
+
+        // migrate any ACC push payload keys if needed
+        final RemoteMessage.Notification notification = message.getNotification();
+        if (notification != null) {
+            convertNotificationPayloadData(notification);
+        }
     }
 
     /**
@@ -78,6 +85,50 @@ public class AEPPushPayload {
         this.messageData = messageData;
     }
 
+    private void convertNotificationPayloadData(final RemoteMessage.Notification notification) {
+        // migrate the 13 ACC KVP to "adb" prefixed keys
+        // message.android.notification.icon to adb_icon
+        // message.android.notification.sound to adb_sound
+        // message.android.notification.tag	to adb_tag
+        // message.android.notification.click_action to adb_uri
+        // message.android.notification.channel_id to adb_channel_id
+        // message.android.notification.ticker to adb_ticker (NEW)
+        // message.android.notification.sticky to adb_sticky (NEW)
+        // message.android.notification.visibility to adb_n_visibility
+        // message.android.notification.notification_priority to adb_n_priority
+        // message.android.notification.notification_count to adb_n_count
+        // message.notification.body to adb_body
+        // message.notification.title to adb_title
+        // message.notification.image to adb_image
+
+        tag = notification.getTag();
+        messageData.put(CampaignPushConstants.PushPayloadKeys.TAG, tag);
+        messageData.put(CampaignPushConstants.PushPayloadKeys.ICON, notification.getIcon());
+        messageData.put(CampaignPushConstants.PushPayloadKeys.SOUND, notification.getSound());
+        messageData.put(
+                CampaignPushConstants.PushPayloadKeys.ACTION_URI, notification.getClickAction());
+        messageData.put(
+                CampaignPushConstants.PushPayloadKeys.CHANNEL_ID, notification.getChannelId());
+        messageData.put(CampaignPushConstants.PushPayloadKeys.TICKER, notification.getTicker());
+        messageData.put(
+                CampaignPushConstants.PushPayloadKeys.STICKY,
+                String.valueOf(notification.getSticky()));
+        messageData.put(
+                CampaignPushConstants.PushPayloadKeys.NOTIFICATION_VISIBILITY,
+                String.valueOf(notification.getVisibility()));
+        messageData.put(
+                CampaignPushConstants.PushPayloadKeys.NOTIFICATION_PRIORITY,
+                String.valueOf(notification.getNotificationPriority()));
+        messageData.put(
+                CampaignPushConstants.PushPayloadKeys.BADGE_NUMBER,
+                String.valueOf(notification.getNotificationCount()));
+        messageData.put(CampaignPushConstants.PushPayloadKeys.BODY, notification.getBody());
+        messageData.put(CampaignPushConstants.PushPayloadKeys.TITLE, notification.getTitle());
+        messageData.put(
+                CampaignPushConstants.PushPayloadKeys.IMAGE_URL,
+                String.valueOf(notification.getImageUrl()));
+    }
+
     @NonNull Map<String, String> getMessageData() {
         return messageData;
     }
@@ -88,5 +139,9 @@ public class AEPPushPayload {
 
     @NonNull String getDeliveryId() {
         return deliveryId;
+    }
+
+    @NonNull String getTag() {
+        return tag;
     }
 }
