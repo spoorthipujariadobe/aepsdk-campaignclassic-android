@@ -11,20 +11,56 @@
 package com.adobe.marketing.mobile;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
 import com.adobe.marketing.mobile.util.MapUtils;
 import com.adobe.marketing.mobile.util.StringUtils;
 import com.google.firebase.messaging.RemoteMessage;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
  * This class validates then stores the {@link Map<String, String>} message data contained in the
  * provided {@link RemoteMessage}.
  */
-public class AEPPushPayload {
+class AEPPushPayload {
     private Map<String, String> messageData;
     private String messageId;
     private String deliveryId;
     private String tag;
+    private static final Map<Integer, String> notificationCompatPriorityMap =
+            new HashMap<Integer, String>() {
+                {
+                    put(
+                            NotificationCompat.PRIORITY_MIN,
+                            AEPPushTemplate.NotificationPriority.PRIORITY_MIN);
+                    put(
+                            NotificationCompat.PRIORITY_LOW,
+                            AEPPushTemplate.NotificationPriority.PRIORITY_LOW);
+                    put(
+                            NotificationCompat.PRIORITY_DEFAULT,
+                            AEPPushTemplate.NotificationPriority.PRIORITY_DEFAULT);
+                    put(
+                            NotificationCompat.PRIORITY_HIGH,
+                            AEPPushTemplate.NotificationPriority.PRIORITY_HIGH);
+                    put(
+                            NotificationCompat.PRIORITY_MAX,
+                            AEPPushTemplate.NotificationPriority.PRIORITY_MAX);
+                }
+            };
+    private static final Map<Integer, String> notificationCompatVisibilityMap =
+            new HashMap<Integer, String>() {
+                {
+                    put(
+                            NotificationCompat.VISIBILITY_PRIVATE,
+                            AEPPushTemplate.NotificationVisibility.PRIVATE);
+                    put(
+                            NotificationCompat.VISIBILITY_PUBLIC,
+                            AEPPushTemplate.NotificationVisibility.PUBLIC);
+                    put(
+                            NotificationCompat.VISIBILITY_SECRET,
+                            AEPPushTemplate.NotificationVisibility.SECRET);
+                }
+            };
 
     /**
      * Constructor
@@ -115,10 +151,10 @@ public class AEPPushPayload {
                 String.valueOf(notification.getSticky()));
         messageData.put(
                 CampaignPushConstants.PushPayloadKeys.NOTIFICATION_VISIBILITY,
-                String.valueOf(notification.getVisibility()));
+                notificationCompatVisibilityMap.get(notification.getVisibility()));
         messageData.put(
                 CampaignPushConstants.PushPayloadKeys.NOTIFICATION_PRIORITY,
-                String.valueOf(notification.getNotificationPriority()));
+                notificationCompatPriorityMap.get(notification.getNotificationPriority()));
         messageData.put(
                 CampaignPushConstants.PushPayloadKeys.BADGE_NUMBER,
                 String.valueOf(notification.getNotificationCount()));

@@ -153,9 +153,8 @@ class AEPPushNotificationBuilder {
                 Log.debug(
                         CampaignPushConstants.LOG_TAG,
                         SELF_TAG,
-                        "Channel does not exist for channel ID obtained from payload ( "
-                                + channelIdFromPayload
-                                + "). Using the Campaign Classic Extension's default channel.");
+                        "No channel ID obtained from payload. Using the Campaign Classic"
+                                + " Extension's default channel.");
             }
 
             // Use the default channel ID if the channel ID from the payload is null or if a channel
@@ -164,13 +163,14 @@ class AEPPushNotificationBuilder {
                 Log.debug(
                         CampaignPushConstants.LOG_TAG,
                         SELF_TAG,
-                        "Channel already exists for the default channel ID: " + channelId);
-                return DEFAULT_CHANNEL_ID;
+                        "Channel already exists for the default channel ID: " + DEFAULT_CHANNEL_ID);
             } else {
                 Log.debug(
                         CampaignPushConstants.LOG_TAG,
                         SELF_TAG,
-                        "Creating a new channel for the default channel ID: " + channelId + ".");
+                        "Creating a new channel for the default channel ID: "
+                                + DEFAULT_CHANNEL_ID
+                                + ".");
                 final NotificationChannel channel =
                         new NotificationChannel(
                                 DEFAULT_CHANNEL_ID, DEFAULT_CHANNEL_NAME, importance);
