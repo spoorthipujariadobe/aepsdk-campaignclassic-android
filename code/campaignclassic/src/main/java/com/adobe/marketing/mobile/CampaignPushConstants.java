@@ -129,6 +129,7 @@ final class CampaignPushConstants {
         public static final String TEMPLATE_TYPE = "adb_template_type";
         public static final String TITLE = "adb_title";
         public static final String BODY = "adb_body";
+        public static final String ACC_PAYLOAD_BODY = "_msg";
         public static final String SOUND = "adb_sound";
         public static final String BADGE_NUMBER = "adb_n_count";
         public static final String NOTIFICATION_VISIBILITY = "adb_n_visibility";

@@ -61,8 +61,11 @@ class AEPPushNotificationBuilder {
         NotificationCompat.Builder builder;
         final Map<String, String> messageData = payload.getMessageData();
         final PushTemplateType pushTemplateType =
-                PushTemplateType.fromString(
-                        messageData.get(CampaignPushConstants.PushPayloadKeys.TEMPLATE_TYPE));
+                messageData.get(CampaignPushConstants.PushPayloadKeys.TEMPLATE_TYPE) == null
+                        ? PushTemplateType.UNKNOWN
+                        : PushTemplateType.fromString(
+                                messageData.get(
+                                        CampaignPushConstants.PushPayloadKeys.TEMPLATE_TYPE));
         switch (pushTemplateType) {
             case BASIC:
                 final BasicPushTemplate basicPushTemplate = new BasicPushTemplate(messageData);

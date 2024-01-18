@@ -202,9 +202,18 @@ class AEPPushTemplate {
         }
 
         try {
-            this.body = DataReader.getString(data, CampaignPushConstants.PushPayloadKeys.BODY);
+            final String bodyText =
+                    DataReader.optString(
+                            data,
+                            CampaignPushConstants.PushPayloadKeys.BODY,
+                            DataReader.getString(
+                                    data, CampaignPushConstants.PushPayloadKeys.ACC_PAYLOAD_BODY));
+            if (StringUtils.isNullOrEmpty(bodyText)) {
+                throw new DataReaderException("Required field \"adb_body\" or \"_msg\" not found.");
+            }
+            this.body = bodyText;
         } catch (final DataReaderException dataReaderException) {
-            throw new IllegalArgumentException("Required field \"adb_body\" not found.");
+            throw new IllegalArgumentException(dataReaderException.getMessage());
         }
 
         try {
@@ -509,9 +518,9 @@ class AEPPushTemplate {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private int getNotificationImportanceFromString(final String priority) {
-        if (StringUtils.isNullOrEmpty(priority)) return NotificationCompat.PRIORITY_DEFAULT;
+        if (StringUtils.isNullOrEmpty(priority)) return NotificationManager.IMPORTANCE_DEFAULT;
         final Integer resolvedImportance = notificationImportanceMap.get(priority);
-        if (resolvedImportance == null) return NotificationCompat.PRIORITY_DEFAULT;
+        if (resolvedImportance == null) return NotificationManager.IMPORTANCE_DEFAULT;
         return resolvedImportance;
     }
 
