@@ -24,7 +24,7 @@ import com.adobe.marketing.mobile.util.StringUtils;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CampaignPushTrackerActivity extends Activity {
+class CampaignPushTrackerActivity extends Activity {
 
     private static final String SELF_TAG = "CampaignPushTrackerActivity";
 
