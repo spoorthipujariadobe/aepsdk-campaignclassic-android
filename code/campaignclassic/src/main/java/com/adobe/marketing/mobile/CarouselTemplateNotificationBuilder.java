@@ -39,10 +39,6 @@ class CarouselTemplateNotificationBuilder {
 
         if (carouselOperationMode.equals(
                 CampaignPushConstants.DefaultValues.MANUAL_CAROUSEL_MODE)) {
-            Log.trace(
-                    CampaignPushConstants.LOG_TAG,
-                    SELF_TAG,
-                    "Building a manual carousel push notification.");
             return buildManualCarouselNotification(pushTemplate, context, channelId, packageName);
         }
 
@@ -64,9 +60,17 @@ class CarouselTemplateNotificationBuilder {
         final String carouselLayoutType = pushTemplate.getCarouselLayoutType();
         if (carouselLayoutType.equals(
                 CampaignPushConstants.DefaultValues.FILMSTRIP_CAROUSEL_MODE)) {
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "Building a manual filmstrip carousel push notification.");
             return FilmstripCarouselTemplateNotificationBuilder.construct(
                     pushTemplate, context, channelId, packageName);
         }
+        Log.trace(
+                CampaignPushConstants.LOG_TAG,
+                SELF_TAG,
+                "Building a default manual carousel push notification.");
         return ManualCarouselTemplateNotificationBuilder.construct(
                 pushTemplate, context, channelId, packageName);
     }

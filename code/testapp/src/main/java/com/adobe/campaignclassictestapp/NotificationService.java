@@ -50,28 +50,6 @@ public class NotificationService extends FirebaseMessagingService {
 		} else {
 			// Handle notification from other sources
 		}
-
-//		displayNotification(remoteMessage);
-//
-//		// Check if message contains a data payload.
-//		if (remoteMessage.getData().size() > 0) {
-//			Log.d(LOG_TAG, "Message data payload: " + remoteMessage.getData());
-//		}
-//
-//		// Check if message contains a notification payload.
-//		if (remoteMessage.getNotification() != null) {
-//			Log.d(LOG_TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
-//			Log.d(LOG_TAG, "Message Notification channel id: " + remoteMessage.getNotification().getChannelId());
-//			Log.d(LOG_TAG, "Message Notification icon: " + remoteMessage.getNotification().getIcon());
-//			Log.d(LOG_TAG, "Message Notification sound: " + remoteMessage.getNotification().getSound());
-//			Log.d(LOG_TAG, "Message Notification color: " + remoteMessage.getNotification().getColor());
-//			Log.d(LOG_TAG, "Message Notification tag: " + remoteMessage.getNotification().getTag());
-//			Log.d(LOG_TAG, "Message Notification image: " + remoteMessage.getNotification().getImageUrl());
-//			Log.d(LOG_TAG, "Message Notification count: " + remoteMessage.getNotification().getNotificationCount());
-//			Log.d(LOG_TAG, "Message Notification sticky: " + remoteMessage.getNotification().getSticky());
-//			Log.d(LOG_TAG, "Message Notification priority: " + remoteMessage.getNotification().getNotificationPriority());
-//			Log.d(LOG_TAG, "Message Notification visibility: " + remoteMessage.getNotification().getVisibility());
-//		}
 	}
 
 	private void displayNotification(RemoteMessage remoteMessage) {

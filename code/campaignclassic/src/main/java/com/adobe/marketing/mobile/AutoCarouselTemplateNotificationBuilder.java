@@ -85,23 +85,22 @@ class AutoCarouselTemplateNotificationBuilder {
         final NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(context, channelId)
                         .setNumber(pushTemplate.getBadgeCount())
-                        .setAutoCancel(true)
+                        .setAutoCancel(pushTemplate.getNotificationAutoCancel())
                         .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
                         .setCustomContentView(smallLayout)
                         .setCustomBigContentView(expandedLayout);
 
+        // small Icon must be present, otherwise the notification will not be displayed.
         AEPPushNotificationBuilder.setSmallIcon(
-                context,
-                builder,
-                pushTemplate.getIcon(),
-                pushTemplate.getSmallIconColor()); // Small Icon must be present, otherwise the
-        // notification will not be
-        // displayed.
+                context, builder, pushTemplate.getIcon(), pushTemplate.getSmallIconColor());
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             AEPPushNotificationBuilder.setVisibility(
                     builder, pushTemplate.getNotificationVisibility());
         }
-        AEPPushNotificationBuilder.setSound(context, builder, pushTemplate.getSound(), false);
+
+        // set custom sound, note this applies to API 25 and lower only as API 26 and up set the
+        // sound on the notification channel
+        AEPPushNotificationBuilder.setSound(context, builder, pushTemplate.getSound());
 
         // if API level is below 26 (prior to notification channels) then notification priority is
         // set on the notification builder

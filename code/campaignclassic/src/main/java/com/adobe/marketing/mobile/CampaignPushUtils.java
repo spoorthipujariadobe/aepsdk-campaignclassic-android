@@ -91,6 +91,7 @@ class CampaignPushUtils {
                         "Failed to download push notification image from url (%s). Exception: %s",
                         url,
                         e.getMessage());
+                return null;
             } finally {
                 if (inputStream != null) {
                     try {
@@ -245,9 +246,9 @@ class CampaignPushUtils {
 
     /**
      * Downloads an image using the provided uri {@code String}. Prior to downloading, the image uri
-     * is used o retrieve a {@code CacheResult} containing a previously cached image. If no cache
-     * result is returned then a call to {@link CampaignPushUtils#download(String)} is made to
-     * download then cache the image.
+     * is used to retrieve a {@code CacheResult} containing a previously cached image. If no cache
+     * result is returned, a call to {@link CampaignPushUtils#download(String)} is made to download
+     * then cache the image.
      *
      * <p>If a valid cache result is returned then no image is downloaded. Instead, a {@code Bitmap}
      * is created from the cache result and returned by this method.

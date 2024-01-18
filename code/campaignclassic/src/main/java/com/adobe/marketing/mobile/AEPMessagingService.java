@@ -16,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.app.NotificationManagerCompat;
 import com.adobe.marketing.mobile.services.Log;
+import com.adobe.marketing.mobile.util.StringUtils;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import java.util.HashMap;
@@ -61,9 +62,15 @@ public class AEPMessagingService extends FirebaseMessagingService {
         AEPPushPayload payload;
         try {
             payload = new AEPPushPayload(remoteMessage);
+            // get the tag from the payload. if no tag was present in the payload use the message id
+            // instead as its guaranteed to always be present.
+            final String tag =
+                    !StringUtils.isNullOrEmpty(payload.getTag())
+                            ? payload.getTag()
+                            : payload.getMessageId();
             final Notification notification =
                     AEPPushNotificationBuilder.buildPushNotification(payload, context);
-            notificationManager.notify(payload.getMessageId().hashCode(), notification);
+            notificationManager.notify(tag.hashCode(), notification);
         } catch (final IllegalArgumentException exception) {
             Log.error(
                     CampaignPushConstants.LOG_TAG,
@@ -82,6 +89,9 @@ public class AEPMessagingService extends FirebaseMessagingService {
             return false;
         }
 
+        // call track notification receive as we know that the push payload data is valid
+        trackNotificationReceive(payload);
+
         return true;
     }
 
@@ -97,17 +107,25 @@ public class AEPMessagingService extends FirebaseMessagingService {
      * @return {@code boolean} signaling if the {@link AEPMessagingService} handled the remote
      *     message
      */
+    // TODO: added for testing only, will be removed in the future
     @VisibleForTesting
-    public static boolean handleRemoteMessageData(
+    // public
+    static boolean handleRemoteMessageData(
             @NonNull final Context context, @NonNull final Map<String, String> messageData) {
         final NotificationManagerCompat notificationManager =
                 NotificationManagerCompat.from(context);
         AEPPushPayload payload;
         try {
             payload = new AEPPushPayload(messageData);
+            // get the tag from the payload. if no tag was present in the payload use the message id
+            // instead as its guaranteed to always be present.
+            final String tag =
+                    !StringUtils.isNullOrEmpty(payload.getTag())
+                            ? payload.getTag()
+                            : payload.getMessageId();
             final Notification notification =
                     AEPPushNotificationBuilder.buildPushNotification(payload, context);
-            notificationManager.notify(payload.getMessageId().hashCode(), notification);
+            notificationManager.notify(tag.hashCode(), notification);
         } catch (final IllegalArgumentException exception) {
             Log.error(
                     CampaignPushConstants.LOG_TAG,
