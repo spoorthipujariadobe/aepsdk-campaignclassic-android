@@ -91,6 +91,8 @@ class ManualCarouselTemplateNotificationBuilder {
         }
     }
 
+    // TODO: migrate logic of building the notification to a common class to be used by
+    // FilmstripCarouselTemplateNotificationBuilder and ManualCarouselTemplateNotificationBuilder
     private static NotificationCompat.Builder createNotificationBuilder(
             final Context context,
             final CarouselPushTemplate pushTemplate,

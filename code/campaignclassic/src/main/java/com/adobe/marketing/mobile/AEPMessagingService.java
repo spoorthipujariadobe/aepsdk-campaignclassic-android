@@ -107,8 +107,10 @@ public class AEPMessagingService extends FirebaseMessagingService {
      * @return {@code boolean} signaling if the {@link AEPMessagingService} handled the remote
      *     message
      */
+    // TODO: added for testing only, will be removed in the future
     @VisibleForTesting
-    public static boolean handleRemoteMessageData(
+    // public
+    static boolean handleRemoteMessageData(
             @NonNull final Context context, @NonNull final Map<String, String> messageData) {
         final NotificationManagerCompat notificationManager =
                 NotificationManagerCompat.from(context);

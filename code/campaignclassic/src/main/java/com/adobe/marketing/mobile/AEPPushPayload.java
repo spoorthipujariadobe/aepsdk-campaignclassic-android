@@ -72,7 +72,7 @@ class AEPPushPayload {
      * @throws IllegalArgumentException if the message, message data, message id, or delivery id is
      *     null
      */
-    public AEPPushPayload(final RemoteMessage message) throws IllegalArgumentException {
+    AEPPushPayload(final RemoteMessage message) throws IllegalArgumentException {
         if (message == null) {
             throw new IllegalArgumentException(
                     "Failed to create AEPPushPayload, remote message is null.");
@@ -95,7 +95,7 @@ class AEPPushPayload {
      *     notification received from {@link com.google.firebase.messaging.FirebaseMessagingService}
      * @throws IllegalArgumentException if the message data, message id, or delivery id is null
      */
-    public AEPPushPayload(final Map<String, String> messageData) throws IllegalArgumentException {
+    AEPPushPayload(final Map<String, String> messageData) throws IllegalArgumentException {
         validateMessageData(messageData);
     }
 
