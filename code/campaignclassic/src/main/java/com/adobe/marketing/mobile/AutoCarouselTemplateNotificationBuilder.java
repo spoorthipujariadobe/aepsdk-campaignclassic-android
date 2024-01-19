@@ -60,9 +60,7 @@ class AutoCarouselTemplateNotificationBuilder {
         if (downloadedImageUris.size()
                 < CampaignPushConstants.DefaultValues.CAROUSEL_MINIMUM_IMAGE_COUNT) {
             return CarouselTemplateNotificationBuilder.fallbackToBasicNotification(
-                    context,
-                    pushTemplate,
-                    downloadedImageUris);
+                    context, pushTemplate, downloadedImageUris);
         }
 
         smallLayout.setTextViewText(R.id.notification_title, pushTemplate.getTitle());

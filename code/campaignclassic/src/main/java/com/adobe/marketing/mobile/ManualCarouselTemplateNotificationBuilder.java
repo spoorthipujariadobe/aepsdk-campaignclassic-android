@@ -132,9 +132,7 @@ class ManualCarouselTemplateNotificationBuilder {
         if (downloadedImageUris.size()
                 < CampaignPushConstants.DefaultValues.CAROUSEL_MINIMUM_IMAGE_COUNT) {
             return CarouselTemplateNotificationBuilder.fallbackToBasicNotification(
-                    context,
-                    pushTemplate,
-                    downloadedImageUris);
+                    context, pushTemplate, downloadedImageUris);
         }
 
         final String titleText = pushTemplate.getTitle();
