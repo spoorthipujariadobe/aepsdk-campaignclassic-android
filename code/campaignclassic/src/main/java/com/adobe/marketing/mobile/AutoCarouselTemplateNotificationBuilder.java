@@ -55,15 +55,12 @@ class AutoCarouselTemplateNotificationBuilder {
                 populateImages(
                         context, cacheService, expandedLayout, pushTemplate, items, packageName);
 
-        // fallback to a basic push template notification builder if only 1 (or less) image was able
+        // fallback to a basic push template notification builder if less than 3 images were able
         // to be downloaded
         if (downloadedImageUris.size()
-                <= CampaignPushConstants.DefaultValues.AUTO_CAROUSEL_MINIMUM_IMAGE_COUNT) {
+                < CampaignPushConstants.DefaultValues.CAROUSEL_MINIMUM_IMAGE_COUNT) {
             return CarouselTemplateNotificationBuilder.fallbackToBasicNotification(
-                    context,
-                    pushTemplate,
-                    downloadedImageUris,
-                    CampaignPushConstants.DefaultValues.AUTO_CAROUSEL_MINIMUM_IMAGE_COUNT);
+                    context, pushTemplate, downloadedImageUris);
         }
 
         smallLayout.setTextViewText(R.id.notification_title, pushTemplate.getTitle());

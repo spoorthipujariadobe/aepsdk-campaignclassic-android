@@ -51,10 +51,8 @@ final class CampaignPushConstants {
         static final String AUTO_CAROUSEL_MODE = "auto";
         static final String MANUAL_CAROUSEL_MODE = "manual";
         static final String FILMSTRIP_CAROUSEL_MODE = "filmstrip";
-        static final int AUTO_CAROUSEL_MINIMUM_IMAGE_COUNT = 1;
-        static final int MANUAL_CAROUSEL_MINIMUM_IMAGE_COUNT = 1;
+        static final int CAROUSEL_MINIMUM_IMAGE_COUNT = 3;
         static final int CENTER_INDEX = 1;
-        static final int FILMSTRIP_CAROUSEL_MINIMUM_IMAGE_COUNT = 3;
         static final int ACTION_BUTTON_CAPACITY = 3;
         // TODO: revisit this value. should cache time be configurable rather than have a static
         // value?

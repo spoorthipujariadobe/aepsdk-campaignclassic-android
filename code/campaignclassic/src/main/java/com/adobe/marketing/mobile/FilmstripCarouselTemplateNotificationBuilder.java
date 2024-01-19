@@ -146,12 +146,9 @@ class FilmstripCarouselTemplateNotificationBuilder {
         // fallback to a basic push template notification builder if less than 3 images were able
         // to be downloaded
         if (downloadedImageUris.size()
-                < CampaignPushConstants.DefaultValues.FILMSTRIP_CAROUSEL_MINIMUM_IMAGE_COUNT) {
+                < CampaignPushConstants.DefaultValues.CAROUSEL_MINIMUM_IMAGE_COUNT) {
             return CarouselTemplateNotificationBuilder.fallbackToBasicNotification(
-                    context,
-                    pushTemplate,
-                    downloadedImageUris,
-                    CampaignPushConstants.DefaultValues.FILMSTRIP_CAROUSEL_MINIMUM_IMAGE_COUNT);
+                    context, pushTemplate, downloadedImageUris);
         }
 
         final String titleText = pushTemplate.getTitle();
