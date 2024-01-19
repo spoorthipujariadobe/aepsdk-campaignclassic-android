@@ -17,29 +17,16 @@ import androidx.annotation.VisibleForTesting;
 import androidx.core.app.NotificationManagerCompat;
 import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.util.StringUtils;
-import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This class is the entry point for all Adobe Campaign Classic push notifications received from
+ * This class is the entry point for all Adobe Campaign Classic out-of-the-box push template notifications received from
  * Firebase.
  */
-public class AEPMessagingService extends FirebaseMessagingService {
+public class AEPMessagingService {
     static final String SELF_TAG = "AEPMessagingService";
-
-    @Override
-    public void onNewToken(@NonNull final String token) {
-        super.onNewToken(token);
-        MobileCore.setPushIdentifier(token);
-    }
-
-    @Override
-    public void onMessageReceived(@NonNull final RemoteMessage remoteMessage) {
-        super.onMessageReceived(remoteMessage);
-        handleRemoteMessage(this, remoteMessage);
-    }
 
     /**
      * Builds an {@link AEPPushPayload} then constructs a {@link Notification} using the {@code
