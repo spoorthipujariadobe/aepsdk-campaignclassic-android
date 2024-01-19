@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This class is the entry point for all Adobe Campaign Classic out-of-the-box push template notifications received from
- * Firebase.
+ * This class is the entry point for all Adobe Campaign Classic out-of-the-box push template
+ * notifications received from Firebase.
  */
 public class AEPMessagingService {
     static final String SELF_TAG = "AEPMessagingService";
