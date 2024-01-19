@@ -78,8 +78,7 @@ class CarouselTemplateNotificationBuilder {
     static NotificationCompat.Builder fallbackToBasicNotification(
             final Context context,
             final CarouselPushTemplate pushTemplate,
-            final List<String> downloadedImageUris,
-            final int minimumImageCount)
+            final List<String> downloadedImageUris)
             throws NotificationConstructionFailedException {
         Log.trace(
                 CampaignPushConstants.LOG_TAG,
@@ -87,7 +86,7 @@ class CarouselTemplateNotificationBuilder {
                 "Only %d image(s) for the carousel notification were downloaded while at least %d"
                         + " were expected. Building a basic push notification instead.",
                 downloadedImageUris.size(),
-                minimumImageCount);
+                CampaignPushConstants.DefaultValues.CAROUSEL_MINIMUM_IMAGE_COUNT);
         if (!CollectionUtils.isEmpty(downloadedImageUris)) {
             // use the first downloaded image (if available) for the basic template notification
             pushTemplate.modifyData(
