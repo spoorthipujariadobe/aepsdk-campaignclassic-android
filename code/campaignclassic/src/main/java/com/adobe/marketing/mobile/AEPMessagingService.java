@@ -23,10 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This class is the entry point for all push notifications received from Firebase.
- *
- * <p>Once the AEPMessagingService is registered in the AndroidManifest.xml, this class will
- * automatically handle display and tracking of Campaign Classic push notifications.
+ * This class is the entry point for all Adobe Campaign Classic push notifications received from
+ * Firebase.
  */
 public class AEPMessagingService extends FirebaseMessagingService {
     static final String SELF_TAG = "AEPMessagingService";
