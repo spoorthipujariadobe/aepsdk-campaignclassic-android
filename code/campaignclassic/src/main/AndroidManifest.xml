@@ -12,4 +12,15 @@
 
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.adobe.marketing.mobile.campaignclassic" />
+    package="com.adobe.marketing.mobile.campaignclassic" >
+
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <application>
+        <activity
+        android:name="com.adobe.marketing.mobile.CampaignPushTrackerActivity"
+        android:exported="false"
+        android:launchMode="singleInstance"
+        android:theme="@style/Messaging.Style.Transparent"/>
+        <receiver android:name="com.adobe.marketing.mobile.AEPPushTemplateBroadcastReceiver" />
+        </application>
+</manifest>
