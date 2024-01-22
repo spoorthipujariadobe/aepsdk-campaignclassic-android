@@ -118,6 +118,9 @@ class AEPPushNotificationBuilder {
                     (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             final String channelIdFromPayload = channelId;
 
+            // setup a silent channel for notification carousel item change
+            setupSilentNotificationChannel(context, notificationManager, importance);
+
             // if a channel from the payload is not null and if a channel exists for the channel ID
             // from the payload, use the same channel ID.
             if (channelIdFromPayload != null
@@ -147,9 +150,6 @@ class AEPPushNotificationBuilder {
 
                 // add the channel to the notification manager
                 notificationManager.createNotificationChannel(channel);
-
-                // setup a silent channel for notification carousel item change
-                setupSilentNotificationChannel(context, notificationManager, importance);
 
                 return channelIdFromPayload;
             } else {
@@ -188,6 +188,16 @@ class AEPPushNotificationBuilder {
             final NotificationManager notificationManager,
             final int importance) {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O) {
+            return;
+        }
+
+        if (notificationManager.getNotificationChannel(
+                        CampaignPushConstants.DefaultValues.SILENT_NOTIFICATION_CHANNEL_ID)
+                != null) {
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "Using previously created silent channel.");
             return;
         }
 

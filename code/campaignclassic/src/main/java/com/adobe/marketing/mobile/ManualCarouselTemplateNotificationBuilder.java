@@ -209,6 +209,13 @@ class ManualCarouselTemplateNotificationBuilder {
         clickIntent.putExtra(
                 CampaignPushConstants.IntentKeys.IMPORTANCE,
                 pushTemplate.getNotificationImportance());
+        clickIntent.putExtra(
+                CampaignPushConstants.IntentKeys.AUTO_CANCEL,
+                pushTemplate.getNotificationAutoCancel());
+        clickIntent.putExtra(
+                CampaignPushConstants.IntentKeys.TAG, pushTemplate.getNotificationTag());
+        clickIntent.putExtra(
+                CampaignPushConstants.IntentKeys.TICKER, pushTemplate.getNotificationTicker());
 
         final PendingIntent pendingIntentLeftButton =
                 PendingIntent.getBroadcast(
@@ -230,6 +237,7 @@ class ManualCarouselTemplateNotificationBuilder {
 
         final NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(context, channelId)
+                        .setTicker(pushTemplate.getNotificationTicker())
                         .setNumber(pushTemplate.getBadgeCount())
                         .setAutoCancel(pushTemplate.getNotificationAutoCancel())
                         .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
@@ -325,6 +333,7 @@ class ManualCarouselTemplateNotificationBuilder {
         final String customSound =
                 intentExtras.getString(CampaignPushConstants.IntentKeys.CUSTOM_SOUND);
         final String ticker = intentExtras.getString(CampaignPushConstants.IntentKeys.TICKER);
+        final String tag = intentExtras.getString(CampaignPushConstants.IntentKeys.TAG);
         final boolean autoCancel =
                 intentExtras.getBoolean(CampaignPushConstants.IntentKeys.AUTO_CANCEL);
 
@@ -418,6 +427,9 @@ class ManualCarouselTemplateNotificationBuilder {
         clickIntent.putExtra(CampaignPushConstants.IntentKeys.SMALL_ICON_COLOR, smallIconColor);
         clickIntent.putExtra(CampaignPushConstants.IntentKeys.VISIBILITY, visibility);
         clickIntent.putExtra(CampaignPushConstants.IntentKeys.IMPORTANCE, importance);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.TICKER, ticker);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.TAG, tag);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.AUTO_CANCEL, autoCancel);
 
         final PendingIntent pendingIntentLeftButton =
                 PendingIntent.getBroadcast(
