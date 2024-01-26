@@ -106,7 +106,6 @@ class BasicTemplateNotificationBuilder {
                 new NotificationCompat.Builder(context, channelIdToUse)
                         .setTicker(pushTemplate.getNotificationTicker())
                         .setNumber(pushTemplate.getBadgeCount())
-                        .setAutoCancel(pushTemplate.getNotificationAutoCancel())
                         .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
                         .setCustomContentView(smallLayout)
                         .setCustomBigContentView(expandedLayout);
@@ -127,7 +126,9 @@ class BasicTemplateNotificationBuilder {
                 builder,
                 pushTemplate.getActionButtonsString(),
                 pushTemplate.getMessageId(),
-                pushTemplate.getDeliveryId());
+                pushTemplate.getDeliveryId(),
+                pushTemplate.getNotificationTag(),
+                pushTemplate.getNotificationStickySetting());
 
         // add a remind later button if we have a label and a timestamp
         if (!StringUtils.isNullOrEmpty(pushTemplate.getRemindLaterText())
@@ -146,7 +147,9 @@ class BasicTemplateNotificationBuilder {
                 builder,
                 pushTemplate.getMessageId(),
                 pushTemplate.getDeliveryId(),
-                pushTemplate.getActionUri());
+                pushTemplate.getActionUri(),
+                pushTemplate.getNotificationTag(),
+                pushTemplate.getNotificationStickySetting());
         AEPPushNotificationBuilder.setNotificationDeleteAction(
                 context, builder, pushTemplate.getMessageId(), pushTemplate.getDeliveryId());
 
@@ -240,8 +243,8 @@ class BasicTemplateNotificationBuilder {
         final String actionButtonsString =
                 intentExtras.getString(CampaignPushConstants.IntentKeys.ACTION_BUTTONS_STRING);
         final String ticker = intentExtras.getString(CampaignPushConstants.IntentKeys.TICKER);
-        final boolean autoCancel =
-                intentExtras.getBoolean(CampaignPushConstants.IntentKeys.AUTO_CANCEL);
+        final String tag = intentExtras.getString(CampaignPushConstants.IntentKeys.TAG);
+        final boolean sticky = intentExtras.getBoolean(CampaignPushConstants.IntentKeys.STICKY);
 
         final String channelIdToUse =
                 AEPPushNotificationBuilder.createChannelAndGetChannelID(
@@ -261,7 +264,6 @@ class BasicTemplateNotificationBuilder {
                 new NotificationCompat.Builder(context, channelIdToUse)
                         .setTicker(ticker)
                         .setNumber(badgeCount)
-                        .setAutoCancel(autoCancel)
                         .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
                         .setCustomContentView(smallLayout)
                         .setCustomBigContentView(expandedLayout);
@@ -280,7 +282,9 @@ class BasicTemplateNotificationBuilder {
                 builder,
                 actionButtonsString,
                 messageId,
-                deliveryId); // Add action buttons if any
+                deliveryId,
+                tag,
+                sticky); // Add action buttons if any
 
         // add a remind later button if we have a label and a timestamp
         if (!StringUtils.isNullOrEmpty(remindLaterText) && remindLaterTimestamp > 0) {
@@ -294,7 +298,7 @@ class BasicTemplateNotificationBuilder {
         AEPPushNotificationBuilder.setSound(context, builder, customSound);
 
         AEPPushNotificationBuilder.setNotificationClickAction(
-                context, builder, messageId, deliveryId, actionUri);
+                context, builder, messageId, deliveryId, actionUri, tag, sticky);
         AEPPushNotificationBuilder.setNotificationDeleteAction(
                 context, builder, messageId, deliveryId);
 
@@ -471,8 +475,8 @@ class BasicTemplateNotificationBuilder {
                 CampaignPushConstants.IntentKeys.ACTION_BUTTONS_STRING,
                 pushTemplate.getActionButtonsString());
         remindIntent.putExtra(
-                CampaignPushConstants.IntentKeys.AUTO_CANCEL,
-                pushTemplate.getNotificationAutoCancel());
+                CampaignPushConstants.IntentKeys.STICKY,
+                pushTemplate.getNotificationStickySetting());
         remindIntent.putExtra(
                 CampaignPushConstants.IntentKeys.TAG, pushTemplate.getNotificationTag());
         remindIntent.putExtra(

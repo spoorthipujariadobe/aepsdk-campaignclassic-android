@@ -33,13 +33,11 @@ class LegacyNotificationBuilder {
                         pushTemplate.getNotificationImportance());
         final NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(context, channelId)
-                        .setAutoCancel(pushTemplate.getNotificationAutoCancel())
                         .setTicker(pushTemplate.getNotificationTicker())
                         .setContentTitle(pushTemplate.getTitle())
                         .setContentText(pushTemplate.getBody())
                         .setNumber(pushTemplate.getBadgeCount())
-                        .setPriority(pushTemplate.getNotificationPriority())
-                        .setAutoCancel(pushTemplate.getNotificationAutoCancel());
+                        .setPriority(pushTemplate.getNotificationPriority());
 
         AEPPushNotificationBuilder.setLargeIcon(
                 builder,
@@ -62,14 +60,18 @@ class LegacyNotificationBuilder {
                 builder,
                 pushTemplate.getActionButtonsString(),
                 pushTemplate.getMessageId(),
-                pushTemplate.getDeliveryId()); // Add action buttons if any
+                pushTemplate.getDeliveryId(),
+                pushTemplate.getNotificationTag(),
+                pushTemplate.getNotificationStickySetting()); // Add action buttons if any
         AEPPushNotificationBuilder.setSound(context, builder, pushTemplate.getSound());
         AEPPushNotificationBuilder.setNotificationClickAction(
                 context,
                 builder,
                 pushTemplate.getMessageId(),
                 pushTemplate.getDeliveryId(),
-                pushTemplate.getActionUri());
+                pushTemplate.getActionUri(),
+                pushTemplate.getNotificationTag(),
+                pushTemplate.getNotificationStickySetting());
         AEPPushNotificationBuilder.setNotificationDeleteAction(
                 context, builder, pushTemplate.getMessageId(), pushTemplate.getDeliveryId());
 

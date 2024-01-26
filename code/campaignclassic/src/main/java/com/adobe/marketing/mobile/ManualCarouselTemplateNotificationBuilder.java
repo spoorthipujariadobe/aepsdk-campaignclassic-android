@@ -121,7 +121,9 @@ class ManualCarouselTemplateNotificationBuilder {
                         items,
                         packageName,
                         pushTemplate.getMessageId(),
-                        pushTemplate.getDeliveryId());
+                        pushTemplate.getDeliveryId(),
+                        pushTemplate.getNotificationTag(),
+                        pushTemplate.getNotificationStickySetting());
 
         final ArrayList<String> downloadedImageUris = extractedItemData.get(IMAGE_URIS_KEY);
         final ArrayList<String> imageCaptions = extractedItemData.get(IMAGE_CAPTIONS_KEY);
@@ -153,7 +155,9 @@ class ManualCarouselTemplateNotificationBuilder {
                 R.id.carousel_item_image_view,
                 pushTemplate.getMessageId(),
                 pushTemplate.getDeliveryId(),
-                imageClickActions.get(centerImageIndex));
+                imageClickActions.get(centerImageIndex),
+                pushTemplate.getNotificationTag(),
+                pushTemplate.getNotificationStickySetting());
 
         // set any custom colors if needed
         AEPPushNotificationBuilder.setCustomNotificationColors(
@@ -210,8 +214,8 @@ class ManualCarouselTemplateNotificationBuilder {
                 CampaignPushConstants.IntentKeys.IMPORTANCE,
                 pushTemplate.getNotificationImportance());
         clickIntent.putExtra(
-                CampaignPushConstants.IntentKeys.AUTO_CANCEL,
-                pushTemplate.getNotificationAutoCancel());
+                CampaignPushConstants.IntentKeys.STICKY,
+                pushTemplate.getNotificationStickySetting());
         clickIntent.putExtra(
                 CampaignPushConstants.IntentKeys.TAG, pushTemplate.getNotificationTag());
         clickIntent.putExtra(
@@ -239,7 +243,6 @@ class ManualCarouselTemplateNotificationBuilder {
                 new NotificationCompat.Builder(context, channelId)
                         .setTicker(pushTemplate.getNotificationTicker())
                         .setNumber(pushTemplate.getBadgeCount())
-                        .setAutoCancel(pushTemplate.getNotificationAutoCancel())
                         .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
                         .setCustomContentView(smallLayout)
                         .setCustomBigContentView(expandedLayout);
@@ -334,8 +337,7 @@ class ManualCarouselTemplateNotificationBuilder {
                 intentExtras.getString(CampaignPushConstants.IntentKeys.CUSTOM_SOUND);
         final String ticker = intentExtras.getString(CampaignPushConstants.IntentKeys.TICKER);
         final String tag = intentExtras.getString(CampaignPushConstants.IntentKeys.TAG);
-        final boolean autoCancel =
-                intentExtras.getBoolean(CampaignPushConstants.IntentKeys.AUTO_CANCEL);
+        final boolean sticky = intentExtras.getBoolean(CampaignPushConstants.IntentKeys.STICKY);
 
         // as we are handling an intent, the image URLS should already be cached
         if (cacheService != null && !CollectionUtils.isEmpty(imageUrls)) {
@@ -385,7 +387,15 @@ class ManualCarouselTemplateNotificationBuilder {
                         imageClickActions.get(newCenterIndex));
         items.add(centerCarouselItem);
         populateImages(
-                context, cacheService, expandedLayout, items, packageName, messageId, deliveryId);
+                context,
+                cacheService,
+                expandedLayout,
+                items,
+                packageName,
+                messageId,
+                deliveryId,
+                tag,
+                sticky);
 
         // set any custom colors if needed
         AEPPushNotificationBuilder.setCustomNotificationColors(
@@ -429,7 +439,7 @@ class ManualCarouselTemplateNotificationBuilder {
         clickIntent.putExtra(CampaignPushConstants.IntentKeys.IMPORTANCE, importance);
         clickIntent.putExtra(CampaignPushConstants.IntentKeys.TICKER, ticker);
         clickIntent.putExtra(CampaignPushConstants.IntentKeys.TAG, tag);
-        clickIntent.putExtra(CampaignPushConstants.IntentKeys.AUTO_CANCEL, autoCancel);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.STICKY, sticky);
 
         final PendingIntent pendingIntentLeftButton =
                 PendingIntent.getBroadcast(
@@ -466,7 +476,6 @@ class ManualCarouselTemplateNotificationBuilder {
                         .setSound(null)
                         .setTicker(ticker)
                         .setNumber(badgeCount)
-                        .setAutoCancel(autoCancel)
                         .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
                         .setCustomContentView(smallLayout)
                         .setCustomBigContentView(expandedLayout);
@@ -502,7 +511,9 @@ class ManualCarouselTemplateNotificationBuilder {
             final ArrayList<CarouselPushTemplate.CarouselItem> items,
             final String packageName,
             final String messageId,
-            final String deliveryId) {
+            final String deliveryId,
+            final String tag,
+            final boolean autoCancel) {
         final ArrayList<String> downloadedImageUris = new ArrayList<>();
         final ArrayList<String> imageCaptions = new ArrayList<>();
         final ArrayList<String> imageClickActions = new ArrayList<>();
@@ -536,7 +547,9 @@ class ManualCarouselTemplateNotificationBuilder {
                     R.id.carousel_item_image_view,
                     messageId,
                     deliveryId,
-                    item.getInteractionUri());
+                    item.getInteractionUri(),
+                    tag,
+                    autoCancel);
 
             // add the carousel item to the view flipper
             expandedLayout.addView(R.id.manual_carousel_view_flipper, carouselItem);

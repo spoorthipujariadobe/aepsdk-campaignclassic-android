@@ -82,7 +82,6 @@ class AutoCarouselTemplateNotificationBuilder {
         final NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(context, channelId)
                         .setNumber(pushTemplate.getBadgeCount())
-                        .setAutoCancel(pushTemplate.getNotificationAutoCancel())
                         .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
                         .setCustomContentView(smallLayout)
                         .setCustomBigContentView(expandedLayout);
@@ -146,7 +145,9 @@ class AutoCarouselTemplateNotificationBuilder {
                     R.id.carousel_item_image_view,
                     pushTemplate.getMessageId(),
                     pushTemplate.getDeliveryId(),
-                    item.getInteractionUri());
+                    item.getInteractionUri(),
+                    pushTemplate.getNotificationTag(),
+                    pushTemplate.getNotificationStickySetting());
 
             // add the carousel item to the view flipper
             expandedLayout.addView(R.id.auto_carousel_view_flipper, carouselItem);
