@@ -180,7 +180,7 @@ class FilmstripCarouselTemplateNotificationBuilder {
                 pushTemplate.getDeliveryId(),
                 imageClickActions.get(centerImageIndex),
                 pushTemplate.getNotificationTag(),
-                pushTemplate.getNotificationStickySetting());
+                pushTemplate.isNotificationSticky());
 
         // set any custom colors if needed
         AEPPushNotificationBuilder.setCustomNotificationColors(
@@ -241,8 +241,7 @@ class FilmstripCarouselTemplateNotificationBuilder {
         clickIntent.putExtra(
                 CampaignPushConstants.IntentKeys.TAG, pushTemplate.getNotificationTag());
         clickIntent.putExtra(
-                CampaignPushConstants.IntentKeys.STICKY,
-                pushTemplate.getNotificationStickySetting());
+                CampaignPushConstants.IntentKeys.STICKY, pushTemplate.isNotificationSticky());
 
         final PendingIntent pendingIntentLeftButton =
                 PendingIntent.getBroadcast(

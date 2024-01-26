@@ -123,7 +123,7 @@ class ManualCarouselTemplateNotificationBuilder {
                         pushTemplate.getMessageId(),
                         pushTemplate.getDeliveryId(),
                         pushTemplate.getNotificationTag(),
-                        pushTemplate.getNotificationStickySetting());
+                        pushTemplate.isNotificationSticky());
 
         final ArrayList<String> downloadedImageUris = extractedItemData.get(IMAGE_URIS_KEY);
         final ArrayList<String> imageCaptions = extractedItemData.get(IMAGE_CAPTIONS_KEY);
@@ -157,7 +157,7 @@ class ManualCarouselTemplateNotificationBuilder {
                 pushTemplate.getDeliveryId(),
                 imageClickActions.get(centerImageIndex),
                 pushTemplate.getNotificationTag(),
-                pushTemplate.getNotificationStickySetting());
+                pushTemplate.isNotificationSticky());
 
         // set any custom colors if needed
         AEPPushNotificationBuilder.setCustomNotificationColors(
@@ -214,8 +214,7 @@ class ManualCarouselTemplateNotificationBuilder {
                 CampaignPushConstants.IntentKeys.IMPORTANCE,
                 pushTemplate.getNotificationImportance());
         clickIntent.putExtra(
-                CampaignPushConstants.IntentKeys.STICKY,
-                pushTemplate.getNotificationStickySetting());
+                CampaignPushConstants.IntentKeys.STICKY, pushTemplate.isNotificationSticky());
         clickIntent.putExtra(
                 CampaignPushConstants.IntentKeys.TAG, pushTemplate.getNotificationTag());
         clickIntent.putExtra(

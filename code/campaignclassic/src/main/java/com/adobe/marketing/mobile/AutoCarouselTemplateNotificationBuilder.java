@@ -147,7 +147,7 @@ class AutoCarouselTemplateNotificationBuilder {
                     pushTemplate.getDeliveryId(),
                     item.getInteractionUri(),
                     pushTemplate.getNotificationTag(),
-                    pushTemplate.getNotificationStickySetting());
+                    pushTemplate.isNotificationSticky());
 
             // add the carousel item to the view flipper
             expandedLayout.addView(R.id.auto_carousel_view_flipper, carouselItem);

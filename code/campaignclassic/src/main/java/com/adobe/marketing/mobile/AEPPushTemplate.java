@@ -401,7 +401,7 @@ class AEPPushTemplate {
         return ticker;
     }
 
-    boolean getNotificationStickySetting() {
+    boolean isNotificationSticky() {
         return sticky;
     }
 

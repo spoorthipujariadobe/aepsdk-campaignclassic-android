@@ -128,7 +128,7 @@ class BasicTemplateNotificationBuilder {
                 pushTemplate.getMessageId(),
                 pushTemplate.getDeliveryId(),
                 pushTemplate.getNotificationTag(),
-                pushTemplate.getNotificationStickySetting());
+                pushTemplate.isNotificationSticky());
 
         // add a remind later button if we have a label and a timestamp
         if (!StringUtils.isNullOrEmpty(pushTemplate.getRemindLaterText())
@@ -149,7 +149,7 @@ class BasicTemplateNotificationBuilder {
                 pushTemplate.getDeliveryId(),
                 pushTemplate.getActionUri(),
                 pushTemplate.getNotificationTag(),
-                pushTemplate.getNotificationStickySetting());
+                pushTemplate.isNotificationSticky());
         AEPPushNotificationBuilder.setNotificationDeleteAction(
                 context, builder, pushTemplate.getMessageId(), pushTemplate.getDeliveryId());
 
@@ -475,8 +475,7 @@ class BasicTemplateNotificationBuilder {
                 CampaignPushConstants.IntentKeys.ACTION_BUTTONS_STRING,
                 pushTemplate.getActionButtonsString());
         remindIntent.putExtra(
-                CampaignPushConstants.IntentKeys.STICKY,
-                pushTemplate.getNotificationStickySetting());
+                CampaignPushConstants.IntentKeys.STICKY, pushTemplate.isNotificationSticky());
         remindIntent.putExtra(
                 CampaignPushConstants.IntentKeys.TAG, pushTemplate.getNotificationTag());
         remindIntent.putExtra(

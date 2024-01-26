@@ -62,7 +62,7 @@ class LegacyNotificationBuilder {
                 pushTemplate.getMessageId(),
                 pushTemplate.getDeliveryId(),
                 pushTemplate.getNotificationTag(),
-                pushTemplate.getNotificationStickySetting()); // Add action buttons if any
+                pushTemplate.isNotificationSticky()); // Add action buttons if any
         AEPPushNotificationBuilder.setSound(context, builder, pushTemplate.getSound());
         AEPPushNotificationBuilder.setNotificationClickAction(
                 context,
@@ -71,7 +71,7 @@ class LegacyNotificationBuilder {
                 pushTemplate.getDeliveryId(),
                 pushTemplate.getActionUri(),
                 pushTemplate.getNotificationTag(),
-                pushTemplate.getNotificationStickySetting());
+                pushTemplate.isNotificationSticky());
         AEPPushNotificationBuilder.setNotificationDeleteAction(
                 context, builder, pushTemplate.getMessageId(), pushTemplate.getDeliveryId());
 
