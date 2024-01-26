@@ -11,13 +11,13 @@
 package com.adobe.marketing.mobile;
 
 import android.app.Activity;
-import android.app.NotificationManager;
 import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationManagerCompat;
 import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.services.ServiceProvider;
 import com.adobe.marketing.mobile.util.StringUtils;
@@ -82,22 +82,6 @@ public class CampaignPushTrackerActivity extends Activity {
      */
     private void handlePushButtonClicked(final Intent intent) {
         CampaignClassic.trackNotificationClick(getTrackInfo(intent));
-
-        // Dismiss the notification once interacted
-        final String messageId =
-                intent.getStringExtra(CampaignPushConstants.Tracking.Keys.MESSAGE_ID);
-        if (!StringUtils.isNullOrEmpty(messageId)) {
-            NotificationManager notificationManager =
-                    (NotificationManager)
-                            getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.cancel(messageId.hashCode());
-        } else {
-            Log.warning(
-                    CampaignPushConstants.LOG_TAG,
-                    SELF_TAG,
-                    "Message ID is null or empty. Unable to dismiss the notification.");
-        }
-
         executePushAction(intent);
     }
 
@@ -141,6 +125,35 @@ public class CampaignPushTrackerActivity extends Activity {
         } else {
             openUri(actionUri);
         }
+
+        // remove the notification if sticky notifications are false
+        final boolean isStickyNotification =
+                intent.getBooleanExtra(CampaignPushConstants.PushPayloadKeys.STICKY, false);
+        final String tag = intent.getStringExtra(CampaignPushConstants.PushPayloadKeys.TAG);
+        if (isStickyNotification) {
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "the sticky notification setting is true, will not remove the notification"
+                            + " with tag %s.",
+                    tag);
+            return;
+        }
+
+        final Context context =
+                ServiceProvider.getInstance().getAppContextService().getApplicationContext();
+        if (context == null) {
+            return;
+        }
+
+        Log.trace(
+                CampaignPushConstants.LOG_TAG,
+                SELF_TAG,
+                "the sticky notification setting is false, removing notification with tag %s.",
+                tag);
+        final NotificationManagerCompat notificationManager =
+                NotificationManagerCompat.from(context);
+        notificationManager.cancel(tag.hashCode());
     }
 
     /**
