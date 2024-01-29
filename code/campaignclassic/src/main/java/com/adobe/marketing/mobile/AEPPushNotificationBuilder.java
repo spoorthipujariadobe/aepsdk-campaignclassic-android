@@ -399,7 +399,7 @@ class AEPPushNotificationBuilder {
     }
 
     /**
-     * Sets the click action for the notification buttons.
+     * Sets the click action for the notification.
      *
      * @param context the application {@link Context}
      * @param notificationBuilder the notification builder
@@ -407,15 +407,21 @@ class AEPPushNotificationBuilder {
      * @param deliveryId {@code String} containing the delivery id from the received push
      *     notification
      * @param actionUri the action uri
+     * @param tag the tag used when scheduling the notification
+     * @param stickyNotification {@code boolean} if false, remove the notification after the {@code
+     *     RemoteViews} is pressed
      */
     static void setNotificationClickAction(
             final Context context,
             final NotificationCompat.Builder notificationBuilder,
             final String messageId,
             final String deliveryId,
-            final String actionUri) {
+            final String actionUri,
+            final String tag,
+            final boolean stickyNotification) {
         final PendingIntent pendingIntent =
-                createPendingIntent(context, messageId, deliveryId, actionUri, null);
+                createPendingIntent(
+                        context, messageId, deliveryId, actionUri, null, tag, stickyNotification);
         notificationBuilder.setContentIntent(pendingIntent);
     }
 
@@ -431,6 +437,9 @@ class AEPPushNotificationBuilder {
      * @param deliveryId {@code String} containing the delivery id from the received push
      *     notification
      * @param actionUri {@code String} containing the action uri defined for the push template image
+     * @param tag the tag used when scheduling the notification
+     * @param stickyNotification {@code boolean} if false, remove the notification after the {@code
+     *     RemoteViews} is pressed
      */
     static void setRemoteViewClickAction(
             final Context context,
@@ -438,9 +447,12 @@ class AEPPushNotificationBuilder {
             final int targetViewResourceId,
             final String messageId,
             final String deliveryId,
-            final String actionUri) {
+            final String actionUri,
+            final String tag,
+            final boolean stickyNotification) {
         final PendingIntent pendingIntent =
-                createPendingIntent(context, messageId, deliveryId, actionUri, null);
+                createPendingIntent(
+                        context, messageId, deliveryId, actionUri, null, tag, stickyNotification);
         pushTemplateRemoteView.setOnClickPendingIntent(targetViewResourceId, pendingIntent);
     }
 
@@ -478,13 +490,18 @@ class AEPPushNotificationBuilder {
      * @param messageId {@code String} containing the message id from the received push notification
      * @param deliveryId {@code String} containing the delivery id from the received push
      *     notification
+     * @param tag the tag used when scheduling the notification
+     * @param stickyNotification {@code boolean} if false, remove the notification after the action
+     *     button is pressed
      */
     static void addActionButtons(
             final Context context,
             final NotificationCompat.Builder builder,
             final String actionButtonsString,
             final String messageId,
-            final String deliveryId) {
+            final String deliveryId,
+            final String tag,
+            final boolean stickyNotification) {
         final List<AEPPushTemplate.ActionButton> actionButtons =
                 AEPPushTemplate.getActionButtonsFromString(actionButtonsString);
         if (actionButtons == null || actionButtons.isEmpty()) {
@@ -502,11 +519,19 @@ class AEPPushNotificationBuilder {
                                 messageId,
                                 deliveryId,
                                 eachButton.getLink(),
-                                eachButton.getLabel());
+                                eachButton.getLabel(),
+                                tag,
+                                stickyNotification);
             } else {
                 pendingIntent =
                         createPendingIntent(
-                                context, messageId, deliveryId, null, eachButton.getLabel());
+                                context,
+                                messageId,
+                                deliveryId,
+                                null,
+                                eachButton.getLabel(),
+                                tag,
+                                stickyNotification);
             }
             builder.addAction(0, eachButton.getLabel(), pendingIntent);
         }
@@ -521,6 +546,8 @@ class AEPPushNotificationBuilder {
      *     notification
      * @param actionUri the action uri
      * @param actionID the action ID
+     * @param stickyNotification {@code boolean} if false, remove the notification after the {@code
+     *     RemoteViews} is pressed
      * @return the pending intent
      */
     private static PendingIntent createPendingIntent(
@@ -528,12 +555,16 @@ class AEPPushNotificationBuilder {
             final String messageId,
             final String deliveryId,
             final String actionUri,
-            final String actionID) {
+            final String actionID,
+            final String tag,
+            final boolean stickyNotification) {
         final Intent intent = new Intent(CampaignPushConstants.NotificationAction.BUTTON_CLICKED);
         intent.setClass(context.getApplicationContext(), CampaignPushTrackerActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         intent.putExtra(CampaignPushConstants.Tracking.Keys.MESSAGE_ID, messageId);
         intent.putExtra(CampaignPushConstants.Tracking.Keys.DELIVERY_ID, deliveryId);
+        intent.putExtra(CampaignPushConstants.PushPayloadKeys.TAG, tag);
+        intent.putExtra(CampaignPushConstants.PushPayloadKeys.STICKY, stickyNotification);
         addActionDetailsToIntent(intent, actionUri, actionID);
 
         // adding tracking details
