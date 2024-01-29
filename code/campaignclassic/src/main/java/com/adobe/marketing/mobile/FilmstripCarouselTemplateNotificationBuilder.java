@@ -178,7 +178,9 @@ class FilmstripCarouselTemplateNotificationBuilder {
                 R.id.manual_carousel_filmstrip_center,
                 pushTemplate.getMessageId(),
                 pushTemplate.getDeliveryId(),
-                imageClickActions.get(centerImageIndex));
+                imageClickActions.get(centerImageIndex),
+                pushTemplate.getNotificationTag(),
+                pushTemplate.isNotificationSticky());
 
         // set any custom colors if needed
         AEPPushNotificationBuilder.setCustomNotificationColors(
@@ -239,8 +241,7 @@ class FilmstripCarouselTemplateNotificationBuilder {
         clickIntent.putExtra(
                 CampaignPushConstants.IntentKeys.TAG, pushTemplate.getNotificationTag());
         clickIntent.putExtra(
-                CampaignPushConstants.IntentKeys.AUTO_CANCEL,
-                pushTemplate.getNotificationAutoCancel());
+                CampaignPushConstants.IntentKeys.STICKY, pushTemplate.isNotificationSticky());
 
         final PendingIntent pendingIntentLeftButton =
                 PendingIntent.getBroadcast(
@@ -266,7 +267,6 @@ class FilmstripCarouselTemplateNotificationBuilder {
                 new NotificationCompat.Builder(context, channelId)
                         .setTicker(pushTemplate.getNotificationTicker())
                         .setNumber(pushTemplate.getBadgeCount())
-                        .setAutoCancel(pushTemplate.getNotificationAutoCancel())
                         .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
                         .setCustomContentView(smallLayout)
                         .setCustomBigContentView(expandedLayout);
@@ -365,8 +365,7 @@ class FilmstripCarouselTemplateNotificationBuilder {
                 intentExtras.getString(CampaignPushConstants.IntentKeys.CUSTOM_SOUND);
         final String ticker = intentExtras.getString(CampaignPushConstants.IntentKeys.TICKER);
         final String tag = intentExtras.getString(CampaignPushConstants.IntentKeys.TAG);
-        final boolean autoCancel =
-                intentExtras.getBoolean(CampaignPushConstants.IntentKeys.AUTO_CANCEL);
+        final boolean sticky = intentExtras.getBoolean(CampaignPushConstants.IntentKeys.STICKY);
 
         // as we are handling an intent, the image URLS should already be cached
         if (cacheService != null && !CollectionUtils.isEmpty(imageUrls)) {
@@ -435,7 +434,9 @@ class FilmstripCarouselTemplateNotificationBuilder {
                 R.id.manual_carousel_filmstrip_center,
                 messageId,
                 deliveryId,
-                imageClickActions.get(newCenterIndex));
+                imageClickActions.get(newCenterIndex),
+                tag,
+                sticky);
 
         // set any custom colors if needed
         AEPPushNotificationBuilder.setCustomNotificationColors(
@@ -479,7 +480,7 @@ class FilmstripCarouselTemplateNotificationBuilder {
         clickIntent.putExtra(CampaignPushConstants.IntentKeys.IMPORTANCE, importance);
         clickIntent.putExtra(CampaignPushConstants.IntentKeys.TICKER, ticker);
         clickIntent.putExtra(CampaignPushConstants.IntentKeys.TAG, tag);
-        clickIntent.putExtra(CampaignPushConstants.IntentKeys.AUTO_CANCEL, autoCancel);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.STICKY, sticky);
 
         final PendingIntent pendingIntentLeftButton =
                 PendingIntent.getBroadcast(
@@ -516,7 +517,6 @@ class FilmstripCarouselTemplateNotificationBuilder {
                         .setSound(null)
                         .setTicker(ticker)
                         .setNumber(badgeCount)
-                        .setAutoCancel(autoCancel)
                         .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
                         .setCustomContentView(smallLayout)
                         .setCustomBigContentView(expandedLayout);

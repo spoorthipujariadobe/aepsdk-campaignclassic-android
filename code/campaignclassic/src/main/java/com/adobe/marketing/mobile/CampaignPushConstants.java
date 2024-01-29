@@ -101,7 +101,7 @@ final class CampaignPushConstants {
         static final String REMIND_TS = "remindTimestamp";
         static final String REMIND_LABEL = "remindLaterLabel";
         static final String ACTION_BUTTONS_STRING = "actionButtonsString";
-        static final String AUTO_CANCEL = "autoCancel";
+        static final String STICKY = "sticky";
         static final String TAG = "tag";
         static final String TICKER = "ticker";
 
