@@ -79,7 +79,7 @@ class AEPPushPayload {
         }
         validateMessageData(message.getData());
 
-        // migrate any ACC push payload keys if needed
+        // migrate any ACC push notification object payload keys if needed
         final RemoteMessage.Notification notification = message.getNotification();
         if (notification != null) {
             convertNotificationPayloadData(notification);
@@ -119,10 +119,16 @@ class AEPPushPayload {
         }
 
         this.messageData = messageData;
+        this.tag = messageData.get(CampaignPushConstants.PushPayloadKeys.TAG);
     }
 
     private void convertNotificationPayloadData(final RemoteMessage.Notification notification) {
-        // migrate the 13 ACC KVP to "adb" prefixed keys
+        // Migrate the 13 ACC KVP to "adb" prefixed keys.
+        // Note, the key value pairs present in the data payload are preferred over the notification
+        // key value pairs.
+        // The notification key value pairs will only be added to the message data if the
+        // corresponding key
+        // does not have a value.
         // message.android.notification.icon to adb_icon
         // message.android.notification.sound to adb_sound
         // message.android.notification.tag	to adb_tag
@@ -137,32 +143,87 @@ class AEPPushPayload {
         // message.notification.title to adb_title
         // message.notification.image to adb_image
 
-        tag = notification.getTag();
-        messageData.put(CampaignPushConstants.PushPayloadKeys.TAG, tag);
-        messageData.put(CampaignPushConstants.PushPayloadKeys.ICON, notification.getIcon());
-        messageData.put(CampaignPushConstants.PushPayloadKeys.SOUND, notification.getSound());
-        messageData.put(
-                CampaignPushConstants.PushPayloadKeys.ACTION_URI, notification.getClickAction());
-        messageData.put(
-                CampaignPushConstants.PushPayloadKeys.CHANNEL_ID, notification.getChannelId());
-        messageData.put(CampaignPushConstants.PushPayloadKeys.TICKER, notification.getTicker());
-        messageData.put(
-                CampaignPushConstants.PushPayloadKeys.STICKY,
-                String.valueOf(notification.getSticky()));
-        messageData.put(
-                CampaignPushConstants.PushPayloadKeys.NOTIFICATION_VISIBILITY,
-                notificationCompatVisibilityMap.get(notification.getVisibility()));
-        messageData.put(
-                CampaignPushConstants.PushPayloadKeys.NOTIFICATION_PRIORITY,
-                notificationCompatPriorityMap.get(notification.getNotificationPriority()));
-        messageData.put(
-                CampaignPushConstants.PushPayloadKeys.BADGE_NUMBER,
-                String.valueOf(notification.getNotificationCount()));
-        messageData.put(CampaignPushConstants.PushPayloadKeys.BODY, notification.getBody());
-        messageData.put(CampaignPushConstants.PushPayloadKeys.TITLE, notification.getTitle());
-        messageData.put(
-                CampaignPushConstants.PushPayloadKeys.IMAGE_URL,
-                String.valueOf(notification.getImageUrl()));
+        if (StringUtils.isNullOrEmpty(messageData.get(CampaignPushConstants.PushPayloadKeys.TAG))) {
+            this.tag = notification.getTag();
+            messageData.put(CampaignPushConstants.PushPayloadKeys.TAG, tag);
+        }
+
+        if (StringUtils.isNullOrEmpty(
+                messageData.get(CampaignPushConstants.PushPayloadKeys.ICON))) {
+            messageData.put(CampaignPushConstants.PushPayloadKeys.ICON, notification.getIcon());
+        }
+
+        if (StringUtils.isNullOrEmpty(
+                messageData.get(CampaignPushConstants.PushPayloadKeys.SOUND))) {
+            messageData.put(CampaignPushConstants.PushPayloadKeys.SOUND, notification.getSound());
+        }
+
+        if (StringUtils.isNullOrEmpty(
+                messageData.get(CampaignPushConstants.PushPayloadKeys.ACTION_URI))) {
+            messageData.put(
+                    CampaignPushConstants.PushPayloadKeys.ACTION_URI,
+                    notification.getClickAction());
+        }
+
+        if (StringUtils.isNullOrEmpty(
+                messageData.get(CampaignPushConstants.PushPayloadKeys.CHANNEL_ID))) {
+            messageData.put(
+                    CampaignPushConstants.PushPayloadKeys.CHANNEL_ID, notification.getChannelId());
+        }
+
+        if (StringUtils.isNullOrEmpty(
+                messageData.get(CampaignPushConstants.PushPayloadKeys.TICKER))) {
+            messageData.put(CampaignPushConstants.PushPayloadKeys.TICKER, notification.getTicker());
+        }
+
+        if (StringUtils.isNullOrEmpty(
+                messageData.get(CampaignPushConstants.PushPayloadKeys.STICKY))) {
+            messageData.put(
+                    CampaignPushConstants.PushPayloadKeys.STICKY,
+                    String.valueOf(notification.getSticky()));
+        }
+
+        if (StringUtils.isNullOrEmpty(
+                messageData.get(CampaignPushConstants.PushPayloadKeys.NOTIFICATION_VISIBILITY))) {
+            messageData.put(
+                    CampaignPushConstants.PushPayloadKeys.NOTIFICATION_VISIBILITY,
+                    notificationCompatVisibilityMap.get(notification.getVisibility()));
+        }
+
+        if (StringUtils.isNullOrEmpty(
+                messageData.get(CampaignPushConstants.PushPayloadKeys.NOTIFICATION_PRIORITY))) {
+            messageData.put(
+                    CampaignPushConstants.PushPayloadKeys.NOTIFICATION_PRIORITY,
+                    notificationCompatPriorityMap.get(notification.getNotificationPriority()));
+        }
+
+        if (StringUtils.isNullOrEmpty(
+                messageData.get(CampaignPushConstants.PushPayloadKeys.BADGE_NUMBER))) {
+            messageData.put(
+                    CampaignPushConstants.PushPayloadKeys.BADGE_NUMBER,
+                    String.valueOf(notification.getNotificationCount()));
+        }
+
+        if (StringUtils.isNullOrEmpty(
+                messageData.get(CampaignPushConstants.PushPayloadKeys.BODY))) {
+            messageData.put(
+                    CampaignPushConstants.PushPayloadKeys.BODY,
+                    String.valueOf(notification.getBody()));
+        }
+
+        if (StringUtils.isNullOrEmpty(
+                messageData.get(CampaignPushConstants.PushPayloadKeys.TITLE))) {
+            messageData.put(
+                    CampaignPushConstants.PushPayloadKeys.TITLE,
+                    String.valueOf(notification.getTitle()));
+        }
+
+        if (StringUtils.isNullOrEmpty(
+                messageData.get(CampaignPushConstants.PushPayloadKeys.IMAGE_URL))) {
+            messageData.put(
+                    CampaignPushConstants.PushPayloadKeys.IMAGE_URL,
+                    String.valueOf(notification.getImageUrl()));
+        }
     }
 
     @NonNull Map<String, String> getMessageData() {
