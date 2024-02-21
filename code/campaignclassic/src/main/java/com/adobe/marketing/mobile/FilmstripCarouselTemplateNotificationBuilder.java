@@ -224,7 +224,10 @@ class FilmstripCarouselTemplateNotificationBuilder {
                 CampaignPushConstants.IntentKeys.MESSAGE_ID, pushTemplate.getMessageId());
         clickIntent.putExtra(
                 CampaignPushConstants.IntentKeys.DELIVERY_ID, pushTemplate.getDeliveryId());
-        clickIntent.putExtra(CampaignPushConstants.IntentKeys.SMALL_ICON, pushTemplate.getIcon());
+        clickIntent.putExtra(
+                CampaignPushConstants.IntentKeys.SMALL_ICON, pushTemplate.getSmallIcon());
+        clickIntent.putExtra(
+                CampaignPushConstants.IntentKeys.LARGE_ICON, pushTemplate.getLargeIcon());
         clickIntent.putExtra(
                 CampaignPushConstants.IntentKeys.SMALL_ICON_COLOR,
                 pushTemplate.getSmallIconColor());
@@ -277,7 +280,12 @@ class FilmstripCarouselTemplateNotificationBuilder {
 
         // small Icon must be present, otherwise the notification will not be displayed.
         AEPPushNotificationBuilder.setSmallIcon(
-                context, builder, pushTemplate.getIcon(), pushTemplate.getSmallIconColor());
+                context, builder, pushTemplate.getSmallIcon(), pushTemplate.getSmallIconColor());
+
+        // set a large icon if one is present
+        AEPPushNotificationBuilder.setRemoteViewLargeIcon(pushTemplate.getLargeIcon(), smallLayout);
+        AEPPushNotificationBuilder.setRemoteViewLargeIcon(
+                pushTemplate.getLargeIcon(), expandedLayout);
 
         // set notification visibility
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -361,6 +369,8 @@ class FilmstripCarouselTemplateNotificationBuilder {
                 intentExtras.getString(CampaignPushConstants.IntentKeys.SMALL_ICON);
         final String smallIconColor =
                 intentExtras.getString(CampaignPushConstants.IntentKeys.SMALL_ICON_COLOR);
+        final String largeIcon =
+                intentExtras.getString(CampaignPushConstants.IntentKeys.LARGE_ICON);
         final String customSound =
                 intentExtras.getString(CampaignPushConstants.IntentKeys.CUSTOM_SOUND);
         final String ticker = intentExtras.getString(CampaignPushConstants.IntentKeys.TICKER);
@@ -476,6 +486,7 @@ class FilmstripCarouselTemplateNotificationBuilder {
         clickIntent.putExtra(CampaignPushConstants.IntentKeys.DELIVERY_ID, deliveryId);
         clickIntent.putExtra(CampaignPushConstants.IntentKeys.SMALL_ICON, smallIcon);
         clickIntent.putExtra(CampaignPushConstants.IntentKeys.SMALL_ICON_COLOR, smallIconColor);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.LARGE_ICON, largeIcon);
         clickIntent.putExtra(CampaignPushConstants.IntentKeys.VISIBILITY, visibility);
         clickIntent.putExtra(CampaignPushConstants.IntentKeys.IMPORTANCE, importance);
         clickIntent.putExtra(CampaignPushConstants.IntentKeys.TICKER, ticker);
@@ -523,6 +534,10 @@ class FilmstripCarouselTemplateNotificationBuilder {
 
         // small Icon must be present, otherwise the notification will not be displayed.
         AEPPushNotificationBuilder.setSmallIcon(context, builder, smallIcon, smallIconColor);
+
+        // set a large icon if one is present
+        AEPPushNotificationBuilder.setRemoteViewLargeIcon(largeIcon, smallLayout);
+        AEPPushNotificationBuilder.setRemoteViewLargeIcon(largeIcon, expandedLayout);
 
         // set notification visibility
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

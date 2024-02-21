@@ -88,11 +88,16 @@ class AutoCarouselTemplateNotificationBuilder {
 
         // small Icon must be present, otherwise the notification will not be displayed.
         AEPPushNotificationBuilder.setSmallIcon(
-                context, builder, pushTemplate.getIcon(), pushTemplate.getSmallIconColor());
+                context, builder, pushTemplate.getSmallIcon(), pushTemplate.getSmallIconColor());
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             AEPPushNotificationBuilder.setVisibility(
                     builder, pushTemplate.getNotificationVisibility());
         }
+
+        // set a large icon if one is present
+        AEPPushNotificationBuilder.setRemoteViewLargeIcon(pushTemplate.getLargeIcon(), smallLayout);
+        AEPPushNotificationBuilder.setRemoteViewLargeIcon(
+                pushTemplate.getLargeIcon(), expandedLayout);
 
         // set custom sound, note this applies to API 25 and lower only as API 26 and up set the
         // sound on the notification channel
