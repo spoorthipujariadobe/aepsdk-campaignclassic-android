@@ -38,26 +38,6 @@ public class CampaignClassic {
 
     private CampaignClassic() {}
 
-    /**
-     * Registers the extension with the MobileCore SDK.
-     *
-     * <p>This method should be called only once in your application class.
-     */
-    @Deprecated
-    public static void registerExtension() {
-        MobileCore.registerExtension(
-                CampaignClassicExtension.class,
-                extensionError -> {
-                    if (extensionError == null) {
-                        return;
-                    }
-                    Log.error(
-                            LOG_TAG,
-                            SELF_TAG,
-                            "There was an error when registering the CampaignClassic extension: %s",
-                            extensionError.getErrorName());
-                });
-    }
 
     /**
      * Returns the current version of the {@code CampaignClassic} extension.
