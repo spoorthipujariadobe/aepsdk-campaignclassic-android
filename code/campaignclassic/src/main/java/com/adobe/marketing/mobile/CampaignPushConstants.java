@@ -94,6 +94,7 @@ final class CampaignPushConstants {
         static final String MESSAGE_ID = "messageId";
         static final String DELIVERY_ID = "deliveryId";
         static final String BADGE_COUNT = "badgeCount";
+        static final String LARGE_ICON = "largeIcon";
         static final String SMALL_ICON = "smallIcon";
         static final String SMALL_ICON_COLOR = "smallIconColor";
         static final String VISIBILITY = "visibility";
@@ -133,7 +134,8 @@ final class CampaignPushConstants {
         public static final String NOTIFICATION_VISIBILITY = "adb_n_visibility";
         public static final String NOTIFICATION_PRIORITY = "adb_n_priority";
         public static final String CHANNEL_ID = "adb_channel_id";
-        public static final String ICON = "adb_icon";
+        public static final String SMALL_ICON = "adb_small_icon";
+        public static final String LARGE_ICON = "adb_large_icon";
         public static final String IMAGE_URL = "adb_image";
         public static final String TAG = "adb_tag";
         public static final String TICKER = "adb_ticker";
