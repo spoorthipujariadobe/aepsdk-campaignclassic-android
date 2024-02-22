@@ -12,68 +12,110 @@
 
 version: 2.1
 orbs:
-  android: circleci/android@2.0
+  android: circleci/android@2.4.0
+  codecov: codecov/codecov@4.0.1
 
 # Workflows orchestrate a set of jobs to be run;
 workflows:
   version: 2
   build-test-deploy:
     jobs:
-      - build-and-unit-test
-      - functional-test
+      - validate-code
+      - build-and-unit-test:
+          requires:
+            - validate-code
+      - functional-test:
+          requires:
+            - validate-code
  
 jobs:
-  build-and-unit-test:
+  validate-code:
     executor:
-        name: android/android-machine
-        resource-class: large
-        tag: 2022.01.1
-    working_directory: ~/code
+      name: android/android-docker
+      resource-class: medium
+      tag: 2024.01.1-node
+
     steps:
       - checkout
+
+      - android/restore-gradle-cache
+
+      - android/restore-build-cache
+
       - run:
-          name: Check format
-          command: make check-format
+          name: Check Format
+          command: make checkformat
+
       - run:
-          name: Check style
+          name: Check Style
           command: make checkstyle
-      - run:
-          name: Assemble phone release
-          command: make assemble-phone-release
+
+      - android/save-gradle-cache
+
+      - android/save-build-cache
+
+      # Store Lint report
+      - store_artifacts:
+          path: code/campaignclassic/build/reports     
+  build-and-unit-test:
+    executor:
+      name: android/android-docker
+      resource-class: medium
+      tag: 2024.01.1-node
+ 
+    steps:
+      - checkout
+
+      - android/restore-gradle-cache
+       
+      - android/restore-build-cache
+
       - run:
           name: Javadoc
           command: make javadoc
+
       - store_artifacts:
-          path: code/campaignclassic/build/libs
+          path: code/campaignclassic/build/docs/javadoc
+
       - run:
-          name: Download Codecov Uploader
-          command: |
-            curl -s https://codecov.io/bash > codecov;
-            VERSION=$(grep 'VERSION=\"[0-9\.]*\"' codecov | cut -d'"' -f2);
-            for i in 1 256 512
-            do
-              shasum -a $i -c --ignore-missing <(curl -s "https://raw.githubusercontent.com/codecov/codecov-bash/${VERSION}/SHA${i}SUM") ||
-              shasum -a $i -c <(curl -s "https://raw.githubusercontent.com/codecov/codecov-bash/${VERSION}/SHA${i}SUM" | grep -w "codecov")
-            done
+          name: Assemble Phone
+          command: make assemble-phone
+          
       - run:
-          name: Run Unit Tests
-          command: make unit-test-coverage
+          name: Assemble App
+          command: make assemble-app
+
+      - android/run-tests:
+          test-command: make unit-test-coverage
+
       - store_artifacts:
           path: code/campaignclassic/build/reports/tests
+
       - store_test_results:
           path: code/campaignclassic/build/test-results/testPhoneDebugUnitTest
-      - run:
-          name: Upload Core unit test coverage
-          command: |
-            bash ./codecov -v -X s3 -c -D "./ci/unit-test/build/reports" -F unit-tests
 
+      - android/save-gradle-cache
+
+      - android/save-build-cache
+
+      - codecov/upload:
+          file: code/campaignclassic/build/reports/coverage/test/phone/debug/report.xml
+          flags: unit-tests
   functional-test:
-    executor:
-        name: android/android-machine
-        resource-class: large
-        tag: 2022.01.1
+    executor: 
+      name: android/android-machine
+      resource-class: medium
+      tag: 2024.01.1
+
     steps:
       - checkout
+
+      - android/restore-build-cache
+
+      - run:
+          name: List available emulator images
+          command: sdkmanager --list
+
       - android/start-emulator-and-run-tests:
           #   It should match the name seen in the "sdkmanager --list" output
           system-image: system-images;android-29;default;x86
@@ -81,22 +123,15 @@ jobs:
           post-emulator-launch-assemble-command: make assemble-phone
           #   The test command
           test-command: make functional-test-coverage
+   
+      - android/save-build-cache
 
-      # code coverage
-      - run:
-          name: Upload Code Coverage Report
-          command: |
-            curl -s https://codecov.io/bash > codecov;
-            VERSION=$(grep 'VERSION=\"[0-9\.]*\"' codecov | cut -d'"' -f2);
-            for i in 1 256 512
-            do
-              shasum -a $i -c --ignore-missing <(curl -s "https://raw.githubusercontent.com/codecov/codecov-bash/${VERSION}/SHA${i}SUM") ||
-              shasum -a $i -c <(curl -s "https://raw.githubusercontent.com/codecov/codecov-bash/${VERSION}/SHA${i}SUM" | grep -w "codecov")
-            done
-            bash ./codecov -v -X s3 -c -D "./code/campaignclassic/build/reports/coverage/androidTest/phone/debug" -F functional-tests
-            
+      - codecov/upload:
+          file: code/campaignclassic/build/reports/coverage/androidTest/phone/debug/connected/report.xml
+          flags: functional-tests
+ 
       - store_artifacts:
           path: code/campaignclassic/build/reports/androidTests
-      
+
       - store_test_results:
           path: code/campaignclassic/build/outputs/androidTest-results
