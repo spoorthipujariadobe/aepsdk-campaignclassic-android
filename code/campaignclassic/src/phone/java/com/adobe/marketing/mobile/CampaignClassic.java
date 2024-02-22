@@ -17,7 +17,14 @@ import com.adobe.marketing.mobile.util.StringUtils;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * CampaignClassic public API class
+ */
 public class CampaignClassic {
+    /**
+     * The {@link Extension} class for CampaignClassic.
+     * This class is used to register the CampaignClassic extension with the Mobile SDK.
+     */
     public static final Class<? extends Extension> EXTENSION = CampaignClassicExtension.class;
 
     private static final String LOG_TAG = "CampaignClassicExtension";
