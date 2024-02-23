@@ -19,6 +19,7 @@ import com.adobe.marketing.mobile.campaignclassic.R;
 import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.services.ServiceProvider;
 import com.adobe.marketing.mobile.services.caching.CacheService;
+import com.adobe.marketing.mobile.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -144,13 +145,17 @@ class AutoCarouselTemplateNotificationBuilder {
             carouselItem.setTextViewText(R.id.carousel_item_caption, item.getCaptionText());
 
             // assign a click action pending intent for each carousel item
+            final String interactionUri =
+                    !StringUtils.isNullOrEmpty(item.getInteractionUri())
+                            ? item.getInteractionUri()
+                            : pushTemplate.getActionUri();
             AEPPushNotificationBuilder.setRemoteViewClickAction(
                     context,
                     carouselItem,
                     R.id.carousel_item_image_view,
                     pushTemplate.getMessageId(),
                     pushTemplate.getDeliveryId(),
-                    item.getInteractionUri(),
+                    interactionUri,
                     pushTemplate.getNotificationTag(),
                     pushTemplate.isNotificationSticky());
 
