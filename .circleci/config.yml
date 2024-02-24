@@ -70,9 +70,9 @@ jobs:
        
       - android/restore-build-cache
 
-      - run:
-          name: Javadoc
-          command: make javadoc
+      # - run:
+      #     name: Javadoc
+      #     command: make javadoc
 
       - store_artifacts:
           path: code/campaignclassic/build/docs/javadoc
