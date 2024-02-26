@@ -275,7 +275,7 @@ class AEPPushNotificationBuilder {
             Log.trace(
                     CampaignPushConstants.LOG_TAG,
                     SELF_TAG,
-                    "Invalid large icon string provided, large icon will not be applied.");
+                    "Null or empty large icon string found, large icon will not be applied.");
             remoteView.setViewVisibility(R.id.large_icon, View.GONE);
             return;
         }
@@ -505,6 +505,22 @@ class AEPPushNotificationBuilder {
             final String actionUri,
             final String tag,
             final boolean stickyNotification) {
+        if (StringUtils.isNullOrEmpty(actionUri)) {
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "No valid action uri found for the clicked view with id %s. No click action"
+                            + " will be assigned.",
+                    targetViewResourceId);
+            return;
+        }
+
+        Log.trace(
+                CampaignPushConstants.LOG_TAG,
+                SELF_TAG,
+                "Setting remote view click action uri: %s ",
+                actionUri);
+
         final PendingIntent pendingIntent =
                 createPendingIntent(
                         context, messageId, deliveryId, actionUri, null, tag, stickyNotification);

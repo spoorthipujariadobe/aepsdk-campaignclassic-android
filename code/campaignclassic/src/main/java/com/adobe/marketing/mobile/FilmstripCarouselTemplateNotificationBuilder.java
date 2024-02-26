@@ -172,13 +172,18 @@ class FilmstripCarouselTemplateNotificationBuilder {
                 R.id.manual_carousel_filmstrip_right, downloadedImages.get(2));
 
         // assign a click action pending intent to the center image view
+        final String fallbackActionUri = pushTemplate.getActionUri();
+        final String interactionUri =
+                !StringUtils.isNullOrEmpty(imageClickActions.get(centerImageIndex))
+                        ? imageClickActions.get(centerImageIndex)
+                        : fallbackActionUri;
         AEPPushNotificationBuilder.setRemoteViewClickAction(
                 context,
                 expandedLayout,
                 R.id.manual_carousel_filmstrip_center,
                 pushTemplate.getMessageId(),
                 pushTemplate.getDeliveryId(),
-                imageClickActions.get(centerImageIndex),
+                interactionUri,
                 pushTemplate.getNotificationTag(),
                 pushTemplate.isNotificationSticky());
 
@@ -245,6 +250,7 @@ class FilmstripCarouselTemplateNotificationBuilder {
                 CampaignPushConstants.IntentKeys.TAG, pushTemplate.getNotificationTag());
         clickIntent.putExtra(
                 CampaignPushConstants.IntentKeys.STICKY, pushTemplate.isNotificationSticky());
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.ACTION_URI, fallbackActionUri);
 
         final PendingIntent pendingIntentLeftButton =
                 PendingIntent.getBroadcast(
@@ -376,6 +382,8 @@ class FilmstripCarouselTemplateNotificationBuilder {
         final String ticker = intentExtras.getString(CampaignPushConstants.IntentKeys.TICKER);
         final String tag = intentExtras.getString(CampaignPushConstants.IntentKeys.TAG);
         final boolean sticky = intentExtras.getBoolean(CampaignPushConstants.IntentKeys.STICKY);
+        final String fallbackActionUri =
+                intentExtras.getString(CampaignPushConstants.IntentKeys.ACTION_URI);
 
         // as we are handling an intent, the image URLS should already be cached
         if (cacheService != null && !CollectionUtils.isEmpty(imageUrls)) {
@@ -438,13 +446,17 @@ class FilmstripCarouselTemplateNotificationBuilder {
         expandedLayout.setTextViewText(R.id.manual_carousel_filmstrip_caption, newCenterCaption);
 
         // assign a click action pending intent to the center image view
+        final String interactionUri =
+                !StringUtils.isNullOrEmpty(imageClickActions.get(newCenterIndex))
+                        ? imageClickActions.get(newCenterIndex)
+                        : fallbackActionUri;
         AEPPushNotificationBuilder.setRemoteViewClickAction(
                 context,
                 expandedLayout,
                 R.id.manual_carousel_filmstrip_center,
                 messageId,
                 deliveryId,
-                imageClickActions.get(newCenterIndex),
+                interactionUri,
                 tag,
                 sticky);
 
@@ -492,6 +504,7 @@ class FilmstripCarouselTemplateNotificationBuilder {
         clickIntent.putExtra(CampaignPushConstants.IntentKeys.TICKER, ticker);
         clickIntent.putExtra(CampaignPushConstants.IntentKeys.TAG, tag);
         clickIntent.putExtra(CampaignPushConstants.IntentKeys.STICKY, sticky);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.ACTION_URI, fallbackActionUri);
 
         final PendingIntent pendingIntentLeftButton =
                 PendingIntent.getBroadcast(
