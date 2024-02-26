@@ -41,7 +41,7 @@ body:
       Please provide the OS version, SDK version(s) used, IDE version, and any other specific settings that could help us narrow down the problem.
       Example:
         - **OS**: Android 13
-        - **SDK(s)**: places 2.0.0, edge 2.0.0, core 2.0.0
+        - **SDK(s)**: campaignclassic 2.0.0, edge 2.0.0, core 2.0.0
         - **IDE**: Android Studio 2021.3.1 Patch 1
   validations:
     required: true
