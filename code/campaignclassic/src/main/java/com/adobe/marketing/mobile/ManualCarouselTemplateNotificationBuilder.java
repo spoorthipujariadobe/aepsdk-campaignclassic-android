@@ -110,6 +110,7 @@ class ManualCarouselTemplateNotificationBuilder {
                 new RemoteViews(packageName, R.layout.push_template_collapsed);
         final RemoteViews expandedLayout =
                 new RemoteViews(packageName, R.layout.push_template_manual_carousel);
+        final String fallbackActionUri = pushTemplate.getActionUri();
 
         // load images into the carousel
         final ArrayList<CarouselPushTemplate.CarouselItem> items = pushTemplate.getCarouselItems();
@@ -123,6 +124,7 @@ class ManualCarouselTemplateNotificationBuilder {
                         pushTemplate.getMessageId(),
                         pushTemplate.getDeliveryId(),
                         pushTemplate.getNotificationTag(),
+                        fallbackActionUri,
                         pushTemplate.isNotificationSticky());
 
         final ArrayList<String> downloadedImageUris = extractedItemData.get(IMAGE_URIS_KEY);
@@ -147,17 +149,6 @@ class ManualCarouselTemplateNotificationBuilder {
 
         final int centerImageIndex =
                 CampaignPushConstants.DefaultValues.CENTER_INDEX; // center index defaults to 1
-
-        // assign a click action pending intent to the currently displayed carousel item
-        AEPPushNotificationBuilder.setRemoteViewClickAction(
-                context,
-                expandedLayout,
-                R.id.carousel_item_image_view,
-                pushTemplate.getMessageId(),
-                pushTemplate.getDeliveryId(),
-                imageClickActions.get(centerImageIndex),
-                pushTemplate.getNotificationTag(),
-                pushTemplate.isNotificationSticky());
 
         // set any custom colors if needed
         AEPPushNotificationBuilder.setCustomNotificationColors(
@@ -201,10 +192,13 @@ class ManualCarouselTemplateNotificationBuilder {
                 CampaignPushConstants.IntentKeys.MESSAGE_ID, pushTemplate.getMessageId());
         clickIntent.putExtra(
                 CampaignPushConstants.IntentKeys.DELIVERY_ID, pushTemplate.getDeliveryId());
-        clickIntent.putExtra(CampaignPushConstants.IntentKeys.SMALL_ICON, pushTemplate.getIcon());
+        clickIntent.putExtra(
+                CampaignPushConstants.IntentKeys.SMALL_ICON, pushTemplate.getSmallIcon());
         clickIntent.putExtra(
                 CampaignPushConstants.IntentKeys.SMALL_ICON_COLOR,
                 pushTemplate.getSmallIconColor());
+        clickIntent.putExtra(
+                CampaignPushConstants.IntentKeys.LARGE_ICON, pushTemplate.getLargeIcon());
         clickIntent.putExtra(
                 CampaignPushConstants.IntentKeys.VISIBILITY,
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
@@ -219,6 +213,7 @@ class ManualCarouselTemplateNotificationBuilder {
                 CampaignPushConstants.IntentKeys.TAG, pushTemplate.getNotificationTag());
         clickIntent.putExtra(
                 CampaignPushConstants.IntentKeys.TICKER, pushTemplate.getNotificationTicker());
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.ACTION_URI, fallbackActionUri);
 
         final PendingIntent pendingIntentLeftButton =
                 PendingIntent.getBroadcast(
@@ -252,7 +247,12 @@ class ManualCarouselTemplateNotificationBuilder {
 
         // small Icon must be present, otherwise the notification will not be displayed.
         AEPPushNotificationBuilder.setSmallIcon(
-                context, builder, pushTemplate.getIcon(), pushTemplate.getSmallIconColor());
+                context, builder, pushTemplate.getSmallIcon(), pushTemplate.getSmallIconColor());
+
+        // set a large icon if one is present
+        AEPPushNotificationBuilder.setRemoteViewLargeIcon(pushTemplate.getLargeIcon(), smallLayout);
+        AEPPushNotificationBuilder.setRemoteViewLargeIcon(
+                pushTemplate.getLargeIcon(), expandedLayout);
 
         // set notification visibility
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -332,11 +332,15 @@ class ManualCarouselTemplateNotificationBuilder {
                 intentExtras.getString(CampaignPushConstants.IntentKeys.SMALL_ICON);
         final String smallIconColor =
                 intentExtras.getString(CampaignPushConstants.IntentKeys.SMALL_ICON_COLOR);
+        final String largeIcon =
+                intentExtras.getString(CampaignPushConstants.IntentKeys.LARGE_ICON);
         final String customSound =
                 intentExtras.getString(CampaignPushConstants.IntentKeys.CUSTOM_SOUND);
         final String ticker = intentExtras.getString(CampaignPushConstants.IntentKeys.TICKER);
         final String tag = intentExtras.getString(CampaignPushConstants.IntentKeys.TAG);
         final boolean sticky = intentExtras.getBoolean(CampaignPushConstants.IntentKeys.STICKY);
+        final String fallbackActionUri =
+                intentExtras.getString(CampaignPushConstants.IntentKeys.ACTION_URI);
 
         // as we are handling an intent, the image URLS should already be cached
         if (cacheService != null && !CollectionUtils.isEmpty(imageUrls)) {
@@ -394,6 +398,7 @@ class ManualCarouselTemplateNotificationBuilder {
                 messageId,
                 deliveryId,
                 tag,
+                fallbackActionUri,
                 sticky);
 
         // set any custom colors if needed
@@ -434,6 +439,7 @@ class ManualCarouselTemplateNotificationBuilder {
         clickIntent.putExtra(CampaignPushConstants.IntentKeys.DELIVERY_ID, deliveryId);
         clickIntent.putExtra(CampaignPushConstants.IntentKeys.SMALL_ICON, smallIcon);
         clickIntent.putExtra(CampaignPushConstants.IntentKeys.SMALL_ICON_COLOR, smallIconColor);
+        clickIntent.putExtra(CampaignPushConstants.IntentKeys.LARGE_ICON, largeIcon);
         clickIntent.putExtra(CampaignPushConstants.IntentKeys.VISIBILITY, visibility);
         clickIntent.putExtra(CampaignPushConstants.IntentKeys.IMPORTANCE, importance);
         clickIntent.putExtra(CampaignPushConstants.IntentKeys.TICKER, ticker);
@@ -482,6 +488,10 @@ class ManualCarouselTemplateNotificationBuilder {
         // small Icon must be present, otherwise the notification will not be displayed.
         AEPPushNotificationBuilder.setSmallIcon(context, builder, smallIcon, smallIconColor);
 
+        // set a large icon if one is present
+        AEPPushNotificationBuilder.setRemoteViewLargeIcon(largeIcon, smallLayout);
+        AEPPushNotificationBuilder.setRemoteViewLargeIcon(largeIcon, expandedLayout);
+
         // set notification visibility
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             AEPPushNotificationBuilder.setVisibility(builder, visibility);
@@ -512,6 +522,7 @@ class ManualCarouselTemplateNotificationBuilder {
             final String messageId,
             final String deliveryId,
             final String tag,
+            final String actionUri,
             final boolean autoCancel) {
         final ArrayList<String> downloadedImageUris = new ArrayList<>();
         final ArrayList<String> imageCaptions = new ArrayList<>();
@@ -540,13 +551,17 @@ class ManualCarouselTemplateNotificationBuilder {
             carouselItem.setTextViewText(R.id.carousel_item_caption, item.getCaptionText());
 
             // assign a click action pending intent for each carousel item
+            final String interactionUri =
+                    !StringUtils.isNullOrEmpty(item.getInteractionUri())
+                            ? item.getInteractionUri()
+                            : actionUri;
             AEPPushNotificationBuilder.setRemoteViewClickAction(
                     context,
                     carouselItem,
                     R.id.carousel_item_image_view,
                     messageId,
                     deliveryId,
-                    item.getInteractionUri(),
+                    interactionUri,
                     tag,
                     autoCancel);
 
