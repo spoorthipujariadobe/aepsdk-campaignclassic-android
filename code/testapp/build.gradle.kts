@@ -47,6 +47,8 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.9.0")
     implementation("androidx.activity:activity:1.8.2")
     implementation("androidx.fragment:fragment:1.6.2")
-    implementation("com.google.firebase:firebase-messaging:21.0.1")
+    implementation("com.google.firebase:firebase-messaging:23.4.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
 }
+
+apply(plugin = "com.google.gms.google-services")
