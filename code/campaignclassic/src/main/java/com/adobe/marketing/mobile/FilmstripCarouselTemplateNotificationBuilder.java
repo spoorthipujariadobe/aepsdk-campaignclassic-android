@@ -108,7 +108,8 @@ class FilmstripCarouselTemplateNotificationBuilder {
         // download the carousel images and populate the image uri, image caption, and image click
         // action arrays
         final int centerImageIndex =
-                CampaignPushConstants.DefaultValues.CENTER_INDEX; // center index defaults to 1
+                CampaignPushConstants.DefaultValues
+                        .FILMSTRIP_CAROUSEL_CENTER_INDEX; // center index defaults to 1
         final long imageProcessingStartTime = System.currentTimeMillis();
         final List<CarouselPushTemplate.CarouselItem> items = pushTemplate.getCarouselItems();
         final ArrayList<Bitmap> downloadedImages = new ArrayList<>();
@@ -425,11 +426,21 @@ class FilmstripCarouselTemplateNotificationBuilder {
                     SELF_TAG,
                     "Unable to calculate new left, center, and right indices. Using default center"
                             + " image index of 1.");
-            newCenterIndex = CampaignPushConstants.DefaultValues.CENTER_INDEX;
-            newLeftImage = cachedImages.get(CampaignPushConstants.DefaultValues.CENTER_INDEX - 1);
-            newCenterImage = cachedImages.get(CampaignPushConstants.DefaultValues.CENTER_INDEX);
-            newRightImage = cachedImages.get(CampaignPushConstants.DefaultValues.CENTER_INDEX + 1);
-            newCenterCaption = imageCaptions.get(CampaignPushConstants.DefaultValues.CENTER_INDEX);
+            newCenterIndex = CampaignPushConstants.DefaultValues.FILMSTRIP_CAROUSEL_CENTER_INDEX;
+            newLeftImage =
+                    cachedImages.get(
+                            CampaignPushConstants.DefaultValues.FILMSTRIP_CAROUSEL_CENTER_INDEX
+                                    - 1);
+            newCenterImage =
+                    cachedImages.get(
+                            CampaignPushConstants.DefaultValues.FILMSTRIP_CAROUSEL_CENTER_INDEX);
+            newRightImage =
+                    cachedImages.get(
+                            CampaignPushConstants.DefaultValues.FILMSTRIP_CAROUSEL_CENTER_INDEX
+                                    + 1);
+            newCenterCaption =
+                    imageCaptions.get(
+                            CampaignPushConstants.DefaultValues.FILMSTRIP_CAROUSEL_CENTER_INDEX);
         } else {
             newLeftIndex = newIndices.get(0);
             newCenterIndex = newIndices.get(1);
