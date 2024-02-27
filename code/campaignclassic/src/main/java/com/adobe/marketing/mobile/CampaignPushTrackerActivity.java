@@ -146,13 +146,24 @@ public class CampaignPushTrackerActivity extends Activity {
             return;
         }
 
+        final NotificationManagerCompat notificationManager =
+                NotificationManagerCompat.from(context);
+        if (StringUtils.isNullOrEmpty(tag)) {
+            Log.warning(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "the sticky notification setting is false but the tag is null or empty,"
+                            + " default to removing all displayed notifications for %s.",
+                    getApplication().getPackageName());
+            notificationManager.cancelAll();
+            return;
+        }
+
         Log.trace(
                 CampaignPushConstants.LOG_TAG,
                 SELF_TAG,
                 "the sticky notification setting is false, removing notification with tag %s.",
                 tag);
-        final NotificationManagerCompat notificationManager =
-                NotificationManagerCompat.from(context);
         notificationManager.cancel(tag.hashCode());
     }
 
