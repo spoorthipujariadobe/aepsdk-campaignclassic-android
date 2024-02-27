@@ -148,7 +148,8 @@ class ManualCarouselTemplateNotificationBuilder {
         expandedLayout.setTextViewText(R.id.notification_body_expanded, expandedBodyText);
 
         final int centerImageIndex =
-                CampaignPushConstants.DefaultValues.CENTER_INDEX; // center index defaults to 1
+                CampaignPushConstants.DefaultValues
+                        .MANUAL_CAROUSEL_START_INDEX; // start index defaults to 0
 
         // set any custom colors if needed
         AEPPushNotificationBuilder.setCustomNotificationColors(
@@ -364,7 +365,7 @@ class ManualCarouselTemplateNotificationBuilder {
         expandedLayout.setTextViewText(R.id.notification_body_expanded, expandedBodyText);
 
         final String action = intent.getAction();
-        int centerImageIndex =
+        final int centerImageIndex =
                 intentExtras.getInt(CampaignPushConstants.IntentKeys.CENTER_IMAGE_INDEX);
         final List<Integer> newIndices =
                 CampaignPushUtils.calculateNewIndices(centerImageIndex, imageUrls.size(), action);
@@ -374,9 +375,9 @@ class ManualCarouselTemplateNotificationBuilder {
             Log.trace(
                     CampaignPushConstants.LOG_TAG,
                     SELF_TAG,
-                    "Unable to calculate new left, center, and right indices. Using default center"
-                            + " image index of 1.");
-            newCenterIndex = CampaignPushConstants.DefaultValues.CENTER_INDEX;
+                    "Unable to calculate new left, center, and right indices. Using default start"
+                            + " image index of 0.");
+            newCenterIndex = CampaignPushConstants.DefaultValues.MANUAL_CAROUSEL_START_INDEX;
         } else {
             newCenterIndex = newIndices.get(1);
         }
@@ -546,7 +547,6 @@ class ManualCarouselTemplateNotificationBuilder {
                     new RemoteViews(packageName, R.layout.push_template_carousel_item);
             downloadedImageUris.add(imageUri);
             imageCaptions.add(item.getCaptionText());
-            imageClickActions.add(item.getInteractionUri());
             carouselItem.setImageViewBitmap(R.id.carousel_item_image_view, pushImage);
             carouselItem.setTextViewText(R.id.carousel_item_caption, item.getCaptionText());
 
@@ -555,6 +555,7 @@ class ManualCarouselTemplateNotificationBuilder {
                     !StringUtils.isNullOrEmpty(item.getInteractionUri())
                             ? item.getInteractionUri()
                             : actionUri;
+            imageClickActions.add(interactionUri);
             AEPPushNotificationBuilder.setRemoteViewClickAction(
                     context,
                     carouselItem,
