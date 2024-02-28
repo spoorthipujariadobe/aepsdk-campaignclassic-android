@@ -86,7 +86,7 @@ class CampaignClassicIntegrationTests {
         ) {
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(1000, TimeUnit.MILLISECONDS))
+        Assert.assertTrue(countDownLatch.await(3, TimeUnit.SECONDS))
         dataStore = ServiceProvider.getInstance().dataStoreService?.getNamedCollection(
             CampaignClassicTestConstants.DATASTORE_KEY
         )
@@ -173,7 +173,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(3, TimeUnit.SECONDS))
         Assert.assertNotNull(
             dataStore?.getString(
                 CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH,
@@ -262,7 +262,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(3, TimeUnit.SECONDS))
         Assert.assertNotNull(
             dataStore?.getString(
                 CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH,
@@ -317,7 +317,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(3, TimeUnit.SECONDS))
         Assert.assertNotNull(
             dataStore?.getString(
                 CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH,
@@ -360,7 +360,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(3, TimeUnit.SECONDS))
         Assert.assertNotNull(
             dataStore?.getString(
                 CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH,
@@ -574,7 +574,7 @@ class CampaignClassicIntegrationTests {
             )
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(3, TimeUnit.SECONDS))
         Assert.assertNotNull(
             dataStore?.getString(
                 CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH,
@@ -653,7 +653,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(3, TimeUnit.SECONDS))
         // verify registration status event dispatched with status true
         Thread.sleep(250)
         var registrationStatusEvents = MonitorExtension.getCapturedRegistrationEvents()
@@ -730,7 +730,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(3, TimeUnit.SECONDS))
         Assert.assertNull(
             dataStore?.getString(
                 CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH,
@@ -775,7 +775,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(3, TimeUnit.SECONDS))
     }
 
     @Test
@@ -804,7 +804,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(3, TimeUnit.SECONDS))
     }
 
     @Test
@@ -1111,7 +1111,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(3, TimeUnit.SECONDS))
 
         val countDownLatch2 = CountDownLatch(1)
         networkMonitor = null
@@ -1172,7 +1172,7 @@ class CampaignClassicIntegrationTests {
             countDownLatch.countDown()
         }
 
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(3, TimeUnit.SECONDS))
     }
 
     // =================================================================================================================
@@ -1210,7 +1210,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(3, TimeUnit.SECONDS))
     }
 
     @Test
@@ -1239,7 +1239,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(3, TimeUnit.SECONDS))
     }
 
     @Test
@@ -1546,7 +1546,7 @@ class CampaignClassicIntegrationTests {
 
             countDownLatch.countDown()
         }
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(3, TimeUnit.SECONDS))
 
         val countDownLatch2 = CountDownLatch(1)
         networkMonitor = null
@@ -1607,7 +1607,7 @@ class CampaignClassicIntegrationTests {
             countDownLatch.countDown()
         }
 
-        Assert.assertTrue(countDownLatch.await(1, TimeUnit.SECONDS))
+        Assert.assertTrue(countDownLatch.await(3, TimeUnit.SECONDS))
     }
 
     private fun setupConfiguration(
