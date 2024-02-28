@@ -8,6 +8,7 @@
   OF ANY KIND, either express or implied. See the License for the specific language
   governing permissions and limitations under the License.
 */
+
 package com.adobe.marketing.mobile;
 
 import android.app.Activity;
@@ -24,9 +25,7 @@ import com.adobe.marketing.mobile.util.StringUtils;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Activity to track and handle push notification interactions.
- */
+/** Activity to track and handle push notification interactions. */
 public class CampaignPushTrackerActivity extends Activity {
 
     private static final String SELF_TAG = "CampaignPushTrackerActivity";

@@ -8,6 +8,7 @@
   OF ANY KIND, either express or implied. See the License for the specific language
   governing permissions and limitations under the License.
 */
+
 package com.adobe.marketing.mobile.campaignclassic.internal;
 
 /** This class holds all test constant values used only by the Campaign Classic extension */
