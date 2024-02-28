@@ -17,6 +17,7 @@ val mavenCoreVersion: String by project
 
 aepLibrary {
     namespace = "com.adobe.marketing.mobile"
+    enableDokkaDoc = true
     enableSpotless = true
     enableCheckStyle = true
 
