@@ -24,6 +24,9 @@ import com.adobe.marketing.mobile.util.StringUtils;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Activity to track and handle push notification interactions.
+ */
 public class CampaignPushTrackerActivity extends Activity {
 
     private static final String SELF_TAG = "CampaignPushTrackerActivity";

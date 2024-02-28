@@ -15,7 +15,6 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.widget.RemoteViews;
 import androidx.core.app.NotificationCompat;
-import com.adobe.marketing.mobile.campaignclassic.R;
 import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.services.ServiceProvider;
 import com.adobe.marketing.mobile.services.caching.CacheService;

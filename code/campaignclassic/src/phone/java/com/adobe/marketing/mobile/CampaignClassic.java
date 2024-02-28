@@ -17,13 +17,20 @@ import com.adobe.marketing.mobile.util.StringUtils;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * CampaignClassic public API class
+ */
 public class CampaignClassic {
+    /**
+     * The {@link Extension} class for CampaignClassic.
+     * This class is used to register the CampaignClassic extension with the Mobile SDK.
+     */
     public static final Class<? extends Extension> EXTENSION = CampaignClassicExtension.class;
 
     private static final String LOG_TAG = "CampaignClassicExtension";
     private static final String SELF_TAG = "CampaignClassic";
 
-    static final String EXTENSION_VERSION = "2.1.3";
+    static final String EXTENSION_VERSION = "3.0.0";
     static final String REGISTER_DEVICE = "registerdevice";
     static final String TRACK_RECEIVE = "trackreceive";
     static final String TRACK_CLICK = "trackclick";
@@ -38,26 +45,6 @@ public class CampaignClassic {
 
     private CampaignClassic() {}
 
-    /**
-     * Registers the extension with the MobileCore SDK.
-     *
-     * <p>This method should be called only once in your application class.
-     */
-    @Deprecated
-    public static void registerExtension() {
-        MobileCore.registerExtension(
-                CampaignClassicExtension.class,
-                extensionError -> {
-                    if (extensionError == null) {
-                        return;
-                    }
-                    Log.error(
-                            LOG_TAG,
-                            SELF_TAG,
-                            "There was an error when registering the CampaignClassic extension: %s",
-                            extensionError.getErrorName());
-                });
-    }
 
     /**
      * Returns the current version of the {@code CampaignClassic} extension.
