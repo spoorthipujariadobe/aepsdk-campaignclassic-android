@@ -1,5 +1,5 @@
 /*
-  Copyright 2024 Adobe. All rights reserved.
+  Copyright 2023 Adobe. All rights reserved.
   This file is licensed to you under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License. You may obtain a copy
   of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -8,6 +8,7 @@
   OF ANY KIND, either express or implied. See the License for the specific language
   governing permissions and limitations under the License.
 */
+
 package com.adobe.marketing.mobile;
 
 import android.app.Activity;
@@ -24,9 +25,7 @@ import com.adobe.marketing.mobile.util.StringUtils;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Activity to track and handle push notification interactions.
- */
+/** Activity to track and handle push notification interactions. */
 public class CampaignPushTrackerActivity extends Activity {
 
     private static final String SELF_TAG = "CampaignPushTrackerActivity";

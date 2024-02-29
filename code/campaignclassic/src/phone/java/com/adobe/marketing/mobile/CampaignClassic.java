@@ -1,5 +1,5 @@
 /*
-  Copyright 2022 Adobe. All rights reserved.
+  Copyright 2023 Adobe. All rights reserved.
   This file is licensed to you under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License. You may obtain a copy
   of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -8,6 +8,7 @@
   OF ANY KIND, either express or implied. See the License for the specific language
   governing permissions and limitations under the License.
 */
+
 package com.adobe.marketing.mobile;
 
 import androidx.annotation.NonNull;
@@ -17,13 +18,11 @@ import com.adobe.marketing.mobile.util.StringUtils;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * CampaignClassic public API class
- */
+/** CampaignClassic public API class */
 public class CampaignClassic {
     /**
-     * The {@link Extension} class for CampaignClassic.
-     * This class is used to register the CampaignClassic extension with the Mobile SDK.
+     * The {@link Extension} class for CampaignClassic. This class is used to register the
+     * CampaignClassic extension with the Mobile SDK.
      */
     public static final Class<? extends Extension> EXTENSION = CampaignClassicExtension.class;
 
@@ -44,7 +43,6 @@ public class CampaignClassic {
             "The provided trackInfo map is null or empty";
 
     private CampaignClassic() {}
-
 
     /**
      * Returns the current version of the {@code CampaignClassic} extension.
