@@ -339,14 +339,16 @@ class ManualCarouselTemplateNotificationBuilder {
         final boolean sticky = intentExtras.getBoolean(CampaignPushConstants.IntentKeys.STICKY);
 
         // as we are handling an intent, the image URLS should already be cached
-        if (cacheService != null && !CollectionUtils.isEmpty(imageUrls)) {
+        if (!CollectionUtils.isEmpty(imageUrls)) {
             for (final String imageUri : imageUrls) {
-                if (!StringUtils.isNullOrEmpty(imageUri)) {
-                    final CacheResult cacheResult = cacheService.get(assetCacheLocation, imageUri);
-                    if (cacheResult != null) {
-                        cachedImages.add(BitmapFactory.decodeStream(cacheResult.getData()));
-                    }
+                if (StringUtils.isNullOrEmpty(imageUri)) {
+                    continue;
                 }
+                final CacheResult cacheResult = cacheService.get(assetCacheLocation, imageUri);
+                if (cacheResult == null) {
+                    continue;
+                }
+                cachedImages.add(BitmapFactory.decodeStream(cacheResult.getData()));
             }
         }
 
