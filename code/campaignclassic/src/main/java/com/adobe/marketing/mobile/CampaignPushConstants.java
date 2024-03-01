@@ -53,7 +53,8 @@ final class CampaignPushConstants {
         static final String MANUAL_CAROUSEL_MODE = "manual";
         static final String FILMSTRIP_CAROUSEL_MODE = "filmstrip";
         static final int CAROUSEL_MINIMUM_IMAGE_COUNT = 3;
-        static final int CENTER_INDEX = 1;
+        static final int MANUAL_CAROUSEL_START_INDEX = 0;
+        static final int FILMSTRIP_CAROUSEL_CENTER_INDEX = 1;
         static final int ACTION_BUTTON_CAPACITY = 3;
         // TODO: revisit this value. should cache time be configurable rather than have a static
         // value?
@@ -95,6 +96,7 @@ final class CampaignPushConstants {
         static final String MESSAGE_ID = "messageId";
         static final String DELIVERY_ID = "deliveryId";
         static final String BADGE_COUNT = "badgeCount";
+        static final String LARGE_ICON = "largeIcon";
         static final String SMALL_ICON = "smallIcon";
         static final String SMALL_ICON_COLOR = "smallIconColor";
         static final String VISIBILITY = "visibility";
@@ -134,7 +136,8 @@ final class CampaignPushConstants {
         public static final String NOTIFICATION_VISIBILITY = "adb_n_visibility";
         public static final String NOTIFICATION_PRIORITY = "adb_n_priority";
         public static final String CHANNEL_ID = "adb_channel_id";
-        public static final String ICON = "adb_icon";
+        public static final String SMALL_ICON = "adb_small_icon";
+        public static final String LARGE_ICON = "adb_large_icon";
         public static final String IMAGE_URL = "adb_image";
         public static final String TAG = "adb_tag";
         public static final String TICKER = "adb_ticker";

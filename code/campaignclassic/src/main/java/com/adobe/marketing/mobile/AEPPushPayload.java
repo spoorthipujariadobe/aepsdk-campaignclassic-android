@@ -130,7 +130,7 @@ class AEPPushPayload {
         // The notification key value pairs will only be added to the message data if the
         // corresponding key
         // does not have a value.
-        // message.android.notification.icon to adb_icon
+        // message.android.notification.icon to adb_small_icon
         // message.android.notification.sound to adb_sound
         // message.android.notification.tag	to adb_tag
         // message.android.notification.click_action to adb_uri
@@ -150,8 +150,9 @@ class AEPPushPayload {
         }
 
         if (StringUtils.isNullOrEmpty(
-                messageData.get(CampaignPushConstants.PushPayloadKeys.ICON))) {
-            messageData.put(CampaignPushConstants.PushPayloadKeys.ICON, notification.getIcon());
+                messageData.get(CampaignPushConstants.PushPayloadKeys.SMALL_ICON))) {
+            messageData.put(
+                    CampaignPushConstants.PushPayloadKeys.SMALL_ICON, notification.getIcon());
         }
 
         if (StringUtils.isNullOrEmpty(

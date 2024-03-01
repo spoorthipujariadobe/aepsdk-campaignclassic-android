@@ -14,7 +14,11 @@ package com.adobe.marketing.mobile.campaignclassic.internal;
 /** This class holds all test constant values used only by the Campaign Classic extension */
 final class CampaignClassicTestConstants {
 
+<<<<<<< HEAD
     static final String EXTENSION_VERSION = "3.0.0";
+=======
+    static final String EXTENSION_VERSION = "2.1.4";
+>>>>>>> 5dc3f5e222e4bb4f455d70d787790bec1b32292e
 
     private CampaignClassicTestConstants() {}
 

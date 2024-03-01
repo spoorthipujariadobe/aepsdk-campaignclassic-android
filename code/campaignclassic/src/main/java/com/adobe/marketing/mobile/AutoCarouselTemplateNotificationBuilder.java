@@ -19,6 +19,7 @@ import androidx.core.app.NotificationCompat;
 import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.services.ServiceProvider;
 import com.adobe.marketing.mobile.services.caching.CacheService;
+import com.adobe.marketing.mobile.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,11 +89,16 @@ class AutoCarouselTemplateNotificationBuilder {
 
         // small Icon must be present, otherwise the notification will not be displayed.
         AEPPushNotificationBuilder.setSmallIcon(
-                context, builder, pushTemplate.getIcon(), pushTemplate.getSmallIconColor());
+                context, builder, pushTemplate.getSmallIcon(), pushTemplate.getSmallIconColor());
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             AEPPushNotificationBuilder.setVisibility(
                     builder, pushTemplate.getNotificationVisibility());
         }
+
+        // set a large icon if one is present
+        AEPPushNotificationBuilder.setRemoteViewLargeIcon(pushTemplate.getLargeIcon(), smallLayout);
+        AEPPushNotificationBuilder.setRemoteViewLargeIcon(
+                pushTemplate.getLargeIcon(), expandedLayout);
 
         // set custom sound, note this applies to API 25 and lower only as API 26 and up set the
         // sound on the notification channel
@@ -139,13 +145,17 @@ class AutoCarouselTemplateNotificationBuilder {
             carouselItem.setTextViewText(R.id.carousel_item_caption, item.getCaptionText());
 
             // assign a click action pending intent for each carousel item
+            final String interactionUri =
+                    !StringUtils.isNullOrEmpty(item.getInteractionUri())
+                            ? item.getInteractionUri()
+                            : pushTemplate.getActionUri();
             AEPPushNotificationBuilder.setRemoteViewClickAction(
                     context,
                     carouselItem,
                     R.id.carousel_item_image_view,
                     pushTemplate.getMessageId(),
                     pushTemplate.getDeliveryId(),
-                    item.getInteractionUri(),
+                    interactionUri,
                     pushTemplate.getNotificationTag(),
                     pushTemplate.isNotificationSticky());
 

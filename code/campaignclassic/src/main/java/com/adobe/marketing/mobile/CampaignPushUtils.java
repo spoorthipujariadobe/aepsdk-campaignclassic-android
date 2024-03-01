@@ -170,14 +170,14 @@ class CampaignPushUtils {
     }
 
     /**
-     * Returns the resource id for the icon with the given name. The icon file must be in the
-     * res/drawable directory. If the icon file is not found, 0 is returned.
+     * Returns the resource id for the drawable with the given name. The file must be in the
+     * res/drawable directory. If the drawable file is not found, 0 is returned.
      *
      * @param iconName the name of the icon file
      * @param context the application {@link Context}
      * @return the resource id for the icon with the given name
      */
-    static int getSmallIconWithResourceName(
+    static int getIconWithResourceName(
             @Nullable final String iconName, @NonNull final Context context) {
         if (StringUtils.isNullOrEmpty(iconName)) {
             return 0;
