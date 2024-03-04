@@ -22,12 +22,15 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.os.Build;
+import android.view.View;
 import android.widget.RemoteViews;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import com.adobe.marketing.mobile.services.Log;
+import com.adobe.marketing.mobile.services.ServiceProvider;
 import com.adobe.marketing.mobile.util.StringUtils;
+import com.adobe.marketing.mobile.util.UrlUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -232,8 +235,7 @@ class AEPPushNotificationBuilder {
             final NotificationCompat.Builder builder,
             final String smallIcon,
             final String smallIconColor) {
-        final int iconFromPayload =
-                CampaignPushUtils.getSmallIconWithResourceName(smallIcon, context);
+        final int iconFromPayload = CampaignPushUtils.getIconWithResourceName(smallIcon, context);
         final int iconFromMobileCore = MobileCore.getSmallIconResourceID();
         int iconResourceId;
 
@@ -258,6 +260,59 @@ class AEPPushNotificationBuilder {
         setSmallIconColor(builder, iconColorHex);
 
         builder.setSmallIcon(iconResourceId);
+    }
+
+    /**
+     * Sets the large icon for the provided {@link RemoteViews}. If a large icon contains a filename
+     * only then the large icon is set from a bundle image resource. If a large icon contains a URL,
+     * the large icon is downloaded then set.
+     *
+     * @param largeIcon {@code String} containing the large icon to use
+     * @param remoteView the remote view
+     */
+    static void setRemoteViewLargeIcon(final String largeIcon, final RemoteViews remoteView) {
+        if (StringUtils.isNullOrEmpty(largeIcon)) {
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "Null or empty large icon string found, large icon will not be applied.");
+            remoteView.setViewVisibility(R.id.large_icon, View.GONE);
+            return;
+        }
+
+        if (UrlUtils.isValidUrl(largeIcon)) {
+            final Bitmap downloadedIcon =
+                    CampaignPushUtils.downloadImage(
+                            ServiceProvider.getInstance().getCacheService(), largeIcon);
+            if (downloadedIcon == null) {
+                Log.trace(
+                        CampaignPushConstants.LOG_TAG,
+                        SELF_TAG,
+                        "Unable to download an image from %s, large icon will not be applied.",
+                        largeIcon);
+                remoteView.setViewVisibility(R.id.large_icon, View.GONE);
+                return;
+            }
+            remoteView.setImageViewBitmap(R.id.large_icon, downloadedIcon);
+        } else {
+            final int bundledIconId =
+                    CampaignPushUtils.getIconWithResourceName(
+                            largeIcon,
+                            ServiceProvider.getInstance()
+                                    .getAppContextService()
+                                    .getApplicationContext());
+            if (bundledIconId == 0) {
+                Log.trace(
+                        CampaignPushConstants.LOG_TAG,
+                        SELF_TAG,
+                        "Unable to find a bundled image with name %s, large icon will not be"
+                                + " applied.",
+                        largeIcon);
+                remoteView.setViewVisibility(R.id.large_icon, View.GONE);
+                return;
+            }
+            remoteView.setImageViewResource(R.id.large_icon, bundledIconId);
+        }
     }
     /**
      * Sets a custom color to the notification's small icon.
@@ -450,6 +505,22 @@ class AEPPushNotificationBuilder {
             final String actionUri,
             final String tag,
             final boolean stickyNotification) {
+        if (StringUtils.isNullOrEmpty(actionUri)) {
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "No valid action uri found for the clicked view with id %s. No click action"
+                            + " will be assigned.",
+                    targetViewResourceId);
+            return;
+        }
+
+        Log.trace(
+                CampaignPushConstants.LOG_TAG,
+                SELF_TAG,
+                "Setting remote view click action uri: %s ",
+                actionUri);
+
         final PendingIntent pendingIntent =
                 createPendingIntent(
                         context, messageId, deliveryId, actionUri, null, tag, stickyNotification);

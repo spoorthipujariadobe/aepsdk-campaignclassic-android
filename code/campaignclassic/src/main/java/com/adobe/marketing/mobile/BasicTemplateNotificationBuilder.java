@@ -110,9 +110,14 @@ class BasicTemplateNotificationBuilder {
                         .setCustomContentView(smallLayout)
                         .setCustomBigContentView(expandedLayout);
 
-        // small Icon must be present, otherwise the notification will not be displayed.
+        // small icon must be present, otherwise the notification will not be displayed.
         AEPPushNotificationBuilder.setSmallIcon(
-                context, builder, pushTemplate.getIcon(), pushTemplate.getSmallIconColor());
+                context, builder, pushTemplate.getSmallIcon(), pushTemplate.getSmallIconColor());
+
+        // set a large icon if one is present
+        AEPPushNotificationBuilder.setRemoteViewLargeIcon(pushTemplate.getLargeIcon(), smallLayout);
+        AEPPushNotificationBuilder.setRemoteViewLargeIcon(
+                pushTemplate.getLargeIcon(), expandedLayout);
 
         // set notification visibility
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -238,6 +243,8 @@ class BasicTemplateNotificationBuilder {
                 intentExtras.getString(CampaignPushConstants.IntentKeys.SMALL_ICON);
         final String smallIconColor =
                 intentExtras.getString(CampaignPushConstants.IntentKeys.SMALL_ICON_COLOR);
+        final String largeIcon =
+                intentExtras.getString(CampaignPushConstants.IntentKeys.LARGE_ICON);
         final String customSound =
                 intentExtras.getString(CampaignPushConstants.IntentKeys.CUSTOM_SOUND);
         final String actionButtonsString =
@@ -270,6 +277,10 @@ class BasicTemplateNotificationBuilder {
 
         // small Icon must be present, otherwise the notification will not be displayed.
         AEPPushNotificationBuilder.setSmallIcon(context, builder, smallIcon, smallIconColor);
+
+        // set a large icon if one is present
+        AEPPushNotificationBuilder.setRemoteViewLargeIcon(largeIcon, smallLayout);
+        AEPPushNotificationBuilder.setRemoteViewLargeIcon(largeIcon, expandedLayout);
 
         // set notification visibility
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -453,10 +464,13 @@ class BasicTemplateNotificationBuilder {
                 CampaignPushConstants.IntentKeys.MESSAGE_ID, pushTemplate.getMessageId());
         remindIntent.putExtra(
                 CampaignPushConstants.IntentKeys.DELIVERY_ID, pushTemplate.getDeliveryId());
-        remindIntent.putExtra(CampaignPushConstants.IntentKeys.SMALL_ICON, pushTemplate.getIcon());
+        remindIntent.putExtra(
+                CampaignPushConstants.IntentKeys.SMALL_ICON, pushTemplate.getSmallIcon());
         remindIntent.putExtra(
                 CampaignPushConstants.IntentKeys.SMALL_ICON_COLOR,
                 pushTemplate.getSmallIconColor());
+        remindIntent.putExtra(
+                CampaignPushConstants.IntentKeys.LARGE_ICON, pushTemplate.getLargeIcon());
         remindIntent.putExtra(
                 CampaignPushConstants.IntentKeys.VISIBILITY,
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP

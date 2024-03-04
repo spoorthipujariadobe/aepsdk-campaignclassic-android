@@ -113,7 +113,8 @@ class AEPPushTemplate {
     private int notificationVisibility = NotificationCompat.VISIBILITY_PRIVATE;
 
     private final String channelId;
-    private final String icon;
+    private final String smallIcon;
+    private final String largeIcon;
     private final String imageUrl;
     private final AEPPushTemplate.ActionType actionType;
     private final String actionUri;
@@ -245,7 +246,10 @@ class AEPPushTemplate {
                 DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.CHANNEL_ID, null);
         this.actionUri =
                 DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.ACTION_URI, null);
-        this.icon = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.ICON, null);
+        this.smallIcon =
+                DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.SMALL_ICON, null);
+        this.largeIcon =
+                DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.LARGE_ICON, null);
         this.expandedBodyText =
                 DataReader.optString(
                         data, CampaignPushConstants.PushPayloadKeys.EXPANDED_BODY_TEXT, null);
@@ -350,8 +354,12 @@ class AEPPushTemplate {
         return channelId;
     }
 
-    @Nullable String getIcon() {
-        return icon;
+    @Nullable String getSmallIcon() {
+        return smallIcon;
+    }
+
+    @Nullable String getLargeIcon() {
+        return largeIcon;
     }
 
     @Nullable String getImageUrl() {

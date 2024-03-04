@@ -48,7 +48,7 @@ class LegacyNotificationBuilder {
         AEPPushNotificationBuilder.setSmallIcon(
                 context,
                 builder,
-                pushTemplate.getIcon(),
+                pushTemplate.getSmallIcon(),
                 pushTemplate.getSmallIconColor()); // Small Icon must be present, otherwise the
         // notification will not be displayed.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
