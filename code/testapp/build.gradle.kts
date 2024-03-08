@@ -38,11 +38,8 @@ android {
 
 dependencies {
     implementation(project(":campaignclassic"))
-    implementation("com.adobe.marketing.mobile:core:$mavenCoreVersion-SNAPSHOT")
-    implementation("com.adobe.marketing.mobile:assurance:3.0.0-SNAPSHOT") {
-        exclude(group = "com.adobe.marketing.mobile", module = "core")
-    }
-
+    implementation("com.adobe.marketing.mobile:core:$mavenCoreVersion")
+    implementation("com.adobe.marketing.mobile:assurance:3.0.0-beta.1-SNAPSHOT")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.work:work-runtime-ktx:2.9.0")
