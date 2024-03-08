@@ -246,7 +246,13 @@ class AEPPushTemplate {
         this.actionUri =
                 DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.ACTION_URI, null);
         this.smallIcon =
-                DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.SMALL_ICON, null);
+                DataReader.optString(
+                        data,
+                        CampaignPushConstants.PushPayloadKeys.SMALL_ICON,
+                        DataReader.optString(
+                                data,
+                                CampaignPushConstants.PushPayloadKeys.LEGACY_SMALL_ICON,
+                                null));
         this.largeIcon =
                 DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.LARGE_ICON, null);
         this.expandedBodyText =
@@ -276,7 +282,7 @@ class AEPPushTemplate {
                 StringUtils.isNullOrEmpty(timestampString)
                         ? CampaignPushConstants.DefaultValues.DEFAULT_REMIND_LATER_TIMESTAMP
                         : Long.parseLong(timestampString);
-        this.tag = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.TAG, null);
+        this.tag = DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.TAG, messageId);
         this.ticker =
                 DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.TICKER, null);
         final String stickyValue =
