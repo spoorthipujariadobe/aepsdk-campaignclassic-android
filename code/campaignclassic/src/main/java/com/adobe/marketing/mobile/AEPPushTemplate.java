@@ -245,14 +245,20 @@ class AEPPushTemplate {
                 DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.CHANNEL_ID, null);
         this.actionUri =
                 DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.ACTION_URI, null);
-        this.smallIcon =
-                DataReader.optString(
-                        data,
-                        CampaignPushConstants.PushPayloadKeys.SMALL_ICON,
-                        DataReader.optString(
-                                data,
-                                CampaignPushConstants.PushPayloadKeys.LEGACY_SMALL_ICON,
-                                null));
+        final String smallIcon =
+                DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.SMALL_ICON, null);
+        if (StringUtils.isNullOrEmpty(smallIcon)) {
+            Log.debug(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "The \"adb_small_icon\" key is not present in the message data payload, using"
+                            + " the \"adb_icon\" key instead.");
+            this.smallIcon =
+                    DataReader.optString(
+                            data, CampaignPushConstants.PushPayloadKeys.LEGACY_SMALL_ICON, null);
+        } else {
+            this.smallIcon = smallIcon;
+        }
         this.largeIcon =
                 DataReader.optString(data, CampaignPushConstants.PushPayloadKeys.LARGE_ICON, null);
         this.expandedBodyText =
