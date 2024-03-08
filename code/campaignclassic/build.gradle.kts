@@ -29,7 +29,7 @@ aepLibrary {
 
 dependencies {
     implementation("com.adobe.marketing.mobile:core:$mavenCoreVersion-SNAPSHOT")
-    implementation("com.google.firebase:firebase-messaging:21.1.0")
+    implementation("com.google.firebase:firebase-messaging:23.4.1")
 
     // testImplementation dependencies provided by aep-library:
     // MOCKITO_CORE, MOCKITO_INLINE, JSON
