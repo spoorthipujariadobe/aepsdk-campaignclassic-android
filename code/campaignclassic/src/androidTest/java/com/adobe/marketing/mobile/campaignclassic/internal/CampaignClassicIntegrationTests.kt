@@ -109,7 +109,7 @@ class CampaignClassicIntegrationTests {
     @Test
     fun testExtensionVersion() {
         Assert.assertEquals(
-            CampaignClassicTestConstants.EXTENSION_VERSION,
+            CampaignClassic.EXTENSION_VERSION,
             CampaignClassic.extensionVersion()
         )
     }

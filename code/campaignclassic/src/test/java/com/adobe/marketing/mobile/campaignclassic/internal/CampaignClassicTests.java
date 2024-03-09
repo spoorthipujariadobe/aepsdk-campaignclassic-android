@@ -36,7 +36,7 @@ public class CampaignClassicTests {
         final String extensionVersion = CampaignClassic.extensionVersion();
         Assert.assertEquals(
                 "extensionVersion API should return the correct version string.",
-                CampaignClassicTestConstants.EXTENSION_VERSION,
+                CampaignClassic.EXTENSION_VERSION,
                 extensionVersion);
     }
 
