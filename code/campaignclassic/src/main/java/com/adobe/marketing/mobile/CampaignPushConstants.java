@@ -137,6 +137,7 @@ final class CampaignPushConstants {
         public static final String CHANNEL_ID = "adb_channel_id";
         public static final String SMALL_ICON = "adb_small_icon";
         public static final String LARGE_ICON = "adb_large_icon";
+        public static final String LEGACY_SMALL_ICON = "adb_icon";
         public static final String IMAGE_URL = "adb_image";
         public static final String TAG = "adb_tag";
         public static final String TICKER = "adb_ticker";
