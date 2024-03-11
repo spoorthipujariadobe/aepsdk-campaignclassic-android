@@ -119,7 +119,14 @@ class AEPPushPayload {
         }
 
         this.messageData = messageData;
-        this.tag = messageData.get(CampaignPushConstants.PushPayloadKeys.TAG);
+
+        // get the tag from the payload. if no tag was present in the payload use the message id
+        // instead as its guaranteed to always be present.
+        this.tag =
+                !StringUtils.isNullOrEmpty(
+                                messageData.get(CampaignPushConstants.PushPayloadKeys.TAG))
+                        ? messageData.get(CampaignPushConstants.PushPayloadKeys.TAG)
+                        : messageId;
     }
 
     private void convertNotificationPayloadData(final RemoteMessage.Notification notification) {
