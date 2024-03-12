@@ -286,19 +286,32 @@ internal class RegistrationManager {
         // send registration request
         Log.trace(CampaignClassicConstants.LOG_TAG, SELF_TAG, "sendRegistrationRequest - Registration request was sent with url $requestUrl")
         networkService.connectAsync(networkRequest) {
-            if (it.responseCode == HttpURLConnection.HTTP_OK) {
-                Log.debug(CampaignClassicConstants.LOG_TAG, SELF_TAG, "sendRegistrationRequest - Registration successful.")
-                dispatchRegistrationStatus(true)
-                updateDataStoreWithRegistrationInfo(registrationHash)
-            } else {
-                Log.debug(
+            if (it == null) {
+                Log.warning(
                     CampaignClassicConstants.LOG_TAG,
                     SELF_TAG,
-                    "sendRegistrationRequest - Unsuccessful Registration request with connection status ${it.responseCode}"
+                    "sendRegistrationRequest - Internet connection is not available. Registration request failed."
                 )
                 dispatchRegistrationStatus(false)
+            } else {
+                if (it.responseCode == HttpURLConnection.HTTP_OK) {
+                    Log.debug(
+                        CampaignClassicConstants.LOG_TAG,
+                        SELF_TAG,
+                        "sendRegistrationRequest - Registration successful."
+                    )
+                    dispatchRegistrationStatus(true)
+                    updateDataStoreWithRegistrationInfo(registrationHash)
+                } else {
+                    Log.warning(
+                        CampaignClassicConstants.LOG_TAG,
+                        SELF_TAG,
+                        "sendRegistrationRequest - Unsuccessful Registration request with connection status ${it.responseCode}"
+                    )
+                    dispatchRegistrationStatus(false)
+                }
+                it.close()
             }
-            it.close()
         }
     }
 
