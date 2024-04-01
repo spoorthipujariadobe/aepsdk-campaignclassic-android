@@ -11,15 +11,4 @@
     governing permissions and limitations under the License.
 
 -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-    <application>
-        <activity
-        android:name="com.adobe.marketing.mobile.CampaignPushTrackerActivity"
-        android:exported="false"
-        android:launchMode="singleInstance"
-        android:theme="@style/Messaging.Style.Transparent"/>
-        <receiver android:name="com.adobe.marketing.mobile.AEPPushTemplateBroadcastReceiver" />
-        </application>
-</manifest>
+<manifest />
