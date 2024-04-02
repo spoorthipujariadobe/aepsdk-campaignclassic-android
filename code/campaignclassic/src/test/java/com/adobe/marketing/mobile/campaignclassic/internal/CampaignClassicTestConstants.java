@@ -1,5 +1,5 @@
 /*
-  Copyright 2022 Adobe. All rights reserved.
+  Copyright 2023 Adobe. All rights reserved.
   This file is licensed to you under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License. You may obtain a copy
   of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -8,26 +8,17 @@
   OF ANY KIND, either express or implied. See the License for the specific language
   governing permissions and limitations under the License.
 */
+
 package com.adobe.marketing.mobile.campaignclassic.internal;
 
 /** This class holds all test constant values used only by the Campaign Classic extension */
 final class CampaignClassicTestConstants {
 
-    static final String EXTENSION_VERSION = "2.1.5";
-
     private CampaignClassicTestConstants() {}
 
-    static final String REGISTER_API_URL_BASE = "%s/nms/mobile/1/registerAndroid.jssp";
-    static final String TRACKING_API_URL_BASE = "%s/r/?id=h%x,%s,%s";
-    static final String REGISTER_PARAM_DEVICE_OS_NAME = "android";
     static final int DEFAULT_TIMEOUT = 30;
-    static final String REGISTER_PARAMS_FORMAT =
-            "registrationToken=%s&mobileAppUuid=%s&userKey=%s&deviceImei=%s&deviceName=%s&deviceModel=%s&deviceBrand=%s&deviceManufacturer=%s&osName=%s&osVersion=%s&osLanguage=%s&additionalParams=";
-
     static final String MESSAGE_RECEIVED_TAGID = "1";
     static final String MESSAGE_CLICKED_TAGID = "2";
-
-    static final String DATASTORE_KEY = "ADOBEMOBILE_CAMPAIGNCLASSIC";
 
     /*
        DataStoreKeys
@@ -58,8 +49,6 @@ final class CampaignClassicTestConstants {
         }
 
         static final class CampaignClassic {
-            static final String EXTENSION_NAME = "com.adobe.module.campaignclassic";
-
             static final String REGISTER_DEVICE = "registerdevice";
             static final String TRACK_RECEIVE = "trackreceive";
             static final String TRACK_CLICK = "trackclick";
