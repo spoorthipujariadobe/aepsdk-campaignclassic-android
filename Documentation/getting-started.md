@@ -36,10 +36,9 @@ The request timeout is the amount of time, in seconds, to wait for a response fr
 
 ## Add Campaign Classic to your app
 
-Installation via [Maven](https://maven.apache.org/) & [Gradle](https://gradle.org/) is the easiest and recommended way to get the Mobile SDK.
+Installation via [Maven](https://maven.apache.org/) & [Gradle](https://gradle.org/) is the easiest and recommended way to get the Mobile SDK. Add the Mobile Core (which includes Lifecycle) and Campaign Classic extensions to your project using the app's Gradle file.
 
 * [Mobile Core](https://github.com/adobe/aepsdk-core-android)
-* [Lifecycle](https://github.com/adobe/aepsdk-core-android)
 
 1. Add the Campaign Classic extension to your project using the app's Gradle file.
 
