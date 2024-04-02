@@ -8,6 +8,7 @@
   OF ANY KIND, either express or implied. See the License for the specific language
   governing permissions and limitations under the License.
 */
+
 package com.adobe.marketing.mobile.campaignclassic.internal
 
 import com.adobe.marketing.mobile.Event
@@ -153,7 +154,31 @@ class RegistrationManagerTests {
         // verify network call
         Mockito.verify(networkService, Mockito.times(1)).connectAsync(ArgumentMatchers.any(), ArgumentMatchers.any())
 
-        // verify hashed token is stored
+        // verify hashed token is not stored
+        Mockito.verify(dataStore, Mockito.times(0)).setString(
+            ArgumentMatchers.eq(
+                CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH
+            ),
+            ArgumentMatchers.anyString()
+        )
+    }
+
+    @Test
+    fun registerDevice_WhenNetworkUnAvailable_ThenStoreToken() {
+        // setup
+        setConfigurationSharedState()
+        Mockito.`when`(networkService.connectAsync(ArgumentMatchers.any(), ArgumentMatchers.any())).thenAnswer { invocation ->
+            (invocation.arguments[1] as NetworkCallback).call(null)
+            null
+        }
+
+        // test
+        registrationManager.registerDevice(getRegisterDeviceEvent())
+
+        // verify network call
+        Mockito.verify(networkService, Mockito.times(1)).connectAsync(ArgumentMatchers.any(), ArgumentMatchers.any())
+
+        // verify hashed token is not stored
         Mockito.verify(dataStore, Mockito.times(0)).setString(
             ArgumentMatchers.eq(
                 CampaignClassicTestConstants.DataStoreKeys.TOKEN_HASH
