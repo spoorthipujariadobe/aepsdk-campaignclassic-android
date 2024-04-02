@@ -25,7 +25,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:name=".CampaignClassicTestApp"
+        android:name="CampaignClassicTestApp"
         android:networkSecurityConfig="@xml/network_security_config">
         <activity android:name=".MainActivity"
             android:exported="true">

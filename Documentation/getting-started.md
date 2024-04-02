@@ -36,18 +36,27 @@ The request timeout is the amount of time, in seconds, to wait for a response fr
 
 ## Add Campaign Classic to your app
 
-The Campaign Classic extension depends on the Core and Lifecycle extensions:
+Installation via [Maven](https://maven.apache.org/) & [Gradle](https://gradle.org/) is the easiest and recommended way to get the Mobile SDK. Add the Mobile Core (which includes Lifecycle) and Campaign Classic extensions to your project using the app's Gradle file.
 
 * [Mobile Core](https://github.com/adobe/aepsdk-core-android)
-* [Lifecycle](https://github.com/adobe/aepsdk-core-android)
 
 1. Add the Campaign Classic extension to your project using the app's Gradle file.
 
-   ```gradle
-   implementation 'com.adobe.marketing.mobile:core:2.+'
-   implementation 'com.adobe.marketing.mobile:lifecycle:2.+'
-   implementation 'com.adobe.marketing.mobile:campaignclassic:2.+'
-   ```
+ #### Kotlin
+
+ ```kotlin
+    implementation(platform("com.adobe.marketing.mobile:sdk-bom:3.+"))
+    implementation("com.adobe.marketing.mobile:core")
+    implementation("com.adobe.marketing.mobile:campaignclassic")
+ ```
+
+ #### Groovy
+
+ ```groovy
+    implementation platform('com.adobe.marketing.mobile:sdk-bom:3.+')
+    implementation 'com.adobe.marketing.mobile:core'
+    implementation 'com.adobe.marketing.mobile:campaignclassic'
+ ```
    
 > **Warning**
 > Using dynamic dependency versions is not recommended for production apps. Refer to this [page](https://github.com/adobe/aepsdk-core-android/blob/main/Documentation/MobileCore/gradle-dependencies.md) for managing gradle dependencies.

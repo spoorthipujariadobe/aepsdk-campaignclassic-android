@@ -12,7 +12,7 @@ Refer to the [getting started](./Documentation/getting-started.md) guide for set
 
 ## Development
 
-***Open the project*** To open and run the project, open the `code/build.gradle` file in Android Studio
+***Open the project*** To open and run the project, open the `code/build.gradle.kts` file in Android Studio
 
 ***Run demo application*** Once you open the project in Android Studio (see above), select the `testapp` runnable and your favorite emulator and run the program.
 
