@@ -206,7 +206,7 @@ public class CampaignPushTrackerActivity extends Activity {
             final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(intent);
-        } catch (ActivityNotFoundException e) {
+        } catch (final ActivityNotFoundException e) {
             Log.warning(
                     CampaignPushConstants.LOG_TAG,
                     SELF_TAG,
