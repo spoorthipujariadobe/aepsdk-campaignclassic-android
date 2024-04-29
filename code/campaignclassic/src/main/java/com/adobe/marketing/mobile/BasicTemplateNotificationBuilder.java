@@ -18,22 +18,27 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.RemoteViews;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+
 import com.adobe.marketing.mobile.campaignclassic.R;
 import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.services.ServiceProvider;
 import com.adobe.marketing.mobile.services.caching.CacheService;
 import com.adobe.marketing.mobile.util.StringUtils;
+
 import java.util.Calendar;
 
 class BasicTemplateNotificationBuilder {
     private static final String SELF_TAG = "BasicTemplateNotificationBuilder";
 
-    @NonNull static NotificationCompat.Builder construct(
+    @NonNull
+    static NotificationCompat.Builder construct(
             final BasicPushTemplate pushTemplate, final Context context)
             throws NotificationConstructionFailedException {
 
@@ -84,6 +89,12 @@ class BasicTemplateNotificationBuilder {
         final Bitmap pushImage = CampaignPushUtils.downloadImage(cacheService, imageUri);
         if (pushImage != null) {
             expandedLayout.setImageViewBitmap(R.id.expanded_template_image, pushImage);
+        } else {
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "No image found for the basic template notification, will not display the image.");
+            expandedLayout.setViewVisibility(R.id.expanded_template_image, View.GONE);
         }
 
         smallLayout.setTextViewText(R.id.notification_title, pushTemplate.getTitle());
@@ -210,6 +221,12 @@ class BasicTemplateNotificationBuilder {
 
         if (pushImage != null) {
             expandedLayout.setImageViewBitmap(R.id.expanded_template_image, pushImage);
+        } else {
+            Log.trace(
+                    CampaignPushConstants.LOG_TAG,
+                    SELF_TAG,
+                    "No image found for the basic template notification, will not display the image.");
+            expandedLayout.setViewVisibility(R.id.expanded_template_image, View.GONE);
         }
 
         smallLayout.setTextViewText(R.id.notification_title, titleText);
@@ -345,7 +362,7 @@ class BasicTemplateNotificationBuilder {
             // message id instead as its guaranteed to always be present.
             final String tag =
                     !StringUtils.isNullOrEmpty(
-                                    intentExtras.getString(CampaignPushConstants.IntentKeys.TAG))
+                            intentExtras.getString(CampaignPushConstants.IntentKeys.TAG))
                             ? intentExtras.getString(CampaignPushConstants.IntentKeys.TAG)
                             : intentExtras.getString(CampaignPushConstants.IntentKeys.MESSAGE_ID);
             notificationManager.notify(tag.hashCode(), notification);
@@ -385,7 +402,7 @@ class BasicTemplateNotificationBuilder {
         // id instead as its guaranteed to always be present.
         final String tag =
                 !StringUtils.isNullOrEmpty(
-                                intentExtras.getString(CampaignPushConstants.IntentKeys.TAG))
+                        intentExtras.getString(CampaignPushConstants.IntentKeys.TAG))
                         ? intentExtras.getString(CampaignPushConstants.IntentKeys.TAG)
                         : intentExtras.getString(CampaignPushConstants.IntentKeys.MESSAGE_ID);
 
