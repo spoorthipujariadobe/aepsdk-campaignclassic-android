@@ -38,7 +38,8 @@ android {
 
 dependencies {
     implementation(project(":campaignclassic"))
-    implementation("com.adobe.marketing.mobile:core:$mavenCoreVersion")
+    implementation(project(":core"))
+    // implementation("com.adobe.marketing.mobile:core:$mavenCoreVersion")
     implementation("com.adobe.marketing.mobile:assurance:3.0.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")

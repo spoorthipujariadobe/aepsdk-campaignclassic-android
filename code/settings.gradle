@@ -28,5 +28,7 @@ dependencyResolutionManagement {
   maven { url = uri("https://jitpack.io") }
  }
 }
- include ':campaignclassic', ':testapp'
+include ':campaignclassic', ':testapp', ':core'
 rootProject.name = "aepsdk-campaignclassic-android"
+project(':core').projectDir =
+        new File(settingsDir, '../../aepsdk-core-android/code/core')

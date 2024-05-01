@@ -20,6 +20,7 @@ buildscript {
     }
     dependencies {
         classpath("com.github.adobe:aepsdk-commons:gp-3.0.0")
+        classpath("org.jetbrains.kotlinx:binary-compatibility-validator:0.13.2")
         classpath("com.google.gms:google-services:4.4.1")
     }
 }
