@@ -15,7 +15,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 
-import com.adobe.marketing.mobile.services.ui.notification.AEPNotificationUtil;
+import com.adobe.marketing.mobile.services.ui.notification.NotificationBuilder;
 import com.adobe.marketing.mobile.services.ui.notification.NotificationConstructionFailedException;
 import com.adobe.marketing.mobile.util.StringUtils;
 
@@ -36,11 +36,11 @@ public class AEPPushTemplateBroadcastReceiver extends BroadcastReceiver {
                 case CampaignPushConstants.IntentActions.MANUAL_CAROUSEL_LEFT_CLICKED:
                 case CampaignPushConstants.IntentActions.MANUAL_CAROUSEL_RIGHT_CLICKED:
                 case CampaignPushConstants.IntentActions.SCHEDULED_NOTIFICATION_BROADCAST:
-                    AEPNotificationUtil.constructNotificationBuilder(intent, CampaignPushTrackerActivity.class, AEPPushTemplateBroadcastReceiver.class);
+                    NotificationBuilder.constructNotificationBuilder(intent, CampaignPushTrackerActivity.class, AEPPushTemplateBroadcastReceiver.class);
                     break;
                 case CampaignPushConstants.IntentActions.REMIND_LATER_CLICKED:
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        AEPNotificationUtil.constructNotificationBuilder(intent, CampaignPushTrackerActivity.class, AEPPushTemplateBroadcastReceiver.class);
+                        NotificationBuilder.constructNotificationBuilder(intent, CampaignPushTrackerActivity.class, AEPPushTemplateBroadcastReceiver.class);
                     }
                     break;
             }

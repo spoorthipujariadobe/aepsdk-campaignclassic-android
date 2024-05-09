@@ -8,7 +8,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.adobe.marketing.mobile.services.Log;
-import com.adobe.marketing.mobile.services.ui.notification.AEPNotificationUtil;
+import com.adobe.marketing.mobile.services.ui.notification.NotificationBuilder;
 import com.adobe.marketing.mobile.services.ui.notification.NotificationConstructionFailedException;
 import com.google.firebase.messaging.RemoteMessage;
 import java.util.HashMap;
@@ -42,7 +42,7 @@ public class AEPMessagingService {
             payload = new AEPPushPayload(remoteMessage);
             final String tag = payload.getTag();
             final NotificationCompat.Builder notificationBuilder =
-                    AEPNotificationUtil.constructNotificationBuilder(
+                    NotificationBuilder.constructNotificationBuilder(
                             payload.getMessageData(),
                             CampaignPushTrackerActivity.class,
                             AEPPushTemplateBroadcastReceiver.class

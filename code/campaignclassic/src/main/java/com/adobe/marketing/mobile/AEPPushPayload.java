@@ -13,7 +13,8 @@ package com.adobe.marketing.mobile;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
-import com.adobe.marketing.mobile.services.ui.notification.models.AEPPushTemplate;
+import com.adobe.marketing.mobile.services.ui.notification.NotificationPriority;
+import com.adobe.marketing.mobile.services.ui.notification.NotificationVisibility;
 import com.adobe.marketing.mobile.util.MapUtils;
 import com.adobe.marketing.mobile.util.StringUtils;
 import com.google.firebase.messaging.RemoteMessage;
@@ -34,19 +35,19 @@ class AEPPushPayload {
                 {
                     put(
                             NotificationCompat.PRIORITY_MIN,
-                            AEPPushTemplate.NotificationPriority.PRIORITY_MIN);
+                            NotificationPriority.PRIORITY_MIN.toString());
                     put(
                             NotificationCompat.PRIORITY_LOW,
-                            AEPPushTemplate.NotificationPriority.PRIORITY_LOW);
+                            NotificationPriority.PRIORITY_LOW.toString());
                     put(
                             NotificationCompat.PRIORITY_DEFAULT,
-                            AEPPushTemplate.NotificationPriority.PRIORITY_DEFAULT);
+                            NotificationPriority.PRIORITY_DEFAULT.toString());
                     put(
                             NotificationCompat.PRIORITY_HIGH,
-                            AEPPushTemplate.NotificationPriority.PRIORITY_HIGH);
+                            NotificationPriority.PRIORITY_HIGH.toString());
                     put(
                             NotificationCompat.PRIORITY_MAX,
-                            AEPPushTemplate.NotificationPriority.PRIORITY_MAX);
+                            NotificationPriority.PRIORITY_MAX.toString());
                 }
             };
     private static final Map<Integer, String> notificationCompatVisibilityMap =
@@ -54,13 +55,13 @@ class AEPPushPayload {
                 {
                     put(
                             NotificationCompat.VISIBILITY_PRIVATE,
-                            AEPPushTemplate.NotificationVisibility.PRIVATE);
+                            NotificationVisibility.VISIBILITY_PRIVATE.getVisibilityString());
                     put(
                             NotificationCompat.VISIBILITY_PUBLIC,
-                            AEPPushTemplate.NotificationVisibility.PUBLIC);
+                            NotificationVisibility.VISIBILITY_PUBLIC.getVisibilityString());
                     put(
                             NotificationCompat.VISIBILITY_SECRET,
-                            AEPPushTemplate.NotificationVisibility.SECRET);
+                            NotificationVisibility.VISIBILITY_SECRET.getVisibilityString());
                 }
             };
 
