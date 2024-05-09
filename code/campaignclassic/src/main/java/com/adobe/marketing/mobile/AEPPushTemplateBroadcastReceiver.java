@@ -15,8 +15,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+
 import com.adobe.marketing.mobile.services.ui.notification.NotificationBuilder;
 import com.adobe.marketing.mobile.services.ui.notification.NotificationConstructionFailedException;
+import com.adobe.marketing.mobile.services.ui.notification.PushTemplateConstants;
 import com.adobe.marketing.mobile.util.StringUtils;
 
 /** Broadcast receiver for handling custom push template notification interactions. */
@@ -29,19 +33,25 @@ public class AEPPushTemplateBroadcastReceiver extends BroadcastReceiver {
             return;
         }
 
+        final String tag = intent.getStringExtra(PushTemplateConstants.IntentKeys.TAG);
+        final NotificationManagerCompat notificationManager =
+                NotificationManagerCompat.from(context);
         try {
             switch (action) {
                 case CampaignPushConstants.IntentActions.FILMSTRIP_LEFT_CLICKED:
                 case CampaignPushConstants.IntentActions.FILMSTRIP_RIGHT_CLICKED:
                 case CampaignPushConstants.IntentActions.MANUAL_CAROUSEL_LEFT_CLICKED:
                 case CampaignPushConstants.IntentActions.MANUAL_CAROUSEL_RIGHT_CLICKED:
-                case CampaignPushConstants.IntentActions.SCHEDULED_NOTIFICATION_BROADCAST:
-                    NotificationBuilder.constructNotificationBuilder(intent, CampaignPushTrackerActivity.class, AEPPushTemplateBroadcastReceiver.class);
+                    NotificationCompat.Builder builder = NotificationBuilder.constructNotificationBuilder(intent, CampaignPushTrackerActivity.class, AEPPushTemplateBroadcastReceiver.class);
+                    notificationManager.notify(tag.hashCode(), builder.build());
                     break;
                 case CampaignPushConstants.IntentActions.REMIND_LATER_CLICKED:
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        NotificationBuilder.constructNotificationBuilder(intent, CampaignPushTrackerActivity.class, AEPPushTemplateBroadcastReceiver.class);
+                        // todo: handle remind later
                     }
+                    break;
+                case CampaignPushConstants.IntentActions.SCHEDULED_NOTIFICATION_BROADCAST:
+                    // todo handle scheduled notification
                     break;
             }
         } catch (NotificationConstructionFailedException e) {

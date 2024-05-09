@@ -30,40 +30,6 @@ class AEPPushPayload {
     private String messageId;
     private String deliveryId;
     private String tag;
-    private static final Map<Integer, String> notificationCompatPriorityMap =
-            new HashMap<Integer, String>() {
-                {
-                    put(
-                            NotificationCompat.PRIORITY_MIN,
-                            NotificationPriority.PRIORITY_MIN.toString());
-                    put(
-                            NotificationCompat.PRIORITY_LOW,
-                            NotificationPriority.PRIORITY_LOW.toString());
-                    put(
-                            NotificationCompat.PRIORITY_DEFAULT,
-                            NotificationPriority.PRIORITY_DEFAULT.toString());
-                    put(
-                            NotificationCompat.PRIORITY_HIGH,
-                            NotificationPriority.PRIORITY_HIGH.toString());
-                    put(
-                            NotificationCompat.PRIORITY_MAX,
-                            NotificationPriority.PRIORITY_MAX.toString());
-                }
-            };
-    private static final Map<Integer, String> notificationCompatVisibilityMap =
-            new HashMap<Integer, String>() {
-                {
-                    put(
-                            NotificationCompat.VISIBILITY_PRIVATE,
-                            NotificationVisibility.VISIBILITY_PRIVATE.getVisibilityString());
-                    put(
-                            NotificationCompat.VISIBILITY_PUBLIC,
-                            NotificationVisibility.VISIBILITY_PUBLIC.getVisibilityString());
-                    put(
-                            NotificationCompat.VISIBILITY_SECRET,
-                            NotificationVisibility.VISIBILITY_SECRET.getVisibilityString());
-                }
-            };
 
     /**
      * Constructor
@@ -81,6 +47,12 @@ class AEPPushPayload {
                     "Failed to create AEPPushPayload, remote message is null.");
         }
         validateMessageData(message.getData());
+
+        if (!StringUtils.isNullOrEmpty(
+                messageData.get(CampaignPushConstants.PushPayloadKeys.ACC_PAYLOAD_BODY))) {
+            messageData.put(CampaignPushConstants.PushPayloadKeys.BODY,
+                    String.valueOf(messageData.get(CampaignPushConstants.PushPayloadKeys.ACC_PAYLOAD_BODY)));
+        }
 
         // migrate any ACC push notification object payload keys if needed
         final RemoteMessage.Notification notification = message.getNotification();
@@ -150,6 +122,7 @@ class AEPPushPayload {
         // message.android.notification.notification_priority to adb_n_priority
         // message.android.notification.notification_count to adb_n_count
         // message.notification.body to adb_body
+        // _msg to adb_body
         // message.notification.title to adb_title
         // message.notification.image to adb_image
 
@@ -198,14 +171,14 @@ class AEPPushPayload {
                 messageData.get(CampaignPushConstants.PushPayloadKeys.NOTIFICATION_VISIBILITY))) {
             messageData.put(
                     CampaignPushConstants.PushPayloadKeys.NOTIFICATION_VISIBILITY,
-                    notificationCompatVisibilityMap.get(notification.getVisibility()));
+                    NotificationVisibility.getNotificationVisibility(notification.getVisibility()));
         }
 
         if (StringUtils.isNullOrEmpty(
                 messageData.get(CampaignPushConstants.PushPayloadKeys.NOTIFICATION_PRIORITY))) {
             messageData.put(
                     CampaignPushConstants.PushPayloadKeys.NOTIFICATION_PRIORITY,
-                    notificationCompatPriorityMap.get(notification.getNotificationPriority()));
+                    NotificationPriority.getNotificationPriority(notification.getNotificationPriority()));
         }
 
         if (StringUtils.isNullOrEmpty(
