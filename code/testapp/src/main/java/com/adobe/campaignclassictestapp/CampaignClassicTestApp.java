@@ -30,7 +30,7 @@ public class CampaignClassicTestApp extends Application {
 			MobileCore.registerExtensions(extensions, new AdobeCallback() {
 				@Override
 				public void call(Object o) {
-					MobileCore.configureWithAppID("");
+					MobileCore.configureWithAppID("94f571f308d5/fa7306843722/launch-11179776ef9e-development");
 					// listen for campaign response event
 					MobileCore.registerEventListener(EventType.CAMPAIGN, EventSource.RESPONSE_CONTENT, new AdobeCallback<Event>() {
 						@Override

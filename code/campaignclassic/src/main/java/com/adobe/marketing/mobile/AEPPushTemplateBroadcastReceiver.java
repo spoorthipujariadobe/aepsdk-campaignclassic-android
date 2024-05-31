@@ -18,9 +18,9 @@ import android.os.Build;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
-import com.adobe.marketing.mobile.services.ui.notification.NotificationBuilder;
-import com.adobe.marketing.mobile.services.ui.notification.NotificationConstructionFailedException;
-import com.adobe.marketing.mobile.services.ui.notification.PushTemplateConstants;
+import com.adobe.marketing.mobile.notificationbuilder.NotificationBuilder;
+import com.adobe.marketing.mobile.notificationbuilder.NotificationConstructionFailedException;
+import com.adobe.marketing.mobile.notificationbuilder.internal.PushTemplateConstants;
 import com.adobe.marketing.mobile.util.StringUtils;
 
 /** Broadcast receiver for handling custom push template notification interactions. */
@@ -33,7 +33,7 @@ public class AEPPushTemplateBroadcastReceiver extends BroadcastReceiver {
             return;
         }
 
-        final String tag = intent.getStringExtra(PushTemplateConstants.IntentKeys.TAG);
+        final String tag = intent.getStringExtra(PushTemplateConstants.PushPayloadKeys.TAG);
         final NotificationManagerCompat notificationManager =
                 NotificationManagerCompat.from(context);
         try {

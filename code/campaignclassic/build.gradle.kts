@@ -28,8 +28,8 @@ aepLibrary {
 }
 
 dependencies {
-    // implementation("com.adobe.marketing.mobile:core:$mavenCoreVersion")
-    implementation(project(":core"))
+    implementation("com.adobe.marketing.mobile:core:$mavenCoreVersion")
+    implementation(project(":notificationbuilder"))
     implementation("com.google.firebase:firebase-messaging:23.4.1")
 
     // testImplementation dependencies provided by aep-library:

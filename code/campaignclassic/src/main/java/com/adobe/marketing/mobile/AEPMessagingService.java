@@ -7,9 +7,9 @@ import androidx.annotation.VisibleForTesting;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import com.adobe.marketing.mobile.notificationbuilder.NotificationBuilder;
+import com.adobe.marketing.mobile.notificationbuilder.NotificationConstructionFailedException;
 import com.adobe.marketing.mobile.services.Log;
-import com.adobe.marketing.mobile.services.ui.notification.NotificationBuilder;
-import com.adobe.marketing.mobile.services.ui.notification.NotificationConstructionFailedException;
 import com.google.firebase.messaging.RemoteMessage;
 import java.util.HashMap;
 import java.util.Map;

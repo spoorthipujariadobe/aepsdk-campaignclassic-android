@@ -11,14 +11,12 @@
 package com.adobe.marketing.mobile;
 
 import androidx.annotation.NonNull;
-import androidx.core.app.NotificationCompat;
 
-import com.adobe.marketing.mobile.services.ui.notification.NotificationPriority;
-import com.adobe.marketing.mobile.services.ui.notification.NotificationVisibility;
+import com.adobe.marketing.mobile.notificationbuilder.internal.NotificationPriority;
+import com.adobe.marketing.mobile.notificationbuilder.internal.NotificationVisibility;
 import com.adobe.marketing.mobile.util.MapUtils;
 import com.adobe.marketing.mobile.util.StringUtils;
 import com.google.firebase.messaging.RemoteMessage;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -171,14 +169,14 @@ class AEPPushPayload {
                 messageData.get(CampaignPushConstants.PushPayloadKeys.NOTIFICATION_VISIBILITY))) {
             messageData.put(
                     CampaignPushConstants.PushPayloadKeys.NOTIFICATION_VISIBILITY,
-                    NotificationVisibility.getNotificationVisibility(notification.getVisibility()));
+                    NotificationVisibility.fromValue(notification.getVisibility()).getStringValue());
         }
 
         if (StringUtils.isNullOrEmpty(
                 messageData.get(CampaignPushConstants.PushPayloadKeys.NOTIFICATION_PRIORITY))) {
             messageData.put(
                     CampaignPushConstants.PushPayloadKeys.NOTIFICATION_PRIORITY,
-                    NotificationPriority.getNotificationPriority(notification.getNotificationPriority()));
+                    NotificationPriority.fromValue(notification.getNotificationPriority()).getStringValue());
         }
 
         if (StringUtils.isNullOrEmpty(
