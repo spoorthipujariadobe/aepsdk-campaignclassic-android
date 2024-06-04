@@ -16,17 +16,14 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-
-import com.adobe.marketing.mobile.campaignclassic.internal.CampaignClassicPushPayload;
 import com.adobe.marketing.mobile.campaignclassic.internal.CampaignClassicPushBroadcastReceiver;
+import com.adobe.marketing.mobile.campaignclassic.internal.CampaignClassicPushPayload;
 import com.adobe.marketing.mobile.campaignclassic.internal.CampaignClassicPushTrackerActivity;
 import com.adobe.marketing.mobile.notificationbuilder.NotificationBuilder;
 import com.adobe.marketing.mobile.notificationbuilder.NotificationConstructionFailedException;
-import com.adobe.marketing.mobile.notificationbuilder.PushTemplateConstants;
 import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.util.StringUtils;
 import com.google.firebase.messaging.RemoteMessage;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,8 +39,8 @@ public class AEPMessagingService {
     static final String TRACK_INFO_KEY_DELIVERY_ID = "_dId";
 
     /**
-     * Builds an {@link CampaignClassicPushPayload} then constructs a {@link Notification} using the {@code
-     * RemoteMessage} payload. The built notification is then passed to the {@link
+     * Builds an {@link CampaignClassicPushPayload} then constructs a {@link Notification} using the
+     * {@code RemoteMessage} payload. The built notification is then passed to the {@link
      * NotificationManagerCompat} to be displayed. If any exceptions are thrown when building the
      * {@code AEPPushPayload} or {@code Notification}, this method will return false signaling that
      * the remote message was not handled by the {@code AEPMessagingService}.
@@ -67,16 +64,15 @@ public class AEPMessagingService {
                 Log.warning(
                         LOG_TAG,
                         SELF_TAG,
-                        "Failed to create a push notification, the notification tag is null or empty."
-                );
+                        "Failed to create a push notification, the notification tag is null or"
+                                + " empty.");
                 return false;
             }
             final NotificationCompat.Builder notificationBuilder =
                     NotificationBuilder.constructNotificationBuilder(
                             payload.getMessageData(),
                             CampaignClassicPushTrackerActivity.class,
-                            CampaignClassicPushBroadcastReceiver.class
-                    );
+                            CampaignClassicPushBroadcastReceiver.class);
             notificationManager.notify(tag.hashCode(), notificationBuilder.build());
         } catch (final IllegalArgumentException exception) {
             Log.error(
@@ -100,7 +96,9 @@ public class AEPMessagingService {
     }
 
     private static void trackNotificationReceive(final CampaignClassicPushPayload payload) {
-        Log.trace(LOG_TAG, SELF_TAG,
+        Log.trace(
+                LOG_TAG,
+                SELF_TAG,
                 "Received push payload is valid, sending notification receive track request.");
         final Map<String, String> trackInfo =
                 new HashMap<String, String>() {

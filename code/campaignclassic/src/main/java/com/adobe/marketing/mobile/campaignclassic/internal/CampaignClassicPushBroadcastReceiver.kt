@@ -1,3 +1,14 @@
+/*
+  Copyright 2024 Adobe. All rights reserved.
+  This file is licensed to you under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License. You may obtain a copy
+  of the License at http://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software distributed under
+  the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+  OF ANY KIND, either express or implied. See the License for the specific language
+  governing permissions and limitations under the License.
+*/
+
 package com.adobe.marketing.mobile.campaignclassic.internal
 
 import android.content.BroadcastReceiver
@@ -5,15 +16,13 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.adobe.marketing.mobile.AEPMessagingService
 import com.adobe.marketing.mobile.notificationbuilder.NotificationBuilder
 import com.adobe.marketing.mobile.notificationbuilder.NotificationConstructionFailedException
 import com.adobe.marketing.mobile.notificationbuilder.PushTemplateConstants
 import com.adobe.marketing.mobile.services.Log
 import com.adobe.marketing.mobile.util.StringUtils
 
-
-internal class CampaignClassicPushBroadcastReceiver: BroadcastReceiver() {
+internal class CampaignClassicPushBroadcastReceiver : BroadcastReceiver() {
     private val SELF_TAG = "CampaignClassicPushBroadcastReceiver"
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -44,7 +53,7 @@ internal class CampaignClassicPushBroadcastReceiver: BroadcastReceiver() {
                 PushTemplateConstants.IntentActions.CATALOG_THUMBNAIL_CLICKED,
                 PushTemplateConstants.IntentActions.RATING_ICON_CLICKED,
                 PushTemplateConstants.IntentActions.TIMER_EXPIRED,
-                PushTemplateConstants.IntentActions.SCHEDULED_NOTIFICATION_BROADCAST-> {
+                PushTemplateConstants.IntentActions.SCHEDULED_NOTIFICATION_BROADCAST -> {
                     val builder: NotificationCompat.Builder = NotificationBuilder.constructNotificationBuilder(
                         intent,
                         CampaignClassicPushTrackerActivity::class.java,
@@ -57,14 +66,16 @@ internal class CampaignClassicPushBroadcastReceiver: BroadcastReceiver() {
                 }
             }
         } catch (e: NotificationConstructionFailedException) {
-            Log.error(CampaignClassicConstants.LOG_TAG, SELF_TAG,
+            Log.error(
+                CampaignClassicConstants.LOG_TAG, SELF_TAG,
                 "Failed to create a push notification, a notification construction failed:" +
-                        "${e.localizedMessage} exception occurred"
+                    "${e.localizedMessage} exception occurred"
             )
         } catch (e: IllegalArgumentException) {
-            Log.error(CampaignClassicConstants.LOG_TAG, SELF_TAG,
+            Log.error(
+                CampaignClassicConstants.LOG_TAG, SELF_TAG,
                 "Failed to create a push notification, an illegal argument exception occurred:" +
-                        "${e.localizedMessage} exception occurred"
+                    "${e.localizedMessage} exception occurred"
             )
         }
     }

@@ -1,18 +1,32 @@
+/*
+  Copyright 2024 Adobe. All rights reserved.
+  This file is licensed to you under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License. You may obtain a copy
+  of the License at http://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software distributed under
+  the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+  OF ANY KIND, either express or implied. See the License for the specific language
+  governing permissions and limitations under the License.
+*/
+
 package com.adobe.marketing.mobile.campaignclassic.internal
 
 import android.app.Activity
+import android.app.RemoteInput
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.adobe.marketing.mobile.CampaignClassic
+import com.adobe.marketing.mobile.notificationbuilder.NotificationBuilder
 import com.adobe.marketing.mobile.notificationbuilder.PushTemplateConstants
 import com.adobe.marketing.mobile.services.Log
 import com.adobe.marketing.mobile.services.ServiceProvider
 import com.adobe.marketing.mobile.util.StringUtils
 
-internal class CampaignClassicPushTrackerActivity: Activity() {
+internal class CampaignClassicPushTrackerActivity : Activity() {
     private val SELF_TAG = "CampaignClassicPushTrackerActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,8 +34,9 @@ internal class CampaignClassicPushTrackerActivity: Activity() {
         if (intent == null) {
             Log.warning(
                 CampaignClassicConstants.LOG_TAG,
-                SELF_TAG, "Intent is null. Ignoring to track or take action on push notification"
-                        + " interaction."
+                SELF_TAG,
+                "Intent is null. Ignoring to track or take action on push notification" +
+                    " interaction."
             )
             finish()
             return
@@ -30,17 +45,61 @@ internal class CampaignClassicPushTrackerActivity: Activity() {
         if (StringUtils.isNullOrEmpty(action)) {
             Log.warning(
                 CampaignClassicConstants.LOG_TAG,
-                SELF_TAG, "Intent action is null or empty. Ignoring to track or take action on push"
-                        + " notification interaction."
+                SELF_TAG,
+                "Intent action is null or empty. Ignoring to track or take action on push" +
+                    " notification interaction."
             )
             finish()
             return
         }
         when (action) {
             PushTemplateConstants.NotificationAction.CLICKED -> handlePushClicked(intent)
+            PushTemplateConstants.NotificationAction.INPUT_RECEIVED -> handleInputReceived(intent)
             else -> {}
         }
         finish()
+    }
+
+    private fun handleInputReceived(intent: Intent) {
+        val context = ServiceProvider.getInstance().appContextService.applicationContext
+            ?: return
+        val notificationManager = NotificationManagerCompat.from(context)
+        val tag = intent.extras?.getString(PushTemplateConstants.PushPayloadKeys.TAG)
+        if (tag.isNullOrEmpty()) {
+            Log.warning(
+                CampaignClassicConstants.LOG_TAG,
+                SELF_TAG,
+                "Tag is null or empty for the notification with action ${intent.action}," +
+                    "default to removing all displayed notifications for ${application.packageName}"
+            )
+            notificationManager.cancelAll()
+            return
+        }
+        val results: Bundle? = RemoteInput.getResultsFromIntent(intent)
+        if (results != null) {
+            val remoteInputResultKey =
+                intent.getStringExtra(PushTemplateConstants.PushPayloadKeys.INPUT_BOX_RECEIVER_NAME)
+            val inputReplyResult = results.getCharSequence(remoteInputResultKey)
+            Log.trace(
+                CampaignClassicConstants.LOG_TAG,
+                SELF_TAG,
+                "Input $inputReplyResult received for notification with tag $tag."
+            )
+            val intentExtra = Bundle()
+            intentExtra.putString(remoteInputResultKey, inputReplyResult.toString())
+            openApplication(intentExtra)
+        }
+        Log.trace(
+            CampaignClassicConstants.LOG_TAG,
+            SELF_TAG,
+            "Recreating notification with tag $tag."
+        )
+        val builder: NotificationCompat.Builder = NotificationBuilder.constructNotificationBuilder(
+            intent,
+            CampaignClassicPushTrackerActivity::class.java,
+            CampaignClassicPushBroadcastReceiver::class.java
+        )
+        notificationManager.notify(tag.hashCode(), builder.build())
     }
 
     /**
@@ -88,7 +147,7 @@ internal class CampaignClassicPushTrackerActivity: Activity() {
         val actionUri =
             intent.getStringExtra(PushTemplateConstants.TrackingKeys.ACTION_URI)
         if (actionUri.isNullOrEmpty()) {
-            openApplication()
+            openApplication(intent.extras)
         } else {
             openUri(actionUri)
         }
@@ -100,9 +159,8 @@ internal class CampaignClassicPushTrackerActivity: Activity() {
             Log.trace(
                 CampaignClassicConstants.LOG_TAG,
                 SELF_TAG,
-                "the sticky notification setting is true, will not remove the notification"
-                        + " with tag %s.",
-                tag
+                "the sticky notification setting is true, will not remove the notification" +
+                    " with tag $tag."
             )
             return
         }
@@ -113,9 +171,8 @@ internal class CampaignClassicPushTrackerActivity: Activity() {
             Log.warning(
                 CampaignClassicConstants.LOG_TAG,
                 SELF_TAG,
-                "he sticky notification setting is false but the tag is null or empty,"
-                        + " default to removing all displayed notifications for %s.",
-                application.packageName
+                "the sticky notification setting is false but the tag is null or empty," +
+                    " default to removing all displayed notifications for ${application.packageName}"
             )
             notificationManager.cancelAll()
             return
@@ -123,8 +180,7 @@ internal class CampaignClassicPushTrackerActivity: Activity() {
         Log.trace(
             CampaignClassicConstants.LOG_TAG,
             SELF_TAG,
-            "the sticky notification setting is false, removing notification with tag %s.",
-            tag
+            "the sticky notification setting is false, removing notification with tag $tag"
         )
         notificationManager.cancel(tag.hashCode())
     }
@@ -133,7 +189,7 @@ internal class CampaignClassicPushTrackerActivity: Activity() {
      * Use this method to create an intent to open the application. If the application is already
      * open and in the foreground, the action will resume the current activity.
      */
-    private fun openApplication() {
+    private fun openApplication(intentExtras: Bundle?) {
         val currentActivity = ServiceProvider.getInstance().appContextService.currentActivity
         val launchIntent = if (currentActivity != null) {
             Intent(currentActivity, currentActivity.javaClass)
@@ -147,15 +203,14 @@ internal class CampaignClassicPushTrackerActivity: Activity() {
         }
         if (launchIntent != null) {
             launchIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            if (intent.extras != null) {
-                launchIntent.putExtras(intent.extras!!)
-            }
+            intentExtras?.let { launchIntent.putExtras(intentExtras) }
             startActivity(launchIntent)
         } else {
             Log.warning(
                 CampaignClassicConstants.LOG_TAG,
-                SELF_TAG, "Unable to create an intent to open the application from the notification"
-                        + " interaction."
+                SELF_TAG,
+                "Unable to create an intent to open the application from the notification" +
+                    " interaction."
             )
         }
     }
@@ -177,8 +232,7 @@ internal class CampaignClassicPushTrackerActivity: Activity() {
             Log.warning(
                 CampaignClassicConstants.LOG_TAG,
                 SELF_TAG,
-                "Unable to open the URI from the notification interaction. URI: %s",
-                uri
+                "Unable to open the URI from the notification interaction. URI: $uri"
             )
         }
     }

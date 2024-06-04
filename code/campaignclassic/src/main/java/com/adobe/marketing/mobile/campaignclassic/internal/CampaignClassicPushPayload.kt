@@ -1,13 +1,22 @@
+/*
+  Copyright 2024 Adobe. All rights reserved.
+  This file is licensed to you under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License. You may obtain a copy
+  of the License at http://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software distributed under
+  the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+  OF ANY KIND, either express or implied. See the License for the specific language
+  governing permissions and limitations under the License.
+*/
+
 package com.adobe.marketing.mobile.campaignclassic.internal
 
 import com.adobe.marketing.mobile.notificationbuilder.NotificationPriority
 import com.adobe.marketing.mobile.notificationbuilder.NotificationVisibility
 import com.adobe.marketing.mobile.notificationbuilder.PushTemplateConstants
 import com.adobe.marketing.mobile.util.DataReader
-import com.adobe.marketing.mobile.util.MapUtils
 import com.adobe.marketing.mobile.util.StringUtils
 import com.google.firebase.messaging.RemoteMessage
-
 
 internal class CampaignClassicPushPayload {
     val messageData: MutableMap<String?, String?>
@@ -40,15 +49,17 @@ internal class CampaignClassicPushPayload {
      *
      * Provides the CampaignClassicPushPayload object
      *
-     * @param messageData [,][<] containing the message data present in a
+     * @param remoteMessageData Map<String, String> containing the message data present in a
      * notification received from [com.google.firebase.messaging.FirebaseMessagingService]
      * @throws IllegalArgumentException if the message data, message id, or delivery id is null
      */
     @Throws(IllegalArgumentException::class)
     constructor(remoteMessageData: Map<String, String>?) {
         if (remoteMessageData.isNullOrEmpty()) {
-            throw IllegalArgumentException("Failed to create CampaignClassicPushPayload, remote message data payload is null or"
-                    + " empty.")
+            throw IllegalArgumentException(
+                "Failed to create CampaignClassicPushPayload, remote message data payload is null or" +
+                    " empty."
+            )
         }
         messageId = remoteMessageData[CampaignClassicConstants.EventDataKeys.CampaignClassic.TRACK_INFO_KEY_MESSAGE_ID]
         if (StringUtils.isNullOrEmpty(messageId)) {
@@ -63,8 +74,12 @@ internal class CampaignClassicPushPayload {
 
         // get the tag from the payload. if no tag was present in the payload use the message id
         // instead as its guaranteed to always be present.
-        tag = if (!StringUtils.isNullOrEmpty(messageData[PushTemplateConstants.PushPayloadKeys.TAG]))
-            messageData[PushTemplateConstants.PushPayloadKeys.TAG] else messageId
+        if (!StringUtils.isNullOrEmpty(messageData[PushTemplateConstants.PushPayloadKeys.TAG])) {
+            tag = messageData[PushTemplateConstants.PushPayloadKeys.TAG]
+        } else {
+            messageData[PushTemplateConstants.PushPayloadKeys.TAG] = messageId
+            tag = messageId
+        }
 
         // convert _msg to adb_body if needed
         if (StringUtils.isNullOrEmpty(messageData[PushTemplateConstants.PushPayloadKeys.BODY])) {
