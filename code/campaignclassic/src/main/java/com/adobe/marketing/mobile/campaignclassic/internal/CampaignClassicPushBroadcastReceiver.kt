@@ -20,7 +20,6 @@ import com.adobe.marketing.mobile.notificationbuilder.NotificationBuilder
 import com.adobe.marketing.mobile.notificationbuilder.NotificationConstructionFailedException
 import com.adobe.marketing.mobile.notificationbuilder.PushTemplateConstants
 import com.adobe.marketing.mobile.services.Log
-import com.adobe.marketing.mobile.util.StringUtils
 
 internal class CampaignClassicPushBroadcastReceiver : BroadcastReceiver() {
     private val SELF_TAG = "CampaignClassicPushBroadcastReceiver"
@@ -35,7 +34,7 @@ internal class CampaignClassicPushBroadcastReceiver : BroadcastReceiver() {
         val tag = intent.getStringExtra(PushTemplateConstants.PushPayloadKeys.TAG)
 
         // this should never happen since tag is set to _mId in the push message
-        if (StringUtils.isNullOrEmpty(tag)) {
+        if (tag.isNullOrEmpty()) {
             Log.warning(
                 CampaignClassicConstants.LOG_TAG,
                 SELF_TAG,

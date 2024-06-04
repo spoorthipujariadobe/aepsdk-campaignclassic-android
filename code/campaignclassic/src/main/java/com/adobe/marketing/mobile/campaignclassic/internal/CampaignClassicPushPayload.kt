@@ -15,7 +15,6 @@ import com.adobe.marketing.mobile.notificationbuilder.NotificationPriority
 import com.adobe.marketing.mobile.notificationbuilder.NotificationVisibility
 import com.adobe.marketing.mobile.notificationbuilder.PushTemplateConstants
 import com.adobe.marketing.mobile.util.DataReader
-import com.adobe.marketing.mobile.util.StringUtils
 import com.google.firebase.messaging.RemoteMessage
 
 internal class CampaignClassicPushPayload {
@@ -32,7 +31,7 @@ internal class CampaignClassicPushPayload {
      *
      * Provides the CampaignClassicPushPayload object
      *
-     * @param message [RemoteMessage] object received from [     ]
+     * @param message [RemoteMessage] object received from [com.google.firebase.messaging.FirebaseMessagingService]
      * @throws IllegalArgumentException if the message, message data, message id, or delivery id is
      * null
      */
@@ -57,16 +56,15 @@ internal class CampaignClassicPushPayload {
     constructor(remoteMessageData: Map<String, String>?) {
         if (remoteMessageData.isNullOrEmpty()) {
             throw IllegalArgumentException(
-                "Failed to create CampaignClassicPushPayload, remote message data payload is null or" +
-                    " empty."
+                "Failed to create CampaignClassicPushPayload, remote message data payload is null or empty."
             )
         }
         messageId = remoteMessageData[CampaignClassicConstants.EventDataKeys.CampaignClassic.TRACK_INFO_KEY_MESSAGE_ID]
-        if (StringUtils.isNullOrEmpty(messageId)) {
+        if (messageId.isNullOrEmpty()) {
             throw IllegalArgumentException("Failed to create CampaignClassicPushPayload, message id is null or empty.")
         }
         deliveryId = remoteMessageData[CampaignClassicConstants.EventDataKeys.CampaignClassic.TRACK_INFO_KEY_DELIVERY_ID]
-        if (StringUtils.isNullOrEmpty(deliveryId)) {
+        if (deliveryId.isNullOrEmpty()) {
             throw IllegalArgumentException("Failed to create CampaignClassicPushPayload, delivery id is null or empty.")
         }
 
@@ -74,7 +72,7 @@ internal class CampaignClassicPushPayload {
 
         // get the tag from the payload. if no tag was present in the payload use the message id
         // instead as its guaranteed to always be present.
-        if (!StringUtils.isNullOrEmpty(messageData[PushTemplateConstants.PushPayloadKeys.TAG])) {
+        if (!(messageData[PushTemplateConstants.PushPayloadKeys.TAG]).isNullOrEmpty()) {
             tag = messageData[PushTemplateConstants.PushPayloadKeys.TAG]
         } else {
             messageData[PushTemplateConstants.PushPayloadKeys.TAG] = messageId
@@ -82,7 +80,7 @@ internal class CampaignClassicPushPayload {
         }
 
         // convert _msg to adb_body if needed
-        if (StringUtils.isNullOrEmpty(messageData[PushTemplateConstants.PushPayloadKeys.BODY])) {
+        if ((messageData[PushTemplateConstants.PushPayloadKeys.BODY]).isNullOrEmpty()) {
             this.messageData[PushTemplateConstants.PushPayloadKeys.BODY] = DataReader.optString(messageData, ACC_PAYLOAD_BODY, null)
         }
     }
@@ -107,84 +105,48 @@ internal class CampaignClassicPushPayload {
         // message.notification.body to adb_body
         // message.notification.title to adb_title
         // message.notification.image to adb_image
-        if (StringUtils.isNullOrEmpty(messageData[PushTemplateConstants.PushPayloadKeys.TAG])) {
+        if ((messageData[PushTemplateConstants.PushPayloadKeys.TAG]).isNullOrEmpty()) {
             tag = notification.tag
             messageData[PushTemplateConstants.PushPayloadKeys.TAG] = tag
         }
-        if (StringUtils.isNullOrEmpty(
-                messageData[PushTemplateConstants.PushPayloadKeys.SMALL_ICON]
-            )
-        ) {
+        if ((messageData[PushTemplateConstants.PushPayloadKeys.SMALL_ICON]).isNullOrEmpty()) {
             messageData[PushTemplateConstants.PushPayloadKeys.SMALL_ICON] = notification.icon
         }
-        if (StringUtils.isNullOrEmpty(
-                messageData[PushTemplateConstants.PushPayloadKeys.SOUND]
-            )
-        ) {
+        if ((messageData[PushTemplateConstants.PushPayloadKeys.SOUND]).isNullOrEmpty()) {
             messageData[PushTemplateConstants.PushPayloadKeys.SOUND] = notification.sound
         }
-        if (StringUtils.isNullOrEmpty(
-                messageData[PushTemplateConstants.PushPayloadKeys.ACTION_URI]
-            )
-        ) {
+        if ((messageData[PushTemplateConstants.PushPayloadKeys.ACTION_URI]).isNullOrEmpty()) {
             messageData[PushTemplateConstants.PushPayloadKeys.ACTION_URI] = notification.clickAction
         }
-        if (StringUtils.isNullOrEmpty(
-                messageData[PushTemplateConstants.PushPayloadKeys.CHANNEL_ID]
-            )
-        ) {
+        if ((messageData[PushTemplateConstants.PushPayloadKeys.CHANNEL_ID]).isNullOrEmpty()) {
             messageData[PushTemplateConstants.PushPayloadKeys.CHANNEL_ID] = notification.channelId
         }
-        if (StringUtils.isNullOrEmpty(
-                messageData[PushTemplateConstants.PushPayloadKeys.TICKER]
-            )
-        ) {
+        if ((messageData[PushTemplateConstants.PushPayloadKeys.TICKER]).isNullOrEmpty()) {
             messageData[PushTemplateConstants.PushPayloadKeys.TICKER] = notification.ticker
         }
-        if (StringUtils.isNullOrEmpty(
-                messageData[PushTemplateConstants.PushPayloadKeys.STICKY]
-            )
-        ) {
+        if ((messageData[PushTemplateConstants.PushPayloadKeys.STICKY]).isNullOrEmpty()) {
             messageData[PushTemplateConstants.PushPayloadKeys.STICKY] =
                 notification.sticky.toString()
         }
-        if (StringUtils.isNullOrEmpty(
-                messageData[PushTemplateConstants.PushPayloadKeys.VISIBILITY]
-            )
-        ) {
+        if ((messageData[PushTemplateConstants.PushPayloadKeys.VISIBILITY]).isNullOrEmpty()) {
             messageData[PushTemplateConstants.PushPayloadKeys.VISIBILITY] =
                 NotificationVisibility.fromValue(notification.visibility).stringValue
         }
-        if (StringUtils.isNullOrEmpty(
-                messageData[PushTemplateConstants.PushPayloadKeys.PRIORITY]
-            )
-        ) {
+        if ((messageData[PushTemplateConstants.PushPayloadKeys.PRIORITY]).isNullOrEmpty()) {
             messageData[PushTemplateConstants.PushPayloadKeys.PRIORITY] =
                 NotificationPriority.fromValue(notification.notificationPriority).stringValue
         }
-        if (StringUtils.isNullOrEmpty(
-                messageData[PushTemplateConstants.PushPayloadKeys.BADGE_COUNT]
-            )
-        ) {
+        if ((messageData[PushTemplateConstants.PushPayloadKeys.BADGE_COUNT]).isNullOrEmpty()) {
             messageData[PushTemplateConstants.PushPayloadKeys.BADGE_COUNT] =
                 notification.notificationCount.toString()
         }
-        if (StringUtils.isNullOrEmpty(
-                messageData[PushTemplateConstants.PushPayloadKeys.BODY]
-            )
-        ) {
+        if ((messageData[PushTemplateConstants.PushPayloadKeys.BODY]).isNullOrEmpty()) {
             messageData[PushTemplateConstants.PushPayloadKeys.BODY] = notification.body
         }
-        if (StringUtils.isNullOrEmpty(
-                messageData[PushTemplateConstants.PushPayloadKeys.TITLE]
-            )
-        ) {
+        if ((messageData[PushTemplateConstants.PushPayloadKeys.TITLE]).isNullOrEmpty()) {
             messageData[PushTemplateConstants.PushPayloadKeys.TITLE] = notification.title
         }
-        if (StringUtils.isNullOrEmpty(
-                messageData[PushTemplateConstants.PushPayloadKeys.IMAGE_URL]
-            )
-        ) {
+        if ((messageData[PushTemplateConstants.PushPayloadKeys.IMAGE_URL]).isNullOrEmpty()) {
             messageData[PushTemplateConstants.PushPayloadKeys.IMAGE_URL] =
                 notification.imageUrl.toString()
         }

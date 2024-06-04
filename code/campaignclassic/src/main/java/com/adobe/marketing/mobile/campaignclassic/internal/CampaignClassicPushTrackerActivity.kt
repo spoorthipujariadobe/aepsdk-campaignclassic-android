@@ -24,7 +24,6 @@ import com.adobe.marketing.mobile.notificationbuilder.NotificationBuilder
 import com.adobe.marketing.mobile.notificationbuilder.PushTemplateConstants
 import com.adobe.marketing.mobile.services.Log
 import com.adobe.marketing.mobile.services.ServiceProvider
-import com.adobe.marketing.mobile.util.StringUtils
 
 internal class CampaignClassicPushTrackerActivity : Activity() {
     private val SELF_TAG = "CampaignClassicPushTrackerActivity"
@@ -42,7 +41,7 @@ internal class CampaignClassicPushTrackerActivity : Activity() {
             return
         }
         val action = intent.action
-        if (StringUtils.isNullOrEmpty(action)) {
+        if (action.isNullOrEmpty()) {
             Log.warning(
                 CampaignClassicConstants.LOG_TAG,
                 SELF_TAG,
@@ -60,6 +59,12 @@ internal class CampaignClassicPushTrackerActivity : Activity() {
         finish()
     }
 
+    /**
+     * Handles input received by input box push template
+     *
+     * @param intent the intent received from submitting the input in input box push template
+     *
+     */
     private fun handleInputReceived(intent: Intent) {
         val context = ServiceProvider.getInstance().appContextService.applicationContext
             ?: return
@@ -117,7 +122,7 @@ internal class CampaignClassicPushTrackerActivity : Activity() {
      * notification's [Intent]
      *
      * @param intent the intent received from the push notification
-     * @return [,][<] containing the notification's tracking information
+     * @return Map<String, String> containing the notification's tracking information
      */
     private fun getTrackInfo(intent: Intent): Map<String, String> {
         val trackInfo = mutableMapOf<String, String>()
@@ -149,7 +154,7 @@ internal class CampaignClassicPushTrackerActivity : Activity() {
         if (actionUri.isNullOrEmpty()) {
             openApplication(intent.extras)
         } else {
-            openUri(actionUri)
+            openUri(actionUri, intent.extras)
         }
 
         // remove the notification if sticky notifications are false
@@ -167,7 +172,7 @@ internal class CampaignClassicPushTrackerActivity : Activity() {
         val context = ServiceProvider.getInstance().appContextService.applicationContext
             ?: return
         val notificationManager = NotificationManagerCompat.from(context)
-        if (StringUtils.isNullOrEmpty(tag)) {
+        if (tag.isNullOrEmpty()) {
             Log.warning(
                 CampaignClassicConstants.LOG_TAG,
                 SELF_TAG,
@@ -188,6 +193,8 @@ internal class CampaignClassicPushTrackerActivity : Activity() {
     /**
      * Use this method to create an intent to open the application. If the application is already
      * open and in the foreground, the action will resume the current activity.
+     *
+     * @param intentExtras the extras to add to the intent
      */
     private fun openApplication(intentExtras: Bundle?) {
         val currentActivity = ServiceProvider.getInstance().appContextService.currentActivity
@@ -219,14 +226,13 @@ internal class CampaignClassicPushTrackerActivity : Activity() {
      * Use this method to create an intent to open the the provided URI.
      *
      * @param uri the uri to open
+     * @param intentExtras the extras to add to the intent
      */
-    private fun openUri(uri: String) {
+    private fun openUri(uri: String, intentExtras: Bundle?) {
         try {
             val deeplinkIntent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
             deeplinkIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            if (intent.extras != null) {
-                deeplinkIntent.putExtras(intent.extras!!)
-            }
+            intentExtras?.let { deeplinkIntent.putExtras(intentExtras) }
             startActivity(deeplinkIntent)
         } catch (e: ActivityNotFoundException) {
             Log.warning(
