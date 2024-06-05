@@ -30,7 +30,3 @@ dependencyResolutionManagement {
 }
 include ':campaignclassic', ':testapp'
 rootProject.name = "aepsdk-campaignclassic-android"
-// todo remove when snapshot is available
-include ':notificationbuilder'
-project(':notificationbuilder').projectDir =
-        new File(settingsDir, '../../aepsdk-ui-android/code/notificationbuilder')

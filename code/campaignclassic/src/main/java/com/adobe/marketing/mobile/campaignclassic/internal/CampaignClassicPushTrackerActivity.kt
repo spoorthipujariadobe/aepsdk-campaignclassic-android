@@ -77,7 +77,6 @@ internal class CampaignClassicPushTrackerActivity : Activity() {
                 "Tag is null or empty for the notification with action ${intent.action}," +
                     "default to removing all displayed notifications for ${application.packageName}"
             )
-            notificationManager.cancelAll()
             return
         }
         val results: Bundle? = RemoteInput.getResultsFromIntent(intent)
@@ -179,7 +178,6 @@ internal class CampaignClassicPushTrackerActivity : Activity() {
                 "the sticky notification setting is false but the tag is null or empty," +
                     " default to removing all displayed notifications for ${application.packageName}"
             )
-            notificationManager.cancelAll()
             return
         }
         Log.trace(
