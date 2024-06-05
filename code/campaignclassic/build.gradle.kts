@@ -29,6 +29,8 @@ aepLibrary {
 
 dependencies {
     implementation("com.adobe.marketing.mobile:core:$mavenCoreVersion")
+    // todo replace with released
+    implementation("com.github.adobe:aepsdk-ui-android:dev-v3.0.0-SNAPSHOT")
     implementation("com.google.firebase:firebase-messaging:23.4.1")
 
     // testImplementation dependencies provided by aep-library:
