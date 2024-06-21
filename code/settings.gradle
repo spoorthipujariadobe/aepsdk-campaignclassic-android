@@ -28,5 +28,5 @@ dependencyResolutionManagement {
   maven { url = uri("https://jitpack.io") }
  }
 }
- include ':campaignclassic', ':testapp'
+include ':campaignclassic', ':testapp'
 rootProject.name = "aepsdk-campaignclassic-android"

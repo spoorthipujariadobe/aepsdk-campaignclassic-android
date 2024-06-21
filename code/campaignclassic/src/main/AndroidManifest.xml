@@ -11,4 +11,16 @@
     governing permissions and limitations under the License.
 
 -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.adobe.marketing.mobile.campaignclassic" >
+
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <application>
+        <activity
+            android:name=".internal.CampaignClassicPushTrackerActivity"
+            android:exported="false"
+            android:launchMode="singleInstance"
+            android:theme="@style/CampaignClassic.Style.Transparent"/>
+        <receiver android:name=".internal.CampaignClassicPushBroadcastReceiver" />
+    </application>
+</manifest>
