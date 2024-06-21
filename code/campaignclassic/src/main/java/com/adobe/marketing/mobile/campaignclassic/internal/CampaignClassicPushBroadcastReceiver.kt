@@ -19,6 +19,7 @@ import androidx.core.app.NotificationManagerCompat
 import com.adobe.marketing.mobile.notificationbuilder.NotificationBuilder
 import com.adobe.marketing.mobile.notificationbuilder.NotificationConstructionFailedException
 import com.adobe.marketing.mobile.notificationbuilder.PushTemplateConstants
+import com.adobe.marketing.mobile.notificationbuilder.RemindLaterHandler
 import com.adobe.marketing.mobile.services.Log
 
 internal class CampaignClassicPushBroadcastReceiver : BroadcastReceiver() {
@@ -61,7 +62,7 @@ internal class CampaignClassicPushBroadcastReceiver : BroadcastReceiver() {
                     notificationManager.notify(tag.hashCode(), builder.build())
                 }
                 PushTemplateConstants.IntentActions.REMIND_LATER_CLICKED -> {
-                    NotificationBuilder.handleRemindIntent(intent, CampaignClassicPushBroadcastReceiver::class.java)
+                    RemindLaterHandler.handleRemindIntent(intent, CampaignClassicPushBroadcastReceiver::class.java)
                 }
             }
         } catch (e: NotificationConstructionFailedException) {
