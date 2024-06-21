@@ -20,7 +20,7 @@
             android:name=".internal.CampaignClassicPushTrackerActivity"
             android:exported="false"
             android:launchMode="singleInstance"
-            android:theme="@style/Messaging.Style.Transparent"/>
+            android:theme="@style/CampaignClassic.Style.Transparent"/>
         <receiver android:name=".internal.CampaignClassicPushBroadcastReceiver" />
     </application>
 </manifest>

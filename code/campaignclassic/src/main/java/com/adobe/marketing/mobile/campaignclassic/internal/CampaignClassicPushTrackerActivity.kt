@@ -54,9 +54,39 @@ internal class CampaignClassicPushTrackerActivity : Activity() {
         when (action) {
             PushTemplateConstants.NotificationAction.CLICKED -> handlePushClicked(intent)
             PushTemplateConstants.NotificationAction.INPUT_RECEIVED -> handleInputReceived(intent)
+            PushTemplateConstants.NotificationAction.DISMISSED -> handleDismissed(intent)
             else -> {}
         }
         finish()
+    }
+
+    /**
+     * Handles the notification dismissal action
+     *
+     * @param intent the intent received from dismissing the notification
+     */
+    private fun handleDismissed(intent: Intent) {
+        CampaignClassic.trackNotificationClick(getTrackInfo(intent))
+
+        // remove the notification if tag is available
+        val context = ServiceProvider.getInstance().appContextService.applicationContext
+            ?: return
+        val tag = intent.getStringExtra(PushTemplateConstants.PushPayloadKeys.TAG)
+        val notificationManager = NotificationManagerCompat.from(context)
+        if (tag.isNullOrEmpty()) {
+            Log.warning(
+                CampaignClassicConstants.LOG_TAG,
+                SELF_TAG,
+                "Unable to remove notification for ${application.packageName}, the tag is null or empty,"
+            )
+            return
+        }
+        Log.trace(
+            CampaignClassicConstants.LOG_TAG,
+            SELF_TAG,
+            "Removing notification with tag $tag"
+        )
+        notificationManager.cancel(tag.hashCode())
     }
 
     /**
