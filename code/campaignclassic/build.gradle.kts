@@ -14,6 +14,7 @@ plugins {
 }
 
 val mavenCoreVersion: String by project
+val mavenUILibraryVersion: String by project
 
 aepLibrary {
     namespace = "com.adobe.marketing.mobile.campaignclassic"
@@ -24,11 +25,13 @@ aepLibrary {
     publishing {
         gitRepoName = "aepsdk-campaignclassic-android"
         addCoreDependency(mavenCoreVersion)
+        addMavenDependency("com.adobe.marketing.mobile", "notificationbuilder", mavenUILibraryVersion)
     }
 }
 
 dependencies {
     implementation("com.adobe.marketing.mobile:core:$mavenCoreVersion")
+    implementation("com.adobe.marketing.mobile:notificationbuilder:$mavenUILibraryVersion")
     implementation("com.google.firebase:firebase-messaging:23.4.1")
 
     // testImplementation dependencies provided by aep-library:
