@@ -780,6 +780,36 @@ class CampaignClassicIntegrationTests {
     }
 
     @Test
+    fun test_trackNotificationReceive_VerifyTrackNotificationReceiveRequestSentWhenBroadLogIdIs64BitV7() {
+        // setup
+        val countDownLatch = CountDownLatch(1)
+        val configurationLatch = CountDownLatch(1)
+        configurationAwareness { configurationLatch.countDown() }
+        setupConfiguration()
+
+        // test
+        CampaignClassic.trackNotificationReceive(
+            mapOf(
+                CampaignClassicTestConstants.EventDataKeys.CampaignClassic.TRACK_INFO_KEY_DELIVERY_ID to "testDeliveryId",
+                CampaignClassicTestConstants.EventDataKeys.CampaignClassic.TRACK_INFO_KEY_MESSAGE_ID to "3147489746"
+            )
+        )
+
+        // verify
+        networkMonitor = { request ->
+            // verify network request url
+            val messageId = java.lang.String.format("%x", 3147489746)
+            Assert.assertEquals(
+                "https://testTrackingServer/r/?id=h$messageId,testDeliveryId,1",
+                request.url
+            )
+
+            countDownLatch.countDown()
+        }
+        Assert.assertTrue(countDownLatch.await(3, TimeUnit.SECONDS))
+    }
+
+    @Test
     fun test_trackNotificationReceive_VerifyTrackNotificationReceiveRequestSentWhenAllParametersArePresentV8() {
         // setup
         val countDownLatch = CountDownLatch(1)

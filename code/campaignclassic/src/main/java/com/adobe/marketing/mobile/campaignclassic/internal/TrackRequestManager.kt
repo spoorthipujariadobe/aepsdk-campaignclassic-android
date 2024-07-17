@@ -106,7 +106,7 @@ internal class TrackRequestManager {
         // No transformation is required for the V8 UUID however for V7, message Id is parsed as an integer and converted to hex string.
         if (!messageId.isValidUUID()) {
             try {
-                messageId = java.lang.String.format("%x", messageId.toInt())
+                messageId = java.lang.String.format("%x", messageId.toLong())
             } catch (ex: NumberFormatException) {
                 Log.debug(
                     CampaignClassicConstants.LOG_TAG,
